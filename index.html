@@ -184,6 +184,11 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 .acc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
 .acc .nm{font-weight:800}
 @media(max-width:560px){.acc{grid-template-columns:1fr 1fr}.acc .nm{grid-column:1/-1}.brand h1{font-size:19px}.cat{grid-template-columns:90px 1fr}.cat .nv{grid-column:1/-1;text-align:start}}
+.modal.wide{max-width:1000px}
+.badge.st-new{background:#d1fae5;color:#047857}.badge.st-upd{background:#e0e7ff;color:#3730a3}.badge.st-same{background:#f1f5f9;color:#475569}.badge.st-err{background:#ffe4e6;color:#be123c}
+.wn{font-size:12px;color:#b45309;font-weight:600;margin-top:3px;white-space:normal}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.tw input[type=checkbox]{width:18px;height:18px}
 @media print{header .who,.tabs-wrap,.actions,.oc-b,footer{display:none!important}}
 </style>
 </head>
@@ -206,6 +211,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 <div id="modal-root"></div>
 <div id="toast"></div>
 <input type="file" id="file-in" accept=".json,application/json" hidden>
+<input type="file" id="xl-in" accept=".xlsx,.xlsm,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 
 <script>
 "use strict";
@@ -402,8 +408,8 @@ function toast(msg,type){
   const t=$('#toast');t.textContent=msg;t.className='on '+(type||'');
   clearTimeout(toastT);toastT=setTimeout(()=>t.className='',type==='err'?4200:2200);
 }
-function openModal(inner){
-  $('#modal-root').innerHTML='<div class="overlay" onmousedown="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true">'+inner+'</div></div>';
+function openModal(inner,wide){
+  $('#modal-root').innerHTML='<div class="overlay" onmousedown="if(event.target===this)closeModal()"><div class="modal'+(wide?' wide':'')+'" role="dialog" aria-modal="true">'+inner+'</div></div>';
   const f=$('#modal-root input,#modal-root select,#modal-root textarea');if(f)setTimeout(()=>f.focus(),30);
 }
 function closeModal(){$('#modal-root').innerHTML='';CONFIRM_CB=null}
@@ -558,7 +564,7 @@ function dashHTML(){
   if(CLOUD&&!DB.orders.length){
     return '<div class="card lock"><div class="ic">☁️</div><div style="flex:1"><b>قاعدة البيانات فاضية</b><div class="muted">'+
       (isAdmin()?'ارفع أوامر الشغل والأرصدة الافتتاحية من ملف الـ Excel الأصلي لبدء العمل.':'سجّل الدخول بحساب المدير العام لرفع بيانات البداية.')+'</div></div>'+
-      (isAdmin()?'<button class="btn primary" onclick="seedCloud()">رفع بيانات البداية</button>':'<button class="btn primary" onclick="loginModal()">تسجيل الدخول</button>')+'</div>';
+      (isAdmin()?'<div class="actions" style="margin:0"><button class="btn primary" onclick="pickExcel()">📥 استيراد من Excel</button><button class="btn light" onclick="seedCloud()">رفع بيانات البداية</button></div>':'<button class="btn primary" onclick="loginModal()">تسجيل الدخول</button>')+'</div>';
   }
   const today=todayStr(),OM=orderMachineMap();
   const rows=MACHINES.map(m=>{
@@ -799,7 +805,7 @@ function saveOrder(m,id){
   if(!number)return err('اكتب رقم الأمر');
   const o=id?DB.orders.find(x=>x.id===id):null;
   if(!(o&&o.number===number)&&!/^\d+\/\d+$/.test(number))return err('رقم الأمر لازم يكون بالشكل 6029/1 (رقم ثم / ثم رقم)');
-  if(DB.orders.some(x=>x.number===number&&x.id!==id))return err('رقم الأمر '+number+' موجود بالفعل');
+  if(DB.orders.some(x=>x.number===number&&x.machine===m&&x.id!==id))return err('رقم الأمر '+number+' موجود بالفعل في هذه الماكينة');
   const qty=parseNum($('#o-qty').value);
   if(isNaN(qty)||qty<1)return err('اكتب كمية الأمر بالفرخ');
   if(qty>MAXQ)return err('كمية الأمر لا يمكن أن تتجاوز '+fmt(MAXQ)+' فرخ');
@@ -850,6 +856,9 @@ function settingsHTML(){
   h+='<div class="err-txt" id="s-err"></div><div class="actions"><button class="btn primary" onclick="saveUsers()">💾 حفظ الحسابات</button></div></div>';
   }
 
+  h+='<div class="card sec"><h3>📥 استيراد من ملف Excel</h3>'+
+   '<div class="muted" style="margin-bottom:12px;line-height:1.9">اختر ملف Excel بنفس شكل جدول «مخزن الترقيمات» (عناوين: رقم الأمر · الفئة · سليم · معيب · ملاحظات · تاريخ آخر تعديل، وأسماء الماكينات «ترقيم ١..٤»). هتظهر معاينة قبل الحفظ، وأرقام السليم/المعيب في الملف تُعتبر الرصيد الحالي لكل أمر.</div>'+
+   '<div class="actions" style="margin-top:0"><button class="btn primary" onclick="pickExcel()">📂 اختيار ملف Excel</button></div></div>';
   h+='<div class="card sec"><h3>💾 النسخ الاحتياطي ونقل البيانات</h3>'+
    '<div class="muted" style="margin-bottom:12px">'+(CLOUD?'حمّل نسخة احتياطية بشكل دوري كإجراء احتياط. «استبدال» و«دمج» يكتبان مباشرة على السحابة لكل الأجهزة.':'البيانات تُحفظ على هذا الجهاز فقط. لجمع بيانات عدة أجهزة: صدّر نسخة من كل جهاز ثم استخدم «دمج نسخة» على الجهاز الرئيسي.')+'</div>'+
    '<div class="actions" style="margin-top:0">'+
@@ -939,6 +948,213 @@ function resetAll(){
     const u=DB.users;DB=seed();DB.users=u;persist();render();toast('تمت إعادة الضبط');
   },'إعادة ضبط');
 }
+
+/* ============== استيراد من Excel ============== */
+/*IMPORT_START*/
+const XL_MACHINE=/^\s*ترقيم\s*([1-4])\s*$/;
+const XL_ORDER_OK=/^\d+\/\d+$/;
+let IMPORT_ROWS=[],IMPORT_SEL=new Set();
+
+/* تاريخ Excel (رقم تسلسلي) ← كائن Date بتوقيت UTC بدون أي إزاحة */
+function xlDate(v){
+  const n=Number(v);if(!isFinite(n))return null;
+  const d=new Date(Date.UTC(1899,11,30)+Math.round(n*86400)*1000);
+  return isNaN(d.getTime())?null:d;
+}
+function xlIso(v){
+  const d=xlDate(v);if(!d)return null;
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+':'+pad(d.getUTCSeconds());
+}
+const hasV=c=>!!c&&c.v!=null&&String(c.v).trim()!=='';
+function xlText(c){
+  if(!c||c.v==null)return '';
+  return (c.t==='s'?String(c.v):(c.w!=null?String(c.w):String(c.v))).replace(/\s+/g,' ').trim();
+}
+/* رقم الأمر: Excel بيحوّل 6029/1 لتاريخ (سنة 6029 شهر 1) — بنرجّعه لشكله الأصلي */
+function xlOrderNo(X,c){
+  if(!hasV(c))return {n:'',w:''};
+  if(c.t==='n'){
+    if(c.z&&X.SSF.is_date(c.z)){
+      const d=xlDate(c.v);
+      if(d)return {n:d.getUTCFullYear()+'/'+(d.getUTCMonth()+1),w:d.getUTCDate()!==1?'تم تجاهل اليوم من رقم الأمر':''};
+    }
+    return {n:String(c.v),w:''};
+  }
+  const t=normDigits(String(c.v)).replace(/[\\⁄∕]/g,'/').trim(),k=t.replace(/\s+/g,'');
+  return {n:XL_ORDER_OK.test(k)?k:t,w:''};
+}
+/* كمية: رقم صحيح غير سالب، أو نص بفواصل/أرقام عربية — NaN لو غير صالح */
+function xlNum(c){
+  if(!hasV(c))return 0;
+  if(c.t==='n')return Number.isInteger(c.v)&&c.v>=0?c.v:NaN;
+  return parseNum(c.v);
+}
+function xlModified(c){
+  if(!hasV(c))return null;
+  if(c.t==='n')return xlIso(c.v);
+  const d=new Date(c.v);
+  return isNaN(d.getTime())?null:ymd(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+}
+
+/* قراءة كل الشيتات: اسم الماكينة من خلية «ترقيم ١..٤» (تفضل سارية لحد ما يظهر اسم جديد، فتشتغل مع الخلايا المدموجة) */
+function parseExcelRows(X,wb){
+  const rows=[];
+  for(const sn of wb.SheetNames){
+    const ws=wb.Sheets[sn];if(!ws||!ws['!ref'])continue;
+    const rg=X.utils.decode_range(ws['!ref']);
+    const at=(r,c)=>ws[X.utils.encode_cell({r:r,c:c})];
+    let col={num:1,denom:2,g:3,b:4,notes:5,mod:6},machine=null;
+    const sm=XL_MACHINE.exec(normDigits(sn));if(sm)machine=Number(sm[1]);
+    for(let r=rg.s.r;r<=rg.e.r;r++){
+      /* صف العناوين: يحدد مكان الأعمدة */
+      const heads={};
+      for(let c=rg.s.c;c<=rg.e.c;c++){
+        const t=normDigits(xlText(at(r,c)));
+        if(/^رقم\s*ال[أإا]مر$/.test(t))heads.num=c;
+        else if(/^الفئ[ةه]$/.test(t))heads.denom=c;
+        else if(t==='سليم')heads.g=c;
+        else if(t==='معيب')heads.b=c;
+        else if(/^ملاحظات?$/.test(t))heads.notes=c;
+        else if(/^تاريخ/.test(t))heads.mod=c;
+      }
+      if(heads.num!=null&&heads.g!=null&&heads.b!=null){col=Object.assign({},col,heads);continue}
+      for(let c=rg.s.c;c<col.num;c++){
+        const m=XL_MACHINE.exec(normDigits(xlText(at(r,c))));if(m)machine=Number(m[1]);
+      }
+      const nc=xlOrderNo(X,at(r,col.num)),denom=normDigits(xlText(at(r,col.denom))),notes=xlText(at(r,col.notes));
+      const gc=at(r,col.g),bc=at(r,col.b);
+      if(!nc.n&&!denom&&!notes&&!hasV(gc)&&!hasV(bc))continue;
+      const g=xlNum(gc),b=xlNum(bc);
+      const x={sheet:sn,row:r+1,machine:machine,number:nc.n||'بدون رقم',denom:denom,g:isNaN(g)?0:g,b:isNaN(b)?0:b,notes:notes,mod:xlModified(at(r,col.mod)),warns:[],err:''};
+      if(nc.w)x.warns.push(nc.w);
+      if(machine==null)x.err='لم أجد اسم الماكينة (ترقيم ١–٤) فوق هذا الصف';
+      else if(isNaN(g)||isNaN(b))x.err='قيمة غير صالحة في السليم أو المعيب (لازم رقم صحيح بدون كسور)';
+      rows.push(x);
+    }
+  }
+  return rows;
+}
+
+/* مقارنة الملف بالبيانات الحالية. أرقام الملف = الرصيد الحالي، فلو الأمر عليه حركات
+   مسجلة بنعدّل الرصيد الافتتاحي بحيث الرصيد النهائي يطابق الملف تماماً (بدون عدّ مرتين) */
+function buildImportPlan(rows){
+  const seen=new Set(),plan=[];
+  for(const x of rows){
+    const key=x.machine+'|'+x.number;
+    const p=Object.assign({},x,{key:key,status:'new',cur:null,og:x.g,ob:x.b,oid:null,warns:x.warns.slice()});
+    plan.push(p);
+    if(x.err){p.status='err';continue}
+    if(seen.has(key)){p.status='err';p.err='رقم الأمر مكرر في نفس الماكينة داخل الملف';continue}
+    seen.add(key);
+    if(x.number!=='بدون رقم'){
+      if(!XL_ORDER_OK.test(x.number))p.warns.push('رقم الأمر بصيغة غير معتادة');
+      const ms=new Set();
+      DB.orders.forEach(z=>{if(z.number===x.number&&z.machine!==x.machine)ms.add(z.machine)});
+      rows.forEach(z=>{if(z.number===x.number&&z.machine&&z.machine!==x.machine)ms.add(z.machine)});
+      if(ms.size)p.warns.push('نفس الرقم موجود أيضاً في '+[...ms].sort().map(MNAME).join(' و'));
+    }
+    const o=DB.orders.find(z=>z.machine===x.machine&&z.number===x.number);
+    if(!o){
+      if(x.g+x.b>MAXQ){p.status='err';p.err='الرصيد أكبر من الحد الأقصى للأمر ('+fmt(MAXQ)+' فرخ)'}
+      continue;
+    }
+    p.status='upd';p.oid=o.id;
+    const ents=DB.entries.filter(e=>e.order===o.id),t0=totals(o,DB.entries);
+    p.cur={sg:t0.sg,sb:t0.sb};
+    p.og=x.g-sum(ents,e=>e.g-e.dg);p.ob=x.b-sum(ents,e=>e.b-e.db);
+    if(p.og<0||p.ob<0){p.status='err';p.err='التسليمات المسجلة على هذا الأمر أكبر من الرصيد في الملف';continue}
+    if(p.og+p.ob+sum(ents,e=>e.g+e.b)>qtyOf(o)){p.status='err';p.err='إجمالي الإنتاج هيتخطى كمية الأمر المسجلة ('+fmt(qtyOf(o))+' فرخ)';continue}
+    if(p.og===o.og&&p.ob===o.ob&&(!x.denom||x.denom===o.denom)&&(!x.notes||x.notes===o.notes))p.status='same';
+  }
+  return plan;
+}
+function applyImport(){
+  if(!isAdmin())return;
+  const plan=buildImportPlan(IMPORT_ROWS),now=new Date().toISOString(),up={};
+  let nn=0,nu=0;
+  for(const p of plan){
+    if(!IMPORT_SEL.has(p.key)||(p.status!=='new'&&p.status!=='upd'))continue;
+    let o;
+    if(p.status==='upd'){
+      o=DB.orders.find(z=>z.id===p.oid);if(!o)continue;
+      o.og=p.og;o.ob=p.ob;if(p.denom)o.denom=p.denom;if(p.notes)o.notes=p.notes;o.modified=p.mod||now;nu++;
+    }else{
+      o={id:uid('o'),machine:p.machine,number:p.number,denom:p.denom,notes:p.notes,og:p.g,ob:p.b,qty:MAXQ,modified:p.mod||now};
+      DB.orders.push(o);nn++;
+    }
+    up['orders/'+o.id]=plain(o);
+  }
+  if(!nn&&!nu){toast('لا يوجد ما يُستورد','err');return}
+  if(CLOUD&&FB)cw(()=>FB.update(FB.ref(FB.db),up));
+  persist();closeModal();render();
+  toast('تم الاستيراد ✓ — '+nn+' أمر جديد · '+nu+' أمر محدّث','ok');
+}
+/*IMPORT_END*/
+function updImpBtn(){const b=$('#imp-go');if(b){b.textContent='✅ استيراد ('+IMPORT_SEL.size+')';b.disabled=!IMPORT_SEL.size}}
+function impTog(el){const k=el.dataset.k;el.checked?IMPORT_SEL.add(k):IMPORT_SEL.delete(k);updImpBtn()}
+function impAll(v){
+  document.querySelectorAll('#modal-root input[data-k]:not([disabled])').forEach(el=>{el.checked=v;v?IMPORT_SEL.add(el.dataset.k):IMPORT_SEL.delete(el.dataset.k)});
+  updImpBtn();
+}
+function importModal(){
+  const plan=buildImportPlan(IMPORT_ROWS),cnt={new:0,upd:0,same:0,err:0};
+  plan.forEach(p=>cnt[p.status]++);
+  IMPORT_SEL=new Set(plan.filter(p=>p.status==='new'||p.status==='upd').map(p=>p.key));
+  const fileKeys=new Set(plan.map(p=>p.key)),missing=DB.orders.filter(o=>!fileKeys.has(o.machine+'|'+o.number));
+  const lab={new:'جديد',upd:'تحديث',same:'بدون تغيير',err:'لا يمكن'};
+  let h='<h3>📥 معاينة الاستيراد من Excel</h3>'+
+   '<div class="muted" style="margin-bottom:10px;line-height:1.9">أرقام السليم والمعيب في الملف تُعتبر <b>الرصيد الحالي</b> لكل أمر. راجع الجدول وألغِ تحديد أي صف لا تريده ثم اضغط «استيراد».</div>'+
+   '<div class="actions" style="margin:0 0 10px"><span class="badge st-new">'+cnt.new+' جديد</span><span class="badge st-upd">'+cnt.upd+' تحديث</span><span class="badge st-same">'+cnt.same+' بدون تغيير</span>'+(cnt.err?'<span class="badge st-err">'+cnt.err+' لا يمكن استيرادها</span>':'')+'</div>'+
+   '<div class="tw" style="max-height:50vh"><table style="min-width:700px"><thead><tr><th><input type="checkbox" checked onchange="impAll(this.checked)" title="تحديد الكل"></th><th>الماكينة</th><th>رقم الأمر</th><th>الفئة</th><th>سليم</th><th>معيب</th><th>الحالة</th></tr></thead><tbody>';
+  h+=plan.map(p=>{
+    const dis=p.status==='err'||p.status==='same';
+    const cell=(v,c)=>'<td><b>'+fmt(v)+'</b>'+(p.cur?'<small>الآن: '+fmt(c)+'</small>':'')+'</td>';
+    return '<tr><td><input type="checkbox" data-k="'+esc(p.key)+'" '+(IMPORT_SEL.has(p.key)?'checked ':'')+(dis?'disabled ':'')+'onchange="impTog(this)"></td>'+
+      '<td>'+(p.machine?MNAME(p.machine):'؟')+'</td>'+
+      '<td class="l"><b class="ltr">'+esc(p.number)+'</b><small>'+esc(p.sheet)+' · صف '+p.row+'</small></td>'+
+      '<td>'+esc(p.denom)+'</td>'+cell(p.g,p.cur?p.cur.sg:0)+cell(p.b,p.cur?p.cur.sb:0)+
+      '<td class="l"><span class="badge st-'+p.status+'">'+lab[p.status]+'</span>'+
+      (p.err?'<div class="wn" style="color:#be123c">'+esc(p.err)+'</div>':'')+
+      p.warns.map(w=>'<div class="wn">⚠ '+esc(w)+'</div>').join('')+'</td></tr>';
+  }).join('');
+  h+='</tbody></table></div>';
+  if(missing.length)h+='<div class="muted" style="margin-top:10px">'+missing.length+' أمر موجود في البرنامج وغير موجود في الملف — لن يتغير.</div>';
+  h+='<div class="actions"><button class="btn primary" id="imp-go" onclick="applyImport()">✅ استيراد ('+IMPORT_SEL.size+')</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>';
+  openModal(h,true);
+  updImpBtn();
+}
+let XL_P=null;
+function loadXLSX(){
+  if(window.XLSX)return Promise.resolve(window.XLSX);
+  if(XL_P)return XL_P;
+  const urls=['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'];
+  XL_P=urls.reduce((p,u)=>p.catch(()=>new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src=u;
+    s.onload=()=>window.XLSX?res(window.XLSX):rej();s.onerror=()=>rej();document.head.appendChild(s);
+  })),Promise.reject()).catch(e=>{XL_P=null;throw e});
+  return XL_P;
+}
+function pickExcel(){
+  if(!isAdmin()){toast('الاستيراد من Excel للمدير العام فقط','err');return}
+  const f=$('#xl-in');f.value='';f.click();
+}
+$('#xl-in').addEventListener('change',ev=>{
+  const f=ev.target.files[0];if(!f)return;
+  toast('جاري قراءة الملف…');
+  const r=new FileReader();
+  r.onerror=()=>toast('تعذر قراءة الملف','err');
+  r.onload=()=>{
+    loadXLSX().then(X=>{
+      let wb;
+      try{wb=X.read(new Uint8Array(r.result),{type:'array',cellNF:true})}
+      catch(e){toast('الملف غير صالح — اختر ملف Excel (xlsx)','err');return}
+      IMPORT_ROWS=parseExcelRows(X,wb);
+      if(!IMPORT_ROWS.length){toast('لم أجد بيانات أوامر في الملف — تأكد من وجود عناوين: رقم الأمر · الفئة · سليم · معيب','err');return}
+      importModal();
+    }).catch(()=>toast('تعذر تحميل أداة قراءة Excel — تأكد من الإنترنت وحاول مرة أخرى','err'));
+  };
+  r.readAsArrayBuffer(f);
+});
 
 /* ============== بدء التشغيل ============== */
 if(CLOUD){
