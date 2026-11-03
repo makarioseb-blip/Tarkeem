@@ -189,7 +189,25 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 .wn{font-size:12px;color:#b45309;font-weight:600;margin-top:3px;white-space:normal}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .tw input[type=checkbox]{width:18px;height:18px}
-@media print{header .who,.tabs-wrap,.actions,.oc-b,footer{display:none!important}}
+@media print{header .who,.tabs-wrap,.actions,.oc-b,footer,.no-print{display:none!important}body{background:#fff!important}.card,.kpi,.tile,.oc{box-shadow:none!important;break-inside:avoid}main{padding-top:8px}.tw{overflow:visible}table{min-width:0;font-size:10px}th,td{padding:5px}}
+.searchbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.searchbar input{flex:1;min-width:180px}
+.search-results{display:grid;gap:9px;margin-top:12px}
+.search-result{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:#fbfcff}
+.search-result b{font-size:15px}
+.search-result .meta{color:var(--muted);font-size:12px}
+.help-hero{background:linear-gradient(125deg,#312e81,#4f46e5 55%,#0891b2);color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}
+.help-hero h2{margin:0 0 5px;font-size:23px}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.help-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow)}
+.help-card h3{margin:0 0 8px;font-size:16px}
+.help-card ol,.help-card ul{margin:6px 0 0;padding-right:20px}
+.help-card li{margin:5px 0;line-height:1.8}
+.note-box{padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:13px;color:#854d0e;line-height:1.9}
+.info-box{padding:12px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px;color:#1e40af;line-height:1.9}
+.ledger-filter{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+.ledger-filter input{max-width:420px}
+@media(max-width:560px){.search-result{align-items:flex-start}.search-result .btn{width:100%}.help-hero h2{font-size:20px}}
 </style>
 </head>
 <body>
@@ -206,7 +224,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 
 <div class="wrap tabs-wrap"><nav class="tabs" id="tabs"></nav></div>
 <main class="wrap" id="view"></main>
-<footer id="foot">البيانات محفوظة داخل هذا المتصفح على هذا الجهاز · استخدم «النسخ الاحتياطي» من صفحة الإدارة بشكل دوري</footer>
+<footer id="foot">مخزن الترقيمات · راجع النسخ الاحتياطي من صفحة الإدارة بشكل دوري</footer>
 
 <div id="modal-root"></div>
 <div id="toast"></div>
@@ -251,7 +269,8 @@ const pad=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const todayStr=()=>ymd(new Date());
 const fmtDate=s=>{const p=String(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s};
-const fmtTime=iso=>{try{const d=new Date(iso);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}catch(e){return ''}};
+const fmtTime=iso=>{try{const d=new Date(iso);if(!Number.isFinite(d.getTime()))return '';return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}catch(e){return ''}};
+const validYmd=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s)))return false;const d=new Date(s+'T00:00:00');return !isNaN(d.getTime())&&ymd(d)===s};
 const normDigits=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 /* يقبل أرقام عربية وإنجليزية وفواصل — يرجع NaN لو القيمة غير صالحة */
 function parseNum(v){
@@ -272,7 +291,8 @@ function niceMax(v){
 }
 
 /* ============== البيانات ============== */
-let DB, SESSION=null, VIEW='dash', RANGE=14, EDITING=null, SHOWALL=false, SEL={}, LASTDATE=null, MEMORY_ONLY=false, CONFIRM_CB=null;
+let DB, SESSION=null, VIEW='dash', RANGE=14, EDITING=null, SHOWALL=false, SEL={}, LASTDATE=null, MEMORY_ONLY=false, CONFIRM_CB=null, SEARCH_Q='';
+let CLOUD_UNSUB=[], CLOUD_CONNECTED_UNSUB=null, CLOUD_LISTENING=false;
 
 function seed(){
   const O=(id,m,number,denom,og,ob,notes,mod)=>({id,machine:m,number,denom,og,ob,notes:notes||'',modified:mod});
@@ -325,33 +345,46 @@ const cloudDelEntry=id=>{if(CLOUD&&FB)cw(()=>FB.remove(FB.ref(FB.db,'entries/'+i
 function withM(e){if(e.m==null){const o=DB.orders.find(x=>x.id===e.order);if(o)return {...e,m:o.machine}}return e}
 const toArr=s=>{const v=s.val();return v?Object.keys(v).map(k=>({...v[k],id:v[k].id||k})):[]};
 function sched(){if(RAF)return;RAF=requestAnimationFrame(()=>{RAF=0;render(true)})}
+function stopCloudListeners(){
+  CLOUD_UNSUB.forEach(fn=>{try{fn()}catch(e){}});CLOUD_UNSUB=[];CLOUD_LISTENING=false;
+  DB.orders=[];DB.entries=[];CLOUD_READY=false;
+}
+function startCloudListeners(){
+  if(!FB||!SESSION||CLOUD_LISTENING)return;
+  CLOUD_ERR='';CLOUD_READY=false;
+  let gotO=false,gotE=false;
+  const ready=()=>{if(gotO&&gotE){CLOUD_READY=true;render(true)}};
+  const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
+  CLOUD_UNSUB=[
+    FB.onValue(FB.ref(FB.db,'orders'),snap=>{DB.orders=toArr(snap);gotO=true;ready();sched()},lerr),
+    FB.onValue(FB.ref(FB.db,'entries'),snap=>{DB.entries=toArr(snap);gotE=true;ready();sched()},lerr)
+  ];
+  CLOUD_LISTENING=true;
+}
 function onAuth(user){
-  if(!user){setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
-  const name=String(user.email||'').split('@')[0].toLowerCase();
+  if(!user){stopCloudListeners();setSession(null);EDITING=null;SEARCH_Q='';if(VIEW==='settings'||(typeof VIEW==='number'))VIEW='dash';render(true);return}
+  const email=String(user.email||'').toLowerCase(),parts=email.split('@'),name=parts[0]||'',domain=parts[1]||'';
   let role=null;
+  if(domain!==ACCOUNT_DOMAIN.toLowerCase()){
+    cw(()=>FB.signOut(FB.auth));toast('الحساب غير تابع لنطاق الدخول المعتمد','err');return;
+  }
   if(name==='admin')role='admin';else{const mm=/^machine([1-4])$/.exec(name);if(mm)role=Number(mm[1])}
   if(role==null){cw(()=>FB.signOut(FB.auth));toast('هذا الحساب غير مصرّح له بالبرنامج','err');return}
   setSession({role});
   if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;toast('أهلاً '+whoName(),'ok')}
-  render(true);
+  startCloudListeners();render(true);
 }
 async function initCloud(){
   try{
     const base='https://www.gstatic.com/firebasejs/'+FB_VERSION+'/';
     const [A,D,U]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-database.js'),import(base+'firebase-auth.js')]);
     const app=A.initializeApp(FIREBASE_CONFIG);
-    /* تخزين الدخول بترتيب احتياطي: لو المتصفح/المعاينة بتمنع التخزين ينزل للذاكرة بدل ما يتعلق */
     let authInst;
     try{authInst=U.initializeAuth(app,{persistence:[U.indexedDBLocalPersistence,U.browserLocalPersistence,U.inMemoryPersistence]})}
     catch(e){authInst=U.getAuth(app)}
     FB={db:D.getDatabase(app),auth:authInst,ref:D.ref,set:D.set,update:D.update,remove:D.remove,
-        signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut};
-    let gotO=false,gotE=false;
-    const ready=()=>{if(gotO&&gotE)CLOUD_READY=true};
-    const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
-    D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s);gotO=true;ready();sched()},lerr);
-    D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s);gotE=true;ready();sched()},lerr);
-    D.onValue(D.ref(FB.db,'.info/connected'),s=>{ONLINE=!!s.val();renderHeader()});
+        onValue:D.onValue,signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut};
+    CLOUD_CONNECTED_UNSUB=D.onValue(D.ref(FB.db,'.info/connected'),snap=>{ONLINE=!!snap.val();renderHeader()});
     U.onAuthStateChanged(FB.auth,onAuth);
   }catch(e){CLOUD_ERR=String((e&&e.message)||e);render(true)}
 }
@@ -419,6 +452,7 @@ function confirmBox(msg,cb,okLabel){
   openModal('<h3>تأكيد</h3><p style="margin:0 0 16px;line-height:1.9">'+esc(msg)+'</p><div class="actions"><button class="btn danger" onclick="const f=CONFIRM_CB;closeModal();f&&f()">'+esc(okLabel||'تأكيد')+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>');
 }
 function go(v){VIEW=v;EDITING=null;SHOWALL=false;render();window.scrollTo({top:0,behavior:'smooth'})}
+function logout(){if(CLOUD&&FB)cw(()=>FB.signOut(FB.auth));setSession(null);if(CLOUD)stopCloudListeners();VIEW='dash';EDITING=null;render();toast('تم تسجيل الخروج')}
 
 /* ============== الدخول ============== */
 function loginModal(msg){
@@ -465,11 +499,11 @@ async function doLogin(){
   }
   $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
-function logout(){if(CLOUD&&FB)cw(()=>FB.signOut(FB.auth));setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
+// logout is defined with the navigation helpers above.
 
 /* ============== الرسم ============== */
 function renderHeader(){
-  const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
+  const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'<span class="chip-user" title="البيانات محفوظة في هذا المتصفح فقط">💾 حفظ محلي</span>';
   $('#who').innerHTML=net+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
@@ -489,17 +523,23 @@ function restoreForm(s){
   if(s.focus){const x=$('#'+s.focus);if(x){x.focus();try{const l=x.value.length;x.setSelectionRange(l,l)}catch(e){}}}
 }
 function renderTabs(){
-  let h='<button class="tab '+(VIEW==='dash'?'on':'')+'" onclick="go(\'dash\')">📊 لوحة المتابعة</button>';
-  for(const m of MACHINES){
-    h+='<button class="tab '+(VIEW===m?'on':'')+'" style="--c:'+MCOL[m]+'" onclick="go('+m+')"><span class="dot"></span>'+MNAME(m)+(canEdit(m)?' <span class="pen">✎</span>':'')+'</button>';
+  let h='';
+  if(SESSION){
+    h+='<button class="tab '+(VIEW==='dash'?'on':'')+'" onclick="go(\'dash\')">📊 لوحة المتابعة</button>';
+    for(const m of MACHINES){
+      h+='<button class="tab '+(VIEW===m?'on':'')+'" style="--c:'+MCOL[m]+'" onclick="go('+m+')"><span class="dot"></span>'+MNAME(m)+(canEdit(m)?' <span class="pen">✎</span>':'')+'</button>';
+    }
+    if(isAdmin())h+='<button class="tab '+(VIEW==='settings'?'on':'')+'" onclick="go(\'settings\')">⚙️ الإدارة</button>';
   }
-  if(isAdmin())h+='<button class="tab '+(VIEW==='settings'?'on':'')+'" onclick="go(\'settings\')">⚙️ الإدارة</button>';
+  h+='<button class="tab '+(VIEW==='help'?'on':'')+'" onclick="go(\'help\')">💡 شرح الاستخدام</button>';
   $('#tabs').innerHTML=h;
 }
 function render(keep){
   const snap=keep?snapForm():null;
   renderHeader();renderTabs();
   const v=$('#view');
+  if(VIEW==='help'){v.innerHTML=helpHTML();return}
+  if(!SESSION){v.innerHTML=lockedHTML('سجّل الدخول لعرض بيانات التشغيل والمخزون');return}
   if(CLOUD&&!CLOUD_READY){
     v.innerHTML=CLOUD_ERR
      ?'<div class="card lock"><div class="ic">⚠️</div><div style="flex:1"><b>تعذر الاتصال بقاعدة البيانات</b><div class="muted">'+esc(CLOUD_ERR)+' — تأكد من الإنترنت ومن إعدادات Firebase وقواعد القراءة.</div></div><button class="btn primary" onclick="location.reload()">إعادة المحاولة</button></div>'
@@ -508,7 +548,8 @@ function render(keep){
   }
   if(VIEW==='dash')v.innerHTML=dashHTML();
   else if(VIEW==='settings')v.innerHTML=isAdmin()?settingsHTML():lockedHTML('صفحة الإدارة للمدير العام فقط');
-  else{v.innerHTML=machineHTML(VIEW);if(canEdit(VIEW)){afterMachineRender(VIEW);restoreForm(snap)}}
+  else if(MACHINES.includes(VIEW)){v.innerHTML=machineHTML(VIEW);if(canEdit(VIEW)){afterMachineRender(VIEW);restoreForm(snap)}}
+  else{VIEW='dash';v.innerHTML=dashHTML()}
 }
 function lockedHTML(txt){
   return '<div class="card lock"><div class="ic">🔒</div><div style="flex:1"><b>'+esc(txt)+'</b><div class="muted">سجّل الدخول للمتابعة</div></div><button class="btn primary" onclick="loginModal()">تسجيل الدخول</button></div>';
@@ -559,6 +600,70 @@ function lineChartSVG(labels,series){
 }
 const legendHTML=items=>'<div class="legend">'+items.map(i=>'<span><i style="background:'+i.color+'"></i>'+esc(i.name)+'</span>').join('')+'</div>';
 
+/* ---------- البحث السريع ومركز الشرح ---------- */
+function setSearchOrder(){SEARCH_Q=String($('#dash-search')?.value||'').trim();render()}
+function clearSearchOrder(){SEARCH_Q='';render()}
+function openFoundOrder(m,id){SEL[m]=id;go(m)}
+function dashboardSearchHTML(){
+  const q=normDigits(SEARCH_Q).toLowerCase();
+  let h='<div class="card sec"><div class="sec-title"><h3>🔎 بحث سريع عن أمر شغل</h3><span class="muted">رقم الأمر أو الفئة أو الملاحظات</span></div>'+
+    '<form class="searchbar" onsubmit="setSearchOrder();return false"><input id="dash-search" type="text" value="'+esc(SEARCH_Q)+'" placeholder="مثال: 6029/1 أو 50 جنيه" autocomplete="off"><button class="btn primary" type="submit">بحث</button>'+(SEARCH_Q?'<button class="btn light" type="button" onclick="clearSearchOrder()">مسح</button>':'')+'</form>';
+  if(q){
+    const found=DB.orders.filter(o=>[o.number,o.denom,o.notes,MNAME(o.machine)].some(v=>normDigits(v||'').toLowerCase().includes(q)));
+    h+='<div class="search-results">';
+    if(!found.length)h+='<div class="empty">مفيش أمر مطابق لكلمة البحث دي.</div>';
+    for(const o of found){
+      const t=totals(o,DB.entries);
+      h+='<div class="search-result"><div><b>'+MNAME(o.machine)+' · <span class="ltr">'+esc(o.number)+'</span></b><div class="meta">'+esc(o.denom||'بدون فئة')+' · سليم '+fmt(t.sg)+' · معيب '+fmt(t.sb)+' · إجمالي المخزون '+fmt(t.stock)+'</div></div><button class="btn light sm" onclick="openFoundOrder('+o.machine+',\''+o.id+'\')">فتح الماكينة</button></div>';
+    }
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function filterLedgerRows(){
+  const q=normDigits($('#ledger-search')?.value||'').trim().toLowerCase();
+  document.querySelectorAll('#ledger-table tbody tr').forEach(tr=>{tr.hidden=!!q&&!normDigits(tr.textContent).toLowerCase().includes(q)});
+}
+function dashboardOrderAlertsHTML(){
+  const tracked=DB.orders.filter(o=>Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0).map(o=>({o,t:totals(o,DB.entries),pct:totals(o,DB.entries).prod/Number(o.qty)*100}));
+  const near=tracked.filter(x=>x.pct>=90).sort((a,b)=>b.pct-a.pct);
+  if(!near.length)return '';
+  let h='<div class="card sec"><div class="sec-title"><h3>⏳ أوامر قربت تكمّل كميتها</h3><span class="muted">الأوامر اللي وصلت ٩٠٪ أو أكتر من الكمية المحددة</span></div><div class="search-results">';
+  for(const x of near){
+    const done=x.pct>=100;
+    h+='<div class="search-result"><div><b>'+MNAME(x.o.machine)+' · <span class="ltr">'+esc(x.o.number)+'</span> · '+(done?'وصل للكمية المحددة':'قرب يكتمل')+'</b><div class="meta">'+fmt(x.t.prod)+' من '+fmt(x.o.qty)+' فرخ · '+Math.min(100,x.pct).toFixed(1)+'٪</div></div><button class="btn light sm" onclick="openFoundOrder('+x.o.machine+',\''+x.o.id+'\')">فتح الأمر</button></div>';
+  }
+  return h+'</div></div>';
+}
+function exportMachineCSV(m){
+  if(!SESSION||!canEdit(m)){toast('مش مسموح بتصدير بيانات الماكينة دي','err');return}
+  const q=v=>'\"'+String(v==null?'':v).replace(/\"/g,'\"\"')+'\"';
+  const os=ordersOf(m),om={};os.forEach(o=>om[o.id]=o);
+  const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
+  DB.entries.filter(e=>om[e.order]).sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{const o=om[e.order];rows.push([e.date,MNAME(m),o.number,o.denom,e.g,e.b,e.g+e.b,e.dg,e.db,e.note,e.by,fmtTime(e.ts)])});
+  rows.push([]);rows.push(['الأرصدة الحالية']);rows.push(['رقم الأمر','الفئة','إجمالي الإنتاج','إجمالي التسليمات','رصيد السليم','رصيد المعيب','الإجمالي']);
+  os.forEach(o=>{const t=totals(o,DB.entries);rows.push([o.number,o.denom,t.prod,t.del,t.sg,t.sb,t.stock])});
+  const cell=v=>{let z=String(v==null?'':v);if(/^[\s]*[=+@\-\t\r]/.test(z))z="'"+z;return q(z)};
+  download('tarqeem-machine-'+m+'-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(cell).join(',')).join('\r\n'),'text/csv;charset=utf-8');toast('تم تصدير تقرير '+MNAME(m),'ok');
+}
+function helpHTML(){
+  const cloud=CLOUD;
+  let h='<div class="help-hero"><h2>💡 دليل استخدام مخزن الترقيمات</h2><div>هنمشي مع بعض خطوة خطوة، من تسجيل الدخول لحد متابعة الرصيد وتصدير التقرير.</div></div>';
+  h+='<div class="help-grid">';
+  h+='<section class="help-card"><h3>١) تسجيل الدخول واختيار الماكينة</h3><ol><li>اضغط «تسجيل الدخول» واكتب اسم المستخدم وكلمة المرور اللي استلمتهم من المسؤول.</li><li>بعد الدخول هتظهرلك لوحة المتابعة وتبويبات الماكينات.</li><li>اختار «ترقيم ١» أو «ترقيم ٢» أو الماكينة المطلوبة.</li><li>علامة القلم جنب اسم الماكينة معناها إن حسابك يقدر يدخل ويعدّل بياناتها.</li></ol></section>';
+  h+='<section class="help-card"><h3>٢) إضافة أمر شغل جديد</h3><ol><li>افتح صفحة الماكينة واضغط «أمر شغل جديد».</li><li>اكتب رقم الأمر بنفس الصيغة المطلوبة، زي 6029/1.</li><li>اكتب كمية الأمر بالفرخ، واختار الفئة واكتب أي ملاحظات مهمة.</li><li>المدير العام يقدر كمان يحدد الرصيد الافتتاحي السليم والمعيب.</li><li>في الأوامر القديمة اللي مفيهاش كمية مسجلة، البرنامج بيعرض الحد الأعلى للنظام (1,200,000 فرخ) كقيمة افتراضية؛ راجع الكمية الفعلية وعدّلها قبل الاعتماد على نسبة الإنجاز.</li><li>اضغط «حفظ». البرنامج هيرفض رقم الأمر المكرر في نفس الماكينة أو كمية غير صحيحة.</li></ol></section>';
+  h+='<section class="help-card"><h3>٣) تسجيل إنتاج وتسليمات اليوم</h3><ol><li>من صفحة الماكينة، اختار أمر الشغل من القائمة.</li><li>حدد تاريخ الحركة.</li><li>اكتب كمية «سليم اليوم» و«معيب اليوم».</li><li>لو فيه تسليم، اكتب «تسليم سليم» و«تسليم معيب» كل واحد في خانته.</li><li>راجع معاينة الرصيد اللي بتتحدث قدامك، وبعدها اضغط «حفظ».</li></ol><div class="info-box">تقدر تكتب الأرقام بالعربي أو بالإنجليزي، ومع فواصل الآلاف. اكتب صفر أو سيب الخانة فاضية لو مفيش كمية.</div></section>';
+  h+='<section class="help-card"><h3>٤) فهم الأرصدة وطريقة الحساب</h3><ol><li>رصيد السليم = الرصيد الافتتاحي السليم + إنتاج السليم − تسليم السليم.</li><li>رصيد المعيب = الرصيد الافتتاحي المعيب + إنتاج المعيب − تسليم المعيب.</li><li>إجمالي المخزون = رصيد السليم + رصيد المعيب.</li><li>المتبقي من كمية الأمر = كمية الأمر − إجمالي الإنتاج المسجل.</li></ol><p class="muted">البرنامج بيفصل السليم عن المعيب، ومش بيسمح بتسليم كمية أكبر من الرصيد المتاح أو إنتاج يتخطى كمية الأمر.</p></section>';
+  h+='<section class="help-card"><h3>٥) تعديل حركة أو حذفها</h3><ol><li>انزل لسجل الإنتاج والتسليمات تحت أوامر الشغل.</li><li>استخدم مربع البحث لتصفية السجل بالتاريخ أو رقم الأمر أو الملاحظة.</li><li>اضغط «تعديل» لتصحيح حركة، أو «حذف» لإلغاء حركة بالكامل.</li><li>قبل الحذف راجع تأثيره على الرصيد؛ البرنامج بيرفض الحذف لو هيخلّي الرصيد بالسالب.</li></ol></section>';
+  h+='<section class="help-card"><h3>٦) البحث والتقارير</h3><ol><li>من لوحة المتابعة استخدم «بحث سريع عن أمر شغل» واكتب رقم الأمر أو الفئة أو جزء من الملاحظات.</li><li>من صفحة الماكينة اضغط «تصدير تقرير الماكينة» لتنزيل ملف CSV فيه الحركات والأرصدة.</li><li>اضغط «طباعة التقرير» لطباعة صفحة الماكينة أو حفظها PDF من نافذة الطباعة.</li><li>من صفحة الإدارة يقدر المدير يصدّر نسخة JSON أو سجل CSV لكل البيانات.</li></ol></section>';
+  h+='<section class="help-card"><h3>٧) الاستيراد والنسخ الاحتياطي</h3><ol><li>استيراد Excel متاح للمدير العام فقط، والبرنامج بيعرض معاينة قبل التنفيذ.</li><li>خد نسخة JSON احتياطية بانتظام واحتفظ بيها في مكان آمن ومصرّح به.</li><li>«دمج نسخة» بيضيف الأوامر والحركات الجديدة من نسخة تانية، و«استبدال» بيمسح الحالي ويحط بيانات الملف مكانه.</li><li>ما تعملش استبدال إلا بعد التأكد من الملف ومن وجود نسخة احتياطية حديثة.</li></ol></section>';
+  h+='</div>';
+  h+='<div class="card sec"><h3>٨) الحفظ والمزامنة والسرية</h3>';
+  h+=cloud?'<div class="info-box">البرنامج متصل بـ Firebase، والمفروض التحديثات تظهر على الأجهزة بعد تسجيل الدخول والاتصال بالإنترنت. لو المزامنة وقفت، راجع حالة الاتصال وصلاحيات قاعدة البيانات مع مسؤول النظام.</div>':'<div class="note-box">الوضع الحالي محلي: البيانات بتتحفظ في المتصفح وعلى نفس الجهاز فقط، ومش بتتنقل تلقائيًا لجهاز تاني. كمان تسجيل الدخول المحلي وسيلة تنظيم بسيطة مش حماية أمنية حقيقية؛ أي شخص عنده وصول للجهاز أو ملف HTML يقدر يفحص الكود والبيانات.</div>';
+  h+='<p class="muted sec">معلومة تشغيلية: تعديل الحركة بيحدّث السجل الحالي، لكنه مش بيحتفظ بسجل تدقيق مستقل بالقيم القديمة والجديدة. لو مطلوب اعتماد رسمي ومراجعة تغييرات، نحتاج إضافة سجل تدقيق غير قابل للمحو بصلاحيات إدارية.</p></div>';
+  return h;
+}
+
 /* ---------- لوحة المتابعة ---------- */
 function dashHTML(){
   if(CLOUD&&!DB.orders.length){
@@ -573,14 +678,19 @@ function dashHTML(){
   });
   const T=k=>sum(rows,r=>r.t[k]);
   const todayProd=sum(rows,r=>r.prod),todayDel=sum(rows,r=>r.del);
+  const allGood=sum(DB.entries,e=>Number(e.g)||0),allBad=sum(DB.entries,e=>Number(e.b)||0);
+  const badPct=allGood+allBad?Math.round(allBad/(allGood+allBad)*1000)/10:0;
   let h='<div class="grid kpis">'+
    '<div class="kpi big"><div class="l">📦 إجمالي المخزون</div><div class="v">'+fmt(T('stock'))+'</div></div>'+
    '<div class="kpi" style="--k:#059669"><div class="l">✅ سليم بالمخازن</div><div class="v">'+fmt(T('sg'))+'</div></div>'+
    '<div class="kpi" style="--k:#e11d48"><div class="l">⚠️ معيب بالمخازن</div><div class="v">'+fmt(T('sb'))+'</div></div>'+
    '<div class="kpi" style="--k:#4f46e5"><div class="l">🏭 إنتاج اليوم</div><div class="v">'+fmt(todayProd)+'</div></div>'+
    '<div class="kpi" style="--k:#d97706"><div class="l">🚚 تسليمات اليوم</div><div class="v">'+fmt(todayDel)+'</div></div>'+
+   '<div class="kpi" style="--k:#be123c"><div class="l">📉 نسبة المعيب المسجل</div><div class="v">'+badPct+'%</div></div>'+
   '</div>';
 
+  h+=dashboardSearchHTML();
+  h+=dashboardOrderAlertsHTML();
   h+='<div class="sec"><div class="sec-title"><h3>الماكينات</h3><span class="muted">اضغط على أي ماكينة لعرض تفاصيلها</span></div><div class="grid mcards">';
   for(const r of rows){
     const defect=r.t.prod?Math.round(r.t.pb/r.t.prod*1000)/10:0;
@@ -635,7 +745,7 @@ function machineHTML(m){
   const last=os.map(o=>o.modified).sort().pop();
   let h='<div style="--mc:'+MCOL[m]+'">';
   h+='<div class="mhead"><div><h2>'+MNAME(m)+'</h2><p>'+os.length+' أوامر شغل'+(last?' · آخر تعديل '+fmtTime(last):'')+(ce?'':' · عرض فقط')+'</p></div>'+
-     (ce?'<button class="btn light" onclick="orderModal('+m+')">＋ أمر شغل جديد</button>':'')+'</div>';
+     '<div class="actions no-print" style="margin:0"><button class="btn light" onclick="window.print()">🖨️ طباعة التقرير</button>'+(ce?'<button class="btn green" onclick="exportMachineCSV('+m+')">📄 تصدير تقرير الماكينة</button><button class="btn primary" onclick="orderModal('+m+')">＋ أمر شغل جديد</button>':'')+'</div></div>';
   h+='<div class="grid tiles">'+
    '<div class="tile" style="--t:#6366f1"><div class="l">إجمالي الإنتاج</div><div class="v">'+fmt(t.prod)+'</div></div>'+
    '<div class="tile" style="--t:#f59e0b"><div class="l">إجمالي التسليمات</div><div class="v">'+fmt(t.del)+'</div></div>'+
@@ -673,12 +783,11 @@ function machineHTML(m){
   /* كروت الأوامر */
   h+='<div class="sec"><div class="sec-title"><h3>أوامر الشغل</h3></div><div class="grid ocards">';
   for(const o of os){
-    const x=totals(o,DB.entries);
+    const x=totals(o,DB.entries),qtyKnown=Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0;
     h+='<div class="oc"><div class="oc-h"><b>'+esc(o.number)+'</b>'+(o.denom?'<span class="badge">'+esc(o.denom)+'</span>':'')+'</div>'+
       (o.notes?'<div class="oc-n">📝 '+esc(o.notes)+'</div>':'')+
       '<div class="oc-s"><div class="a"><div class="l">سليم</div><div class="v">'+fmt(x.sg)+'</div></div><div class="c"><div class="l">معيب</div><div class="v">'+fmt(x.sb)+'</div></div><div class="d"><div class="l">الإجمالي</div><div class="v">'+fmt(x.stock)+'</div></div></div>'+
-      '<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div>'+
-      '<div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>'+
+      (qtyKnown?'<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div><div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>':'<div class="wn">⚠ كمية الأمر الأصلية غير محددة — حد النظام الافتراضي 1,200,000 فرخ، راجع الكمية الفعلية من «تعديل»</div>')+
       '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>'+fmtTime(o.modified)+'</span></div>'+
       (ce?'<div class="oc-b"><button class="btn primary sm" onclick="pickOrder('+m+',\''+o.id+'\')">＋ إدخال</button><button class="btn light sm" onclick="orderModal('+m+',\''+o.id+'\')">تعديل</button>'+(isAdmin()?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">حذف</button>':'')+'</div>':'')+
     '</div>';
@@ -694,7 +803,8 @@ function machineHTML(m){
   h+='<div class="card sec"><div class="sec-title"><h3>📒 سجل الإنتاج والتسليمات</h3><span class="muted">'+ents.length+' حركة</span></div>';
   if(!ents.length)h+='<div class="empty">لا توجد حركات مُدخلة بعد</div>';
   else{
-    h+='<div class="tw"><table><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
+    h+='<div class="ledger-filter no-print"><input id="ledger-search" type="text" placeholder="ابحث بالتاريخ أو رقم الأمر أو الملاحظة..." oninput="filterLedgerRows()"><span class="muted">اكتب جزء من المعلومة لتصفية الحركات</span></div>';
+    h+='<div class="tw"><table id="ledger-table"><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
     for(const e of shown){
       const o=oMap[e.order],b=bal[e.id]||{sg:0,sb:0};
       h+='<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.by||'')+'</small></td>'+
@@ -752,9 +862,9 @@ function saveEntry(m){
   const o=DB.orders.find(x=>x.id===$('#f-order').value);
   if(!o||o.machine!==m)return err('اختر أمر الشغل');
   if(!canEdit(m))return err('ليس لديك صلاحية');
-  const date=$('#f-date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return err('اختر التاريخ');
+  const date=$('#f-date').value;if(!validYmd(date))return err('اختار تاريخ صحيح من التقويم');
   const g=parseNum($('#f-g').value),b=parseNum($('#f-b').value),dg=parseNum($('#f-dg').value),db=parseNum($('#f-db').value);
-  if([g,b,dg,db].some(isNaN))return err('الأرقام يجب أن تكون صحيحة وغير سالبة (بدون كسور أو حروف)');
+  if([g,b,dg,db].some(n=>!Number.isSafeInteger(n)||n<0))return err('الأرقام لازم تكون أعداد صحيحة موجبة أو صفر، ومن غير كسور أو حروف');
   if(g+b+dg+db===0)return err('أدخل قيمة واحدة على الأقل');
   const rec={id:EDITING||uid('e'),order:o.id,m:o.machine,date,g,b,dg,db,note:$('#f-note').value.trim(),by:whoName(),ts:new Date().toISOString()};
   const test=EDITING?DB.entries.map(e=>e.id===EDITING?rec:e):DB.entries.concat(rec);
@@ -795,7 +905,7 @@ function orderModal(m,id){
    '<label class="f">الفئة<input type="text" id="o-den" list="cats" autocomplete="off" value="'+esc(o?o.denom:'')+'"><datalist id="cats">'+cats.map(c=>'<option value="'+esc(c)+'">').join('')+'</datalist></label>'+
    '<label class="f span2">ملاحظات<textarea id="o-notes" rows="3">'+esc(o?o.notes:'')+'</textarea></label>'+
    (isAdmin()?'<label class="f gd">رصيد افتتاحي — سليم<input type="text" inputmode="numeric" class="num" id="o-og" value="'+(o?o.og:0)+'"></label><label class="f bd">رصيد افتتاحي — معيب<input type="text" inputmode="numeric" class="num" id="o-ob" value="'+(o?o.ob:0)+'"></label>':'')+
-   '</div><div class="err-txt" id="o-err"></div><div class="actions"><button class="btn primary" type="submit">حفظ</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
+   '</div>'+(o&&!(Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0)?'<div class="note-box sec">الكمية الفعلية للأمر مش متسجلة في البيانات القديمة. القيمة الظاهرة 1,200,000 هي حد النظام الافتراضي؛ اكتب الكمية الصحيحة قبل الحفظ.</div>':'')+'<div class="err-txt" id="o-err"></div><div class="actions"><button class="btn primary" type="submit">حفظ</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
 }
 function saveOrder(m,id){
   const err=t=>{$('#o-err').textContent=t};
@@ -807,10 +917,10 @@ function saveOrder(m,id){
   if(!(o&&o.number===number)&&!/^\d+\/\d+$/.test(number))return err('رقم الأمر لازم يكون بالشكل 6029/1 (رقم ثم / ثم رقم)');
   if(DB.orders.some(x=>x.number===number&&x.machine===m&&x.id!==id))return err('رقم الأمر '+number+' موجود بالفعل في هذه الماكينة');
   const qty=parseNum($('#o-qty').value);
-  if(isNaN(qty)||qty<1)return err('اكتب كمية الأمر بالفرخ');
+  if(!Number.isSafeInteger(qty)||qty<1)return err('اكتب كمية صحيحة للأمر بالفرخ');
   if(qty>MAXQ)return err('كمية الأمر لا يمكن أن تتجاوز '+fmt(MAXQ)+' فرخ');
   let og=o?o.og:0,ob=o?o.ob:0;
-  if(isAdmin()){og=parseNum($('#o-og').value);ob=parseNum($('#o-ob').value);if(isNaN(og)||isNaN(ob))return err('الرصيد الافتتاحي رقم صحيح غير سالب')}
+  if(isAdmin()){og=parseNum($('#o-og').value);ob=parseNum($('#o-ob').value);if(!Number.isSafeInteger(og)||og<0||!Number.isSafeInteger(ob)||ob<0)return err('الأرصدة الافتتاحية لازم تكون أعداد صحيحة غير سالبة')}
   const now=new Date().toISOString();
   if(o){
     const t=totals({...o,og,ob},DB.entries);
@@ -851,7 +961,7 @@ function settingsHTML(){
     const a=DB.users[k];
     h+='<div class="acc"><div class="nm">'+(k==='admin'?'👑 المدير العام':MNAME(k))+'</div>'+
       '<input type="text" id="u-'+k+'" value="'+esc(a.user)+'" placeholder="اسم المستخدم" autocomplete="off" style="direction:ltr;text-align:right">'+
-      '<input type="text" id="p-'+k+'" value="'+esc(a.pass)+'" placeholder="كلمة المرور" autocomplete="off" style="direction:ltr;text-align:right"></div>';
+      '<input type="password" id="p-'+k+'" value="'+esc(a.pass)+'" placeholder="كلمة المرور" autocomplete="new-password" style="direction:ltr;text-align:right"></div>';
   }
   h+='<div class="err-txt" id="s-err"></div><div class="actions"><button class="btn primary" onclick="saveUsers()">💾 حفظ الحسابات</button></div></div>';
   }
@@ -893,7 +1003,7 @@ function exportJSON(){
   download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
 }
 function exportCSV(){
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const q=v=>{let z=String(v==null?'':v);if(/^[\s]*[=+@\-\t\r]/.test(z))z="'"+z;return '"'+z.replace(/"/g,'""')+'"'};
   const OM={};DB.orders.forEach(o=>OM[o.id]=o);
   const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
   [...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{
@@ -906,6 +1016,38 @@ function exportCSV(){
   download('tarqeem-log-'+todayStr()+'.csv','﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
   toast('تم تنزيل السجل','ok');
 }
+function validateBackup(d){
+  const fail=message=>({ok:false,message});
+  if(!d||typeof d!=='object'||!Array.isArray(d.orders)||!Array.isArray(d.entries))return fail('الملف لازم يحتوي على أوامر وحركات بصيغة النسخة الاحتياطية.');
+  d={...d,
+    orders:d.orders.map(o=>({...o,id:String(o?.id??''),machine:Number(o?.machine),number:String(o?.number??''),og:o?.og==null?0:Number(o.og),ob:o?.ob==null?0:Number(o.ob),qty:o?.qty==null?null:Number(o.qty)})),
+    entries:d.entries.map(e=>({...e,id:String(e?.id??''),order:String(e?.order??''),date:String(e?.date??''),g:e?.g==null?0:Number(e.g),b:e?.b==null?0:Number(e.b),dg:e?.dg==null?0:Number(e.dg),db:e?.db==null?0:Number(e.db)}))
+  };
+  const orderIds=new Set(),entryIds=new Set(),orderKeys=new Set();
+  for(const o of d.orders){
+    if(!o||typeof o!=='object'||!o.id||!/^[A-Za-z0-9_-]{1,100}$/.test(String(o.id))||!MACHINES.includes(Number(o.machine))||!String(o.number||'').trim())return fail('فيه أمر شغل ناقص أو فيه ماكينة/رقم أمر غير صالح.');
+    if(orderIds.has(String(o.id)))return fail('فيه رقم تعريفي مكرر لأمر شغل.');orderIds.add(String(o.id));
+    const orderKey=Number(o.machine)+'|'+String(o.number);if(orderKeys.has(orderKey))return fail('فيه رقم أمر مكرر داخل نفس الماكينة.');orderKeys.add(orderKey);
+    for(const k of ['og','ob']){const n=o[k]==null?0:Number(o[k]);if(!Number.isSafeInteger(n)||n<0)return fail('رصيد افتتاحي غير صالح في الأمر '+o.number+'.');}
+    if(o.qty!=null){const n=Number(o.qty);if(!Number.isSafeInteger(n)||n<1||n>MAXQ)return fail('كمية الأمر غير صالحة في الأمر '+o.number+'.');}
+  }
+  for(const e of d.entries){
+    if(!e||typeof e!=='object'||!e.id||!/^[A-Za-z0-9_-]{1,100}$/.test(String(e.id))||!orderIds.has(String(e.order)))return fail('فيه حركة بدون رقم تعريفي صالح أو مرتبطة بأمر غير موجود.');
+    if(entryIds.has(String(e.id)))return fail('فيه رقم تعريفي مكرر لحركة.');entryIds.add(String(e.id));
+    if(!validYmd(e.date))return fail('فيه حركة بتاريخ غير صحيح.');
+    for(const k of ['g','b','dg','db']){const n=e[k]==null?0:Number(e[k]);if(!Number.isSafeInteger(n)||n<0)return fail('فيه كمية غير صحيحة في حركة بتاريخ '+e.date+'.');}
+  }
+  for(const o of d.orders){
+    const movements=d.entries.filter(e=>String(e.order)===String(o.id));
+    const produced=Number(o.og||0)+Number(o.ob||0)+sum(movements,e=>Number(e.g||0)+Number(e.b||0));
+    const good=Number(o.og||0)+sum(movements,e=>Number(e.g||0)-Number(e.dg||0));
+    const bad=Number(o.ob||0)+sum(movements,e=>Number(e.b||0)-Number(e.db||0));
+    if(!Number.isSafeInteger(produced)||!Number.isSafeInteger(good)||!Number.isSafeInteger(bad))return fail('إجمالي الكميات أكبر من النطاق المسموح به في الأمر '+o.number+'.');
+    if(good<0||bad<0)return fail('النسخة فيها تسليمات تتجاوز الرصيد المتاح في الأمر '+o.number+'.');
+    if(o.qty!=null&&produced>Number(o.qty))return fail('إجمالي الإنتاج أكبر من كمية الأمر '+o.number+'.');
+  }
+  return {ok:true,data:d};
+}
 let IMPORT_MODE='merge';
 function pickFile(mode){IMPORT_MODE=mode;const f=$('#file-in');f.value='';f.click()}
 $('#file-in').addEventListener('change',ev=>{
@@ -913,7 +1055,9 @@ $('#file-in').addEventListener('change',ev=>{
   const r=new FileReader();
   r.onload=()=>{
     let d;try{d=JSON.parse(r.result)}catch(e){toast('الملف غير صالح','err');return}
-    if(!d||!Array.isArray(d.orders)||!Array.isArray(d.entries)){toast('هذا ليس ملف نسخة احتياطية صالح','err');return}
+    const checked=validateBackup(d);
+    if(!checked.ok){toast(checked.message,'err');return}
+    d=checked.data;
     if(IMPORT_MODE==='replace'){
       confirmBox('سيتم استبدال كل البيانات الحالية بمحتوى الملف. متأكد؟',()=>{
         if(CLOUD&&FB){
@@ -1079,7 +1223,7 @@ function applyImport(){
       o=DB.orders.find(z=>z.id===p.oid);if(!o)continue;
       o.og=p.og;o.ob=p.ob;if(p.denom)o.denom=p.denom;if(p.notes)o.notes=p.notes;o.modified=p.mod||now;nu++;
     }else{
-      o={id:uid('o'),machine:p.machine,number:p.number,denom:p.denom,notes:p.notes,og:p.g,ob:p.b,qty:MAXQ,modified:p.mod||now};
+      o={id:uid('o'),machine:p.machine,number:p.number,denom:p.denom,notes:p.notes,og:p.g,ob:p.b,qty:null,modified:p.mod||now};
       DB.orders.push(o);nn++;
     }
     up['orders/'+o.id]=plain(o);
