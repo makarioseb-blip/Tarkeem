@@ -189,25 +189,23 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 .wn{font-size:12px;color:#b45309;font-weight:600;margin-top:3px;white-space:normal}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .tw input[type=checkbox]{width:18px;height:18px}
-@media print{header .who,.tabs-wrap,.actions,.oc-b,footer,.no-print{display:none!important}body{background:#fff!important}.card,.kpi,.tile,.oc{box-shadow:none!important;break-inside:avoid}main{padding-top:8px}.tw{overflow:visible}table{min-width:0;font-size:10px}th,td{padding:5px}}
-.searchbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.searchbar input{flex:1;min-width:180px}
-.search-results{display:grid;gap:9px;margin-top:12px}
-.search-result{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:#fbfcff}
-.search-result b{font-size:15px}
-.search-result .meta{color:var(--muted);font-size:12px}
-.help-hero{background:linear-gradient(125deg,#312e81,#4f46e5 55%,#0891b2);color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}
-.help-hero h2{margin:0 0 5px;font-size:23px}
-.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.help-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow)}
-.help-card h3{margin:0 0 8px;font-size:16px}
-.help-card ol,.help-card ul{margin:6px 0 0;padding-right:20px}
-.help-card li{margin:5px 0;line-height:1.8}
-.note-box{padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:13px;color:#854d0e;line-height:1.9}
-.info-box{padding:12px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px;color:#1e40af;line-height:1.9}
-.ledger-filter{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
-.ledger-filter input{max-width:420px}
-@media(max-width:560px){.search-result{align-items:flex-start}.search-result .btn{width:100%}.help-hero h2{font-size:20px}}
+@media print{header .who,.tabs-wrap,.actions,.oc-b,footer{display:none!important}}
+.alerts{display:grid;gap:8px}
+.al{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:13px;font-weight:600;font-size:14px;line-height:1.7;border:1px solid}
+.al .ic{font-size:18px;line-height:1.5}
+.al.hi{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+.al.md{background:#fffbeb;border-color:#fde68a;color:#92400e}
+.al.lo{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+.fc{font-size:12.5px;color:#475569;background:#f8fafc;border-radius:9px;padding:5px 10px;margin:0 0 6px}
+.fc b{color:var(--ink)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:0 0 12px}
+.filters label.f{font-size:12.5px}
+#toast.act{pointer-events:auto}
+#toast .ub{margin-inline-start:10px;background:#fff;color:#0f172a;border:0;border-radius:9px;padding:3px 12px;font-weight:800}
+tr.tot td{background:#eef2ff;font-weight:800}
+body.pr header.top,body.pr .tabs-wrap,body.pr main,body.pr footer,body.pr .noprint,body.pr #toast{display:none!important}
+body.pr .overlay{position:static;background:#fff;padding:0;display:block;backdrop-filter:none;animation:none}
+body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;padding:0;animation:none}
 </style>
 </head>
 <body>
@@ -224,7 +222,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 
 <div class="wrap tabs-wrap"><nav class="tabs" id="tabs"></nav></div>
 <main class="wrap" id="view"></main>
-<footer id="foot">مخزن الترقيمات · راجع النسخ الاحتياطي من صفحة الإدارة بشكل دوري</footer>
+<footer id="foot">البيانات محفوظة داخل هذا المتصفح على هذا الجهاز · استخدم «النسخ الاحتياطي» من صفحة الإدارة بشكل دوري</footer>
 
 <div id="modal-root"></div>
 <div id="toast"></div>
@@ -241,6 +239,8 @@ const MNAME=m=>'ترقيم '+AR_NUM[m];
 const MCOL={1:'#0d9488',2:'#4f46e5',3:'#d97706',4:'#db2777'};
 const MAXQ=1200000;                       /* أقصى كمية للأمر الواحد (فرخ) */
 const qtyOf=o=>Math.min(MAXQ,Number(o.qty)||MAXQ);
+/* حدود التنبيهات الذكية */
+const DEFECT_WARN=20, NEAR_DONE=0.9, IDLE_DAYS=14;
 
 /* ============== إعدادات Firebase ==============
    الصق هنا إعدادات مشروعك من: Firebase Console ← Project settings ← Your apps ← Web app ← firebaseConfig
@@ -269,8 +269,7 @@ const pad=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const todayStr=()=>ymd(new Date());
 const fmtDate=s=>{const p=String(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s};
-const fmtTime=iso=>{try{const d=new Date(iso);if(!Number.isFinite(d.getTime()))return '';return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}catch(e){return ''}};
-const validYmd=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s)))return false;const d=new Date(s+'T00:00:00');return !isNaN(d.getTime())&&ymd(d)===s};
+const fmtTime=iso=>{try{const d=new Date(iso);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}catch(e){return ''}};
 const normDigits=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 /* يقبل أرقام عربية وإنجليزية وفواصل — يرجع NaN لو القيمة غير صالحة */
 function parseNum(v){
@@ -291,8 +290,8 @@ function niceMax(v){
 }
 
 /* ============== البيانات ============== */
-let DB, SESSION=null, VIEW='dash', RANGE=14, EDITING=null, SHOWALL=false, SEL={}, LASTDATE=null, MEMORY_ONLY=false, CONFIRM_CB=null, SEARCH_Q='';
-let CLOUD_UNSUB=[], CLOUD_CONNECTED_UNSUB=null, CLOUD_LISTENING=false;
+let DB, SESSION=null, VIEW='dash', RANGE=14, EDITING=null, SHOWALL=false, SEL={}, LASTDATE=null, MEMORY_ONLY=false, CONFIRM_CB=null;
+let METRIC='prod', LOGF={o:'',from:'',to:'',q:''}, ALL_AL=false, CF_WORD='';
 
 function seed(){
   const O=(id,m,number,denom,og,ob,notes,mod)=>({id,machine:m,number,denom,og,ob,notes:notes||'',modified:mod});
@@ -345,46 +344,36 @@ const cloudDelEntry=id=>{if(CLOUD&&FB)cw(()=>FB.remove(FB.ref(FB.db,'entries/'+i
 function withM(e){if(e.m==null){const o=DB.orders.find(x=>x.id===e.order);if(o)return {...e,m:o.machine}}return e}
 const toArr=s=>{const v=s.val();return v?Object.keys(v).map(k=>({...v[k],id:v[k].id||k})):[]};
 function sched(){if(RAF)return;RAF=requestAnimationFrame(()=>{RAF=0;render(true)})}
-function stopCloudListeners(){
-  CLOUD_UNSUB.forEach(fn=>{try{fn()}catch(e){}});CLOUD_UNSUB=[];CLOUD_LISTENING=false;
-  DB.orders=[];DB.entries=[];CLOUD_READY=false;
-}
-function startCloudListeners(){
-  if(!FB||!SESSION||CLOUD_LISTENING)return;
-  CLOUD_ERR='';CLOUD_READY=false;
-  let gotO=false,gotE=false;
-  const ready=()=>{if(gotO&&gotE){CLOUD_READY=true;render(true)}};
-  const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
-  CLOUD_UNSUB=[
-    FB.onValue(FB.ref(FB.db,'orders'),snap=>{DB.orders=toArr(snap);gotO=true;ready();sched()},lerr),
-    FB.onValue(FB.ref(FB.db,'entries'),snap=>{DB.entries=toArr(snap);gotE=true;ready();sched()},lerr)
-  ];
-  CLOUD_LISTENING=true;
-}
 function onAuth(user){
-  if(!user){stopCloudListeners();setSession(null);EDITING=null;SEARCH_Q='';if(VIEW==='settings'||(typeof VIEW==='number'))VIEW='dash';render(true);return}
-  const email=String(user.email||'').toLowerCase(),parts=email.split('@'),name=parts[0]||'',domain=parts[1]||'';
+  auditStop();
+  if(!user){setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
+  const name=String(user.email||'').split('@')[0].toLowerCase();
   let role=null;
-  if(domain!==ACCOUNT_DOMAIN.toLowerCase()){
-    cw(()=>FB.signOut(FB.auth));toast('الحساب غير تابع لنطاق الدخول المعتمد','err');return;
-  }
   if(name==='admin')role='admin';else{const mm=/^machine([1-4])$/.exec(name);if(mm)role=Number(mm[1])}
   if(role==null){cw(()=>FB.signOut(FB.auth));toast('هذا الحساب غير مصرّح له بالبرنامج','err');return}
   setSession({role});
+  if(role==='admin')auditListen();
   if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;toast('أهلاً '+whoName(),'ok')}
-  startCloudListeners();render(true);
+  render(true);
 }
 async function initCloud(){
   try{
     const base='https://www.gstatic.com/firebasejs/'+FB_VERSION+'/';
     const [A,D,U]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-database.js'),import(base+'firebase-auth.js')]);
     const app=A.initializeApp(FIREBASE_CONFIG);
+    /* تخزين الدخول بترتيب احتياطي: لو المتصفح/المعاينة بتمنع التخزين ينزل للذاكرة بدل ما يتعلق */
     let authInst;
     try{authInst=U.initializeAuth(app,{persistence:[U.indexedDBLocalPersistence,U.browserLocalPersistence,U.inMemoryPersistence]})}
     catch(e){authInst=U.getAuth(app)}
     FB={db:D.getDatabase(app),auth:authInst,ref:D.ref,set:D.set,update:D.update,remove:D.remove,
-        onValue:D.onValue,signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut};
-    CLOUD_CONNECTED_UNSUB=D.onValue(D.ref(FB.db,'.info/connected'),snap=>{ONLINE=!!snap.val();renderHeader()});
+        signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut,
+        onValue:D.onValue,query:D.query,limitToLast:D.limitToLast};
+    let gotO=false,gotE=false;
+    const ready=()=>{if(gotO&&gotE)CLOUD_READY=true};
+    const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
+    D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s);gotO=true;ready();sched()},lerr);
+    D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s);gotE=true;ready();sched()},lerr);
+    D.onValue(D.ref(FB.db,'.info/connected'),s=>{ONLINE=!!s.val();renderHeader()});
     U.onAuthStateChanged(FB.auth,onAuth);
   }catch(e){CLOUD_ERR=String((e&&e.message)||e);render(true)}
 }
@@ -400,9 +389,21 @@ function setSession(s){SESSION=s;try{s?sessionStorage.setItem(SS_KEY,JSON.string
 
 /* ============== الحسابات ============== */
 const ordersOf=m=>DB.orders.filter(o=>o.machine===m);
+/* فهرس الحركات حسب الأمر: يُعاد بناؤه فقط لما تتغير مصفوفة الحركات أو عددها، فالحساب يبقى سريع مهما كبرت البيانات */
+let _ix={e:null,n:-1,map:null};
+function entsOf(id){
+  const E=DB.entries;
+  if(_ix.e!==E||_ix.n!==E.length){
+    const m=new Map();
+    for(const x of E){let a=m.get(x.order);if(!a)m.set(x.order,a=[]);a.push(x)}
+    _ix={e:E,n:E.length,map:m};
+  }
+  return _ix.map.get(id)||[];
+}
 function totals(o,list){
-  let pg=o.og,pb=o.ob,dg=0,db=0;
-  for(const e of list){ if(e.order!==o.id)continue; pg+=e.g;pb+=e.b;dg+=e.dg;db+=e.db }
+  let pg=o.og||0,pb=o.ob||0,dg=0,db=0;
+  const src=list===DB.entries?entsOf(o.id):list;
+  for(const e of src){ if(e.order!==o.id)continue; pg+=e.g||0;pb+=e.b||0;dg+=e.dg||0;db+=e.db||0 }
   return {pg,pb,dg,db,sg:pg-dg,sb:pb-db,prod:pg+pb,del:dg+db,stock:(pg-dg)+(pb-db)};
 }
 function mTotals(m,list){
@@ -412,20 +413,23 @@ function mTotals(m,list){
   return t;
 }
 function orderMachineMap(){const m={};DB.orders.forEach(o=>m[o.id]=o.machine);return m}
+/* ترتيب زمني (تاريخ ثم وقت الإدخال) بمقارنة مباشرة — أسرع بكثير من localeCompare على آلاف الحركات */
+const cmpDT=(a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.ts<b.ts?-1:a.ts>b.ts?1:0);
 function runningBalances(o){
-  const list=DB.entries.filter(e=>e.order===o.id).sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts)));
-  let sg=o.og,sb=o.ob;const map={};
-  for(const e of list){sg+=e.g-e.dg;sb+=e.b-e.db;map[e.id]={sg,sb}}
+  const list=[...entsOf(o.id)].sort(cmpDT);
+  let sg=o.og||0,sb=o.ob||0;const map={};
+  for(const e of list){sg+=(e.g||0)-(e.dg||0);sb+=(e.b||0)-(e.db||0);map[e.id]={sg,sb}}
   return map;
 }
-function dailySeries(days){
+/* metric: prod = إنتاج (سليم+معيب) · def = معيب · del = تسليمات */
+function dailySeries(days,metric){
   const OM=orderMachineMap(),labels=[],keys=[],now=new Date();
   for(let i=days-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);keys.push(ymd(d));labels.push(pad(d.getDate())+'/'+pad(d.getMonth()+1))}
   const idx={};keys.forEach((k,i)=>idx[k]=i);
   const series=MACHINES.map(m=>({name:MNAME(m),color:MCOL[m],values:keys.map(()=>0)}));
   for(const e of DB.entries){
     const i=idx[e.date],m=OM[e.order];
-    if(i!=null&&m)series[m-1].values[i]+=e.g+e.b;
+    if(i!=null&&m)series[m-1].values[i]+=metric==='def'?(e.b||0):metric==='del'?(e.dg||0)+(e.db||0):(e.g||0)+(e.b||0);
   }
   return {labels,series};
 }
@@ -441,18 +445,28 @@ function toast(msg,type){
   const t=$('#toast');t.textContent=msg;t.className='on '+(type||'');
   clearTimeout(toastT);toastT=setTimeout(()=>t.className='',type==='err'?4200:2200);
 }
+function toastUndo(msg,fn){
+  const t=$('#toast');t.textContent=msg+' ';
+  const b=document.createElement('button');b.className='ub';b.textContent='↩ تراجع';
+  b.onclick=()=>{clearTimeout(toastT);t.className='';fn()};
+  t.appendChild(b);t.className='on act';
+  clearTimeout(toastT);toastT=setTimeout(()=>t.className='',8000);
+}
 function openModal(inner,wide){
   $('#modal-root').innerHTML='<div class="overlay" onmousedown="if(event.target===this)closeModal()"><div class="modal'+(wide?' wide':'')+'" role="dialog" aria-modal="true">'+inner+'</div></div>';
-  const f=$('#modal-root input,#modal-root select,#modal-root textarea');if(f)setTimeout(()=>f.focus(),30);
+  const f=$('#modal-root input,#modal-root select,#modal-root textarea');if(f)setTimeout(()=>{if(!$('#modal-root').contains(document.activeElement))f.focus()},30);
 }
 function closeModal(){$('#modal-root').innerHTML='';CONFIRM_CB=null}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-function confirmBox(msg,cb,okLabel){
-  CONFIRM_CB=cb;
-  openModal('<h3>تأكيد</h3><p style="margin:0 0 16px;line-height:1.9">'+esc(msg)+'</p><div class="actions"><button class="btn danger" onclick="const f=CONFIRM_CB;closeModal();f&&f()">'+esc(okLabel||'تأكيد')+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>');
+/* تأكيد: msg نص أو قائمة تحذيرات · word = كلمة لازم المستخدم يكتبها قبل ما يتفعّل الزرار (للعمليات الخطرة) */
+function confirmBox(msg,cb,okLabel,word){
+  CONFIRM_CB=cb;CF_WORD=word||'';
+  const body=Array.isArray(msg)?msg.map(x=>'• '+esc(x)).join('<br>'):esc(msg);
+  openModal('<h3>تأكيد</h3><p style="margin:0 0 16px;line-height:1.9">'+body+'</p>'+
+    (word?'<label class="f" style="margin-bottom:14px">اكتب «'+esc(word)+'» للتأكيد<input type="text" id="cf-w" autocomplete="off" oninput="$(\'#cf-ok\').disabled=this.value.trim()!==CF_WORD"></label>':'')+
+    '<div class="actions"><button class="btn danger" id="cf-ok"'+(word?' disabled':'')+' onclick="const f=CONFIRM_CB;closeModal();f&&f()">'+esc(okLabel||'تأكيد')+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>');
 }
-function go(v){VIEW=v;EDITING=null;SHOWALL=false;render();window.scrollTo({top:0,behavior:'smooth'})}
-function logout(){if(CLOUD&&FB)cw(()=>FB.signOut(FB.auth));setSession(null);if(CLOUD)stopCloudListeners();VIEW='dash';EDITING=null;render();toast('تم تسجيل الخروج')}
+function go(v){VIEW=v;EDITING=null;SHOWALL=false;LOGF={o:'',from:'',to:'',q:''};render();window.scrollTo({top:0,behavior:'smooth'})}
 
 /* ============== الدخول ============== */
 function loginModal(msg){
@@ -499,12 +513,12 @@ async function doLogin(){
   }
   $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
-// logout is defined with the navigation helpers above.
+function logout(){if(CLOUD&&FB)cw(()=>FB.signOut(FB.auth));setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
 
 /* ============== الرسم ============== */
 function renderHeader(){
-  const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'<span class="chip-user" title="البيانات محفوظة في هذا المتصفح فقط">💾 حفظ محلي</span>';
-  $('#who').innerHTML=net+(SESSION
+  const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
+  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
 }
@@ -523,23 +537,18 @@ function restoreForm(s){
   if(s.focus){const x=$('#'+s.focus);if(x){x.focus();try{const l=x.value.length;x.setSelectionRange(l,l)}catch(e){}}}
 }
 function renderTabs(){
-  let h='';
-  if(SESSION){
-    h+='<button class="tab '+(VIEW==='dash'?'on':'')+'" onclick="go(\'dash\')">📊 لوحة المتابعة</button>';
-    for(const m of MACHINES){
-      h+='<button class="tab '+(VIEW===m?'on':'')+'" style="--c:'+MCOL[m]+'" onclick="go('+m+')"><span class="dot"></span>'+MNAME(m)+(canEdit(m)?' <span class="pen">✎</span>':'')+'</button>';
-    }
-    if(isAdmin())h+='<button class="tab '+(VIEW==='settings'?'on':'')+'" onclick="go(\'settings\')">⚙️ الإدارة</button>';
+  let h='<button class="tab '+(VIEW==='dash'?'on':'')+'" onclick="go(\'dash\')">📊 لوحة المتابعة</button>';
+  for(const m of MACHINES){
+    h+='<button class="tab '+(VIEW===m?'on':'')+'" style="--c:'+MCOL[m]+'" onclick="go('+m+')"><span class="dot"></span>'+MNAME(m)+(canEdit(m)?' <span class="pen">✎</span>':'')+'</button>';
   }
-  h+='<button class="tab '+(VIEW==='help'?'on':'')+'" onclick="go(\'help\')">💡 شرح الاستخدام</button>';
+  if(isAdmin())h+='<button class="tab '+(VIEW==='settings'?'on':'')+'" onclick="go(\'settings\')">⚙️ الإدارة</button>';
   $('#tabs').innerHTML=h;
 }
 function render(keep){
   const snap=keep?snapForm():null;
+  const qf=!!(keep&&document.activeElement&&document.activeElement.id==='lg-q');
   renderHeader();renderTabs();
   const v=$('#view');
-  if(VIEW==='help'){v.innerHTML=helpHTML();return}
-  if(!SESSION){v.innerHTML=lockedHTML('سجّل الدخول لعرض بيانات التشغيل والمخزون');return}
   if(CLOUD&&!CLOUD_READY){
     v.innerHTML=CLOUD_ERR
      ?'<div class="card lock"><div class="ic">⚠️</div><div style="flex:1"><b>تعذر الاتصال بقاعدة البيانات</b><div class="muted">'+esc(CLOUD_ERR)+' — تأكد من الإنترنت ومن إعدادات Firebase وقواعد القراءة.</div></div><button class="btn primary" onclick="location.reload()">إعادة المحاولة</button></div>'
@@ -548,8 +557,8 @@ function render(keep){
   }
   if(VIEW==='dash')v.innerHTML=dashHTML();
   else if(VIEW==='settings')v.innerHTML=isAdmin()?settingsHTML():lockedHTML('صفحة الإدارة للمدير العام فقط');
-  else if(MACHINES.includes(VIEW)){v.innerHTML=machineHTML(VIEW);if(canEdit(VIEW)){afterMachineRender(VIEW);restoreForm(snap)}}
-  else{VIEW='dash';v.innerHTML=dashHTML()}
+  else{v.innerHTML=machineHTML(VIEW);if(canEdit(VIEW)){afterMachineRender(VIEW);restoreForm(snap)}}
+  if(qf){const x=$('#lg-q');if(x){x.focus();try{const l=x.value.length;x.setSelectionRange(l,l)}catch(e){}}}
 }
 function lockedHTML(txt){
   return '<div class="card lock"><div class="ic">🔒</div><div style="flex:1"><b>'+esc(txt)+'</b><div class="muted">سجّل الدخول للمتابعة</div></div><button class="btn primary" onclick="loginModal()">تسجيل الدخول</button></div>';
@@ -600,70 +609,6 @@ function lineChartSVG(labels,series){
 }
 const legendHTML=items=>'<div class="legend">'+items.map(i=>'<span><i style="background:'+i.color+'"></i>'+esc(i.name)+'</span>').join('')+'</div>';
 
-/* ---------- البحث السريع ومركز الشرح ---------- */
-function setSearchOrder(){SEARCH_Q=String($('#dash-search')?.value||'').trim();render()}
-function clearSearchOrder(){SEARCH_Q='';render()}
-function openFoundOrder(m,id){SEL[m]=id;go(m)}
-function dashboardSearchHTML(){
-  const q=normDigits(SEARCH_Q).toLowerCase();
-  let h='<div class="card sec"><div class="sec-title"><h3>🔎 بحث سريع عن أمر شغل</h3><span class="muted">رقم الأمر أو الفئة أو الملاحظات</span></div>'+
-    '<form class="searchbar" onsubmit="setSearchOrder();return false"><input id="dash-search" type="text" value="'+esc(SEARCH_Q)+'" placeholder="مثال: 6029/1 أو 50 جنيه" autocomplete="off"><button class="btn primary" type="submit">بحث</button>'+(SEARCH_Q?'<button class="btn light" type="button" onclick="clearSearchOrder()">مسح</button>':'')+'</form>';
-  if(q){
-    const found=DB.orders.filter(o=>[o.number,o.denom,o.notes,MNAME(o.machine)].some(v=>normDigits(v||'').toLowerCase().includes(q)));
-    h+='<div class="search-results">';
-    if(!found.length)h+='<div class="empty">مفيش أمر مطابق لكلمة البحث دي.</div>';
-    for(const o of found){
-      const t=totals(o,DB.entries);
-      h+='<div class="search-result"><div><b>'+MNAME(o.machine)+' · <span class="ltr">'+esc(o.number)+'</span></b><div class="meta">'+esc(o.denom||'بدون فئة')+' · سليم '+fmt(t.sg)+' · معيب '+fmt(t.sb)+' · إجمالي المخزون '+fmt(t.stock)+'</div></div><button class="btn light sm" onclick="openFoundOrder('+o.machine+',\''+o.id+'\')">فتح الماكينة</button></div>';
-    }
-    h+='</div>';
-  }
-  return h+'</div>';
-}
-function filterLedgerRows(){
-  const q=normDigits($('#ledger-search')?.value||'').trim().toLowerCase();
-  document.querySelectorAll('#ledger-table tbody tr').forEach(tr=>{tr.hidden=!!q&&!normDigits(tr.textContent).toLowerCase().includes(q)});
-}
-function dashboardOrderAlertsHTML(){
-  const tracked=DB.orders.filter(o=>Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0).map(o=>({o,t:totals(o,DB.entries),pct:totals(o,DB.entries).prod/Number(o.qty)*100}));
-  const near=tracked.filter(x=>x.pct>=90).sort((a,b)=>b.pct-a.pct);
-  if(!near.length)return '';
-  let h='<div class="card sec"><div class="sec-title"><h3>⏳ أوامر قربت تكمّل كميتها</h3><span class="muted">الأوامر اللي وصلت ٩٠٪ أو أكتر من الكمية المحددة</span></div><div class="search-results">';
-  for(const x of near){
-    const done=x.pct>=100;
-    h+='<div class="search-result"><div><b>'+MNAME(x.o.machine)+' · <span class="ltr">'+esc(x.o.number)+'</span> · '+(done?'وصل للكمية المحددة':'قرب يكتمل')+'</b><div class="meta">'+fmt(x.t.prod)+' من '+fmt(x.o.qty)+' فرخ · '+Math.min(100,x.pct).toFixed(1)+'٪</div></div><button class="btn light sm" onclick="openFoundOrder('+x.o.machine+',\''+x.o.id+'\')">فتح الأمر</button></div>';
-  }
-  return h+'</div></div>';
-}
-function exportMachineCSV(m){
-  if(!SESSION||!canEdit(m)){toast('مش مسموح بتصدير بيانات الماكينة دي','err');return}
-  const q=v=>'\"'+String(v==null?'':v).replace(/\"/g,'\"\"')+'\"';
-  const os=ordersOf(m),om={};os.forEach(o=>om[o.id]=o);
-  const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
-  DB.entries.filter(e=>om[e.order]).sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{const o=om[e.order];rows.push([e.date,MNAME(m),o.number,o.denom,e.g,e.b,e.g+e.b,e.dg,e.db,e.note,e.by,fmtTime(e.ts)])});
-  rows.push([]);rows.push(['الأرصدة الحالية']);rows.push(['رقم الأمر','الفئة','إجمالي الإنتاج','إجمالي التسليمات','رصيد السليم','رصيد المعيب','الإجمالي']);
-  os.forEach(o=>{const t=totals(o,DB.entries);rows.push([o.number,o.denom,t.prod,t.del,t.sg,t.sb,t.stock])});
-  const cell=v=>{let z=String(v==null?'':v);if(/^[\s]*[=+@\-\t\r]/.test(z))z="'"+z;return q(z)};
-  download('tarqeem-machine-'+m+'-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(cell).join(',')).join('\r\n'),'text/csv;charset=utf-8');toast('تم تصدير تقرير '+MNAME(m),'ok');
-}
-function helpHTML(){
-  const cloud=CLOUD;
-  let h='<div class="help-hero"><h2>💡 دليل استخدام مخزن الترقيمات</h2><div>هنمشي مع بعض خطوة خطوة، من تسجيل الدخول لحد متابعة الرصيد وتصدير التقرير.</div></div>';
-  h+='<div class="help-grid">';
-  h+='<section class="help-card"><h3>١) تسجيل الدخول واختيار الماكينة</h3><ol><li>اضغط «تسجيل الدخول» واكتب اسم المستخدم وكلمة المرور اللي استلمتهم من المسؤول.</li><li>بعد الدخول هتظهرلك لوحة المتابعة وتبويبات الماكينات.</li><li>اختار «ترقيم ١» أو «ترقيم ٢» أو الماكينة المطلوبة.</li><li>علامة القلم جنب اسم الماكينة معناها إن حسابك يقدر يدخل ويعدّل بياناتها.</li></ol></section>';
-  h+='<section class="help-card"><h3>٢) إضافة أمر شغل جديد</h3><ol><li>افتح صفحة الماكينة واضغط «أمر شغل جديد».</li><li>اكتب رقم الأمر بنفس الصيغة المطلوبة، زي 6029/1.</li><li>اكتب كمية الأمر بالفرخ، واختار الفئة واكتب أي ملاحظات مهمة.</li><li>المدير العام يقدر كمان يحدد الرصيد الافتتاحي السليم والمعيب.</li><li>في الأوامر القديمة اللي مفيهاش كمية مسجلة، البرنامج بيعرض الحد الأعلى للنظام (1,200,000 فرخ) كقيمة افتراضية؛ راجع الكمية الفعلية وعدّلها قبل الاعتماد على نسبة الإنجاز.</li><li>اضغط «حفظ». البرنامج هيرفض رقم الأمر المكرر في نفس الماكينة أو كمية غير صحيحة.</li></ol></section>';
-  h+='<section class="help-card"><h3>٣) تسجيل إنتاج وتسليمات اليوم</h3><ol><li>من صفحة الماكينة، اختار أمر الشغل من القائمة.</li><li>حدد تاريخ الحركة.</li><li>اكتب كمية «سليم اليوم» و«معيب اليوم».</li><li>لو فيه تسليم، اكتب «تسليم سليم» و«تسليم معيب» كل واحد في خانته.</li><li>راجع معاينة الرصيد اللي بتتحدث قدامك، وبعدها اضغط «حفظ».</li></ol><div class="info-box">تقدر تكتب الأرقام بالعربي أو بالإنجليزي، ومع فواصل الآلاف. اكتب صفر أو سيب الخانة فاضية لو مفيش كمية.</div></section>';
-  h+='<section class="help-card"><h3>٤) فهم الأرصدة وطريقة الحساب</h3><ol><li>رصيد السليم = الرصيد الافتتاحي السليم + إنتاج السليم − تسليم السليم.</li><li>رصيد المعيب = الرصيد الافتتاحي المعيب + إنتاج المعيب − تسليم المعيب.</li><li>إجمالي المخزون = رصيد السليم + رصيد المعيب.</li><li>المتبقي من كمية الأمر = كمية الأمر − إجمالي الإنتاج المسجل.</li></ol><p class="muted">البرنامج بيفصل السليم عن المعيب، ومش بيسمح بتسليم كمية أكبر من الرصيد المتاح أو إنتاج يتخطى كمية الأمر.</p></section>';
-  h+='<section class="help-card"><h3>٥) تعديل حركة أو حذفها</h3><ol><li>انزل لسجل الإنتاج والتسليمات تحت أوامر الشغل.</li><li>استخدم مربع البحث لتصفية السجل بالتاريخ أو رقم الأمر أو الملاحظة.</li><li>اضغط «تعديل» لتصحيح حركة، أو «حذف» لإلغاء حركة بالكامل.</li><li>قبل الحذف راجع تأثيره على الرصيد؛ البرنامج بيرفض الحذف لو هيخلّي الرصيد بالسالب.</li></ol></section>';
-  h+='<section class="help-card"><h3>٦) البحث والتقارير</h3><ol><li>من لوحة المتابعة استخدم «بحث سريع عن أمر شغل» واكتب رقم الأمر أو الفئة أو جزء من الملاحظات.</li><li>من صفحة الماكينة اضغط «تصدير تقرير الماكينة» لتنزيل ملف CSV فيه الحركات والأرصدة.</li><li>اضغط «طباعة التقرير» لطباعة صفحة الماكينة أو حفظها PDF من نافذة الطباعة.</li><li>من صفحة الإدارة يقدر المدير يصدّر نسخة JSON أو سجل CSV لكل البيانات.</li></ol></section>';
-  h+='<section class="help-card"><h3>٧) الاستيراد والنسخ الاحتياطي</h3><ol><li>استيراد Excel متاح للمدير العام فقط، والبرنامج بيعرض معاينة قبل التنفيذ.</li><li>خد نسخة JSON احتياطية بانتظام واحتفظ بيها في مكان آمن ومصرّح به.</li><li>«دمج نسخة» بيضيف الأوامر والحركات الجديدة من نسخة تانية، و«استبدال» بيمسح الحالي ويحط بيانات الملف مكانه.</li><li>ما تعملش استبدال إلا بعد التأكد من الملف ومن وجود نسخة احتياطية حديثة.</li></ol></section>';
-  h+='</div>';
-  h+='<div class="card sec"><h3>٨) الحفظ والمزامنة والسرية</h3>';
-  h+=cloud?'<div class="info-box">البرنامج متصل بـ Firebase، والمفروض التحديثات تظهر على الأجهزة بعد تسجيل الدخول والاتصال بالإنترنت. لو المزامنة وقفت، راجع حالة الاتصال وصلاحيات قاعدة البيانات مع مسؤول النظام.</div>':'<div class="note-box">الوضع الحالي محلي: البيانات بتتحفظ في المتصفح وعلى نفس الجهاز فقط، ومش بتتنقل تلقائيًا لجهاز تاني. كمان تسجيل الدخول المحلي وسيلة تنظيم بسيطة مش حماية أمنية حقيقية؛ أي شخص عنده وصول للجهاز أو ملف HTML يقدر يفحص الكود والبيانات.</div>';
-  h+='<p class="muted sec">معلومة تشغيلية: تعديل الحركة بيحدّث السجل الحالي، لكنه مش بيحتفظ بسجل تدقيق مستقل بالقيم القديمة والجديدة. لو مطلوب اعتماد رسمي ومراجعة تغييرات، نحتاج إضافة سجل تدقيق غير قابل للمحو بصلاحيات إدارية.</p></div>';
-  return h;
-}
-
 /* ---------- لوحة المتابعة ---------- */
 function dashHTML(){
   if(CLOUD&&!DB.orders.length){
@@ -678,19 +623,16 @@ function dashHTML(){
   });
   const T=k=>sum(rows,r=>r.t[k]);
   const todayProd=sum(rows,r=>r.prod),todayDel=sum(rows,r=>r.del);
-  const allGood=sum(DB.entries,e=>Number(e.g)||0),allBad=sum(DB.entries,e=>Number(e.b)||0);
-  const badPct=allGood+allBad?Math.round(allBad/(allGood+allBad)*1000)/10:0;
   let h='<div class="grid kpis">'+
    '<div class="kpi big"><div class="l">📦 إجمالي المخزون</div><div class="v">'+fmt(T('stock'))+'</div></div>'+
    '<div class="kpi" style="--k:#059669"><div class="l">✅ سليم بالمخازن</div><div class="v">'+fmt(T('sg'))+'</div></div>'+
    '<div class="kpi" style="--k:#e11d48"><div class="l">⚠️ معيب بالمخازن</div><div class="v">'+fmt(T('sb'))+'</div></div>'+
    '<div class="kpi" style="--k:#4f46e5"><div class="l">🏭 إنتاج اليوم</div><div class="v">'+fmt(todayProd)+'</div></div>'+
    '<div class="kpi" style="--k:#d97706"><div class="l">🚚 تسليمات اليوم</div><div class="v">'+fmt(todayDel)+'</div></div>'+
-   '<div class="kpi" style="--k:#be123c"><div class="l">📉 نسبة المعيب المسجل</div><div class="v">'+badPct+'%</div></div>'+
   '</div>';
 
-  h+=dashboardSearchHTML();
-  h+=dashboardOrderAlertsHTML();
+  const al=buildAlerts();
+  h+='<div class="card sec"><div class="sec-title"><h3>🔔 التنبيهات الذكية</h3>'+(al.length?'<span class="chip" style="margin:0">'+al.length+'</span>':'')+'</div><div class="alerts">'+alertsHTML(al,ALL_AL?0:5)+'</div></div>';
   h+='<div class="sec"><div class="sec-title"><h3>الماكينات</h3><span class="muted">اضغط على أي ماكينة لعرض تفاصيلها</span></div><div class="grid mcards">';
   for(const r of rows){
     const defect=r.t.prod?Math.round(r.t.pb/r.t.prod*1000)/10:0;
@@ -704,6 +646,8 @@ function dashHTML(){
   }
   h+='</div></div>';
 
+  h+=perfHTML();
+
   /* رسم مقارنة الماكينات */
   const labels=MACHINES.map(MNAME);
   const cmp=[
@@ -711,14 +655,15 @@ function dashHTML(){
     {name:'التسليمات',color:'#f59e0b',values:rows.map(r=>r.t.del)},
     {name:'الرصيد بالمخزن',color:'#10b981',values:rows.map(r=>r.t.stock)}
   ];
-  const ds=dailySeries(RANGE),hasDaily=ds.series.some(s=>s.values.some(v=>v>0));
+  const ds=dailySeries(RANGE,METRIC),hasDaily=ds.series.some(s=>s.values.some(v=>v>0));
 
   h+='<div class="grid two sec">'+
    '<div class="card"><div class="sec-title"><h3>📊 مقارنة إنتاجية الماكينات</h3></div>'+legendHTML(cmp)+barChartSVG(labels,cmp)+'</div>'+
-   '<div class="card"><div class="sec-title"><h3>📈 الإنتاج اليومي</h3><div class="seg">'+
+   '<div class="card"><div class="sec-title"><h3>📈 '+({prod:'الإنتاج اليومي',def:'المعيب اليومي',del:'التسليمات اليومية'})[METRIC]+'</h3><div class="seg">'+
      [7,14,30].map(n=>'<button class="'+(RANGE===n?'on':'')+'" onclick="RANGE='+n+';render()">'+n+' يوم</button>').join('')+'</div></div>'+
+     '<div class="seg" style="margin-bottom:8px">'+[['prod','🏭 الإنتاج'],['def','⚠️ المعيب'],['del','🚚 التسليمات']].map(x=>'<button class="'+(METRIC===x[0]?'on':'')+'" onclick="METRIC=\''+x[0]+'\';render()">'+x[1]+'</button>').join('')+'</div>'+
      legendHTML(ds.series)+
-     (hasDaily?lineChartSVG(ds.labels,ds.series):'<div class="empty">لا يوجد إنتاج يومي مُدخل خلال هذه الفترة.<br>سيظهر الرسم هنا بمجرد إدخال أول إنتاج للماكينات.</div>')+
+     (hasDaily?lineChartSVG(ds.labels,ds.series):'<div class="empty">لا توجد بيانات مُدخلة خلال هذه الفترة.<br>سيظهر الرسم هنا بمجرد إدخال أول حركة.</div>')+
    '</div></div>';
 
   /* المخزون حسب الفئة */
@@ -745,7 +690,7 @@ function machineHTML(m){
   const last=os.map(o=>o.modified).sort().pop();
   let h='<div style="--mc:'+MCOL[m]+'">';
   h+='<div class="mhead"><div><h2>'+MNAME(m)+'</h2><p>'+os.length+' أوامر شغل'+(last?' · آخر تعديل '+fmtTime(last):'')+(ce?'':' · عرض فقط')+'</p></div>'+
-     '<div class="actions no-print" style="margin:0"><button class="btn light" onclick="window.print()">🖨️ طباعة التقرير</button>'+(ce?'<button class="btn green" onclick="exportMachineCSV('+m+')">📄 تصدير تقرير الماكينة</button><button class="btn primary" onclick="orderModal('+m+')">＋ أمر شغل جديد</button>':'')+'</div></div>';
+     (ce?'<button class="btn light" onclick="orderModal('+m+')">＋ أمر شغل جديد</button>':'')+'</div>';
   h+='<div class="grid tiles">'+
    '<div class="tile" style="--t:#6366f1"><div class="l">إجمالي الإنتاج</div><div class="v">'+fmt(t.prod)+'</div></div>'+
    '<div class="tile" style="--t:#f59e0b"><div class="l">إجمالي التسليمات</div><div class="v">'+fmt(t.del)+'</div></div>'+
@@ -754,6 +699,9 @@ function machineHTML(m){
    '<div class="tile hl"><div class="l">إجمالي المخزن</div><div class="v">'+fmt(t.stock)+'</div></div>'+
    '<div class="tile" style="--t:#0ea5e9"><div class="l">إنتاج اليوم</div><div class="v">'+fmt(sum(te,e=>e.g+e.b))+'</div></div>'+
   '</div>';
+
+  const mal=buildAlerts().filter(a=>a.m===m);
+  if(mal.length)h+='<div class="sec alerts">'+alertsHTML(mal,0,true)+'</div>';
 
   /* نموذج الإدخال */
   if(!ce){
@@ -783,11 +731,13 @@ function machineHTML(m){
   /* كروت الأوامر */
   h+='<div class="sec"><div class="sec-title"><h3>أوامر الشغل</h3></div><div class="grid ocards">';
   for(const o of os){
-    const x=totals(o,DB.entries),qtyKnown=Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0;
+    const x=totals(o,DB.entries);
     h+='<div class="oc"><div class="oc-h"><b>'+esc(o.number)+'</b>'+(o.denom?'<span class="badge">'+esc(o.denom)+'</span>':'')+'</div>'+
       (o.notes?'<div class="oc-n">📝 '+esc(o.notes)+'</div>':'')+
       '<div class="oc-s"><div class="a"><div class="l">سليم</div><div class="v">'+fmt(x.sg)+'</div></div><div class="c"><div class="l">معيب</div><div class="v">'+fmt(x.sb)+'</div></div><div class="d"><div class="l">الإجمالي</div><div class="v">'+fmt(x.stock)+'</div></div></div>'+
-      (qtyKnown?'<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div><div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>':'<div class="wn">⚠ كمية الأمر الأصلية غير محددة — حد النظام الافتراضي 1,200,000 فرخ، راجع الكمية الفعلية من «تعديل»</div>')+
+      '<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div>'+
+      '<div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>'+
+      fcHTML(o)+
       '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>'+fmtTime(o.modified)+'</span></div>'+
       (ce?'<div class="oc-b"><button class="btn primary sm" onclick="pickOrder('+m+',\''+o.id+'\')">＋ إدخال</button><button class="btn light sm" onclick="orderModal('+m+',\''+o.id+'\')">تعديل</button>'+(isAdmin()?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">حذف</button>':'')+'</div>':'')+
     '</div>';
@@ -795,29 +745,8 @@ function machineHTML(m){
   if(!os.length)h+='<div class="empty" style="grid-column:1/-1">لا توجد أوامر</div>';
   h+='</div></div>';
 
-  /* سجل الحركات */
-  const bal={};os.forEach(o=>Object.assign(bal,runningBalances(o)));
-  const oMap={};os.forEach(o=>oMap[o.id]=o);
-  const ents=DB.entries.filter(e=>oMap[e.order]).sort((a,b)=>b.date.localeCompare(a.date)||String(b.ts).localeCompare(String(a.ts)));
-  const shown=SHOWALL?ents:ents.slice(0,40);
-  h+='<div class="card sec"><div class="sec-title"><h3>📒 سجل الإنتاج والتسليمات</h3><span class="muted">'+ents.length+' حركة</span></div>';
-  if(!ents.length)h+='<div class="empty">لا توجد حركات مُدخلة بعد</div>';
-  else{
-    h+='<div class="ledger-filter no-print"><input id="ledger-search" type="text" placeholder="ابحث بالتاريخ أو رقم الأمر أو الملاحظة..." oninput="filterLedgerRows()"><span class="muted">اكتب جزء من المعلومة لتصفية الحركات</span></div>';
-    h+='<div class="tw"><table id="ledger-table"><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
-    for(const e of shown){
-      const o=oMap[e.order],b=bal[e.id]||{sg:0,sb:0};
-      h+='<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.by||'')+'</small></td>'+
-        '<td class="l"><b class="ltr">'+esc(o.number)+'</b><small>'+esc(o.denom)+(e.note?' · '+esc(e.note):'')+'</small></td>'+
-        '<td class="g"><b>'+fmt(e.g)+'</b></td><td class="b"><b>'+fmt(e.b)+'</b></td><td><b>'+fmt(e.g+e.b)+'</b></td>'+
-        '<td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td>'+
-        '<td class="g">'+fmt(b.sg)+'</td><td class="b">'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td>'+
-        (ce?'<td><button class="btn light sm" onclick="editEntry(\''+e.id+'\')">تعديل</button> <button class="btn danger sm" onclick="delEntry(\''+e.id+'\')">حذف</button></td>':'')+'</tr>';
-    }
-    h+='</tbody></table></div>';
-    if(ents.length>40)h+='<div class="actions"><button class="btn light sm" onclick="SHOWALL='+(!SHOWALL)+';render()">'+(SHOWALL?'عرض آخر 40 فقط':'عرض كل الحركات ('+ents.length+')')+'</button></div>';
-  }
-  h+='</div></div>';
+  h+=logCardHTML(m);
+  h+='</div>';
   return h;
 }
 function afterMachineRender(m){
@@ -857,22 +786,40 @@ function pickOrder(m,id){
 }
 
 /* ============== العمليات: الحركات ============== */
-function saveEntry(m){
-  const err=t=>{$('#f-err').textContent=t;return false};
+const entSum=e=>'سليم '+fmt(e.g)+' / معيب '+fmt(e.b)+' / تسليم '+fmt((e.dg||0)+(e.db||0));
+function saveEntry(m,force){
+  const err=t=>{const el=$('#f-err');if(el)el.textContent=t;return false};
   const o=DB.orders.find(x=>x.id===$('#f-order').value);
   if(!o||o.machine!==m)return err('اختر أمر الشغل');
   if(!canEdit(m))return err('ليس لديك صلاحية');
-  const date=$('#f-date').value;if(!validYmd(date))return err('اختار تاريخ صحيح من التقويم');
+  const date=$('#f-date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return err('اختر التاريخ');
   const g=parseNum($('#f-g').value),b=parseNum($('#f-b').value),dg=parseNum($('#f-dg').value),db=parseNum($('#f-db').value);
-  if([g,b,dg,db].some(n=>!Number.isSafeInteger(n)||n<0))return err('الأرقام لازم تكون أعداد صحيحة موجبة أو صفر، ومن غير كسور أو حروف');
+  if([g,b,dg,db].some(isNaN))return err('الأرقام يجب أن تكون صحيحة وغير سالبة (بدون كسور أو حروف)');
   if(g+b+dg+db===0)return err('أدخل قيمة واحدة على الأقل');
+  const old=EDITING?DB.entries.find(e=>e.id===EDITING):null;
   const rec={id:EDITING||uid('e'),order:o.id,m:o.machine,date,g,b,dg,db,note:$('#f-note').value.trim(),by:whoName(),ts:new Date().toISOString()};
   const test=EDITING?DB.entries.map(e=>e.id===EDITING?rec:e):DB.entries.concat(rec);
   const t=totals(o,test);
   if(t.prod>qtyOf(o))return err('إجمالي إنتاج الأمر سيصبح '+fmt(t.prod)+' وهو أكبر من كمية الأمر ('+fmt(qtyOf(o))+' فرخ) — المتبقي المتاح للإنتاج: '+fmt(Math.max(0,qtyOf(o)-(t.prod-g-b)))+' فرخ');
   if(t.sg<0)return err('تسليم السليم ('+fmt(dg)+') أكبر من المتاح بالمخزن ('+fmt(t.sg+dg)+')');
   if(t.sb<0)return err('تسليم المعيب ('+fmt(db)+') أكبر من المتاح بالمخزن ('+fmt(t.sb+db)+')');
+  err('');
+  /* حماية من أخطاء الإدخال: تحذير يقدر المستخدم يتجاوزه لو متأكد */
+  if(!force){
+    const warns=[],today=todayStr();
+    if(date>today)warns.push('التاريخ ('+fmtDate(date)+') بعد تاريخ اليوم');
+    else if(daysBetween(date,today)>45)warns.push('التاريخ ('+fmtDate(date)+') قديم — قبل '+daysBetween(date,today)+' يوم');
+    if(DB.entries.some(e=>e.id!==rec.id&&e.order===o.id&&e.date===date&&e.g===g&&e.b===b&&e.dg===dg&&e.db===db))
+      warns.push('توجد حركة مطابقة تماماً لهذا الأمر في نفس التاريخ — تأكد أنك لا تسجّلها مرتين');
+    const pv=entsOf(o.id).filter(e=>e.id!==rec.id&&(e.g||0)+(e.b||0)>0);
+    if(pv.length>=3&&g+b>=20000){
+      const avg=sum(pv,e=>(e.g||0)+(e.b||0))/pv.length;
+      if(g+b>avg*4)warns.push('إنتاج اليوم ('+fmt(g+b)+') أكبر بكثير من المتوسط المعتاد لهذا الأمر (≈ '+fmt(Math.round(avg))+') — تأكد من عدم وجود صفر زائد');
+    }
+    if(warns.length){confirmBox(warns,()=>saveEntry(m,true),'متأكد، احفظ');return false}
+  }
   DB.entries=test;o.modified=rec.ts;cloudEntry(rec);cloudOrderTouch(o);
+  if(old)auditLog('تعديل حركة',MNAME(m)+' · أمر '+o.number+' · '+fmtDate(old.date)+': ['+entSum(old)+'] ← ['+entSum(rec)+']');
   const was=!!EDITING;EDITING=null;LASTDATE=date;SEL[m]=o.id;
   persist();render();toast(was?'تم حفظ التعديل ✓':'تم الحفظ ✓ — رصيد الأمر: '+fmt(t.stock),'ok');
 }
@@ -889,8 +836,20 @@ function delEntry(id){
   const rest=DB.entries.filter(x=>x.id!==id),t=totals(o,rest);
   if(t.sg<0||t.sb<0){toast('لا يمكن الحذف: سيصبح رصيد الأمر بالسالب بسبب تسليمات مسجلة','err');return}
   confirmBox('حذف حركة '+fmtDate(e.date)+' (سليم '+fmt(e.g)+' / معيب '+fmt(e.b)+')؟',()=>{
-    DB.entries=rest;o.modified=new Date().toISOString();cloudDelEntry(id);cloudOrderTouch(o);persist();render();toast('تم الحذف');
+    DB.entries=rest;o.modified=new Date().toISOString();cloudDelEntry(id);cloudOrderTouch(o);
+    auditLog('حذف حركة',MNAME(o.machine)+' · أمر '+o.number+' · '+fmtDate(e.date)+': ['+entSum(e)+']'+(e.by?' · أدخلها '+e.by:''));
+    persist();render();
+    toastUndo('تم حذف الحركة',()=>undoDelEntry(e));
   },'حذف');
+}
+function undoDelEntry(e){
+  const o=DB.orders.find(x=>x.id===e.order);if(!o||!canEdit(o.machine))return;
+  if(DB.entries.some(x=>x.id===e.id))return;
+  const test=DB.entries.concat(e),t=totals(o,test);
+  if(t.prod>qtyOf(o)||t.sg<0||t.sb<0){toast('تعذر الاسترجاع: الأرصدة تغيّرت بعد الحذف','err');return}
+  DB.entries=test;o.modified=new Date().toISOString();cloudEntry(e);cloudOrderTouch(o);
+  auditLog('استرجاع حركة محذوفة',MNAME(o.machine)+' · أمر '+o.number+' · '+fmtDate(e.date)+': ['+entSum(e)+']');
+  persist();render();toast('تم استرجاع الحركة ✓','ok');
 }
 
 /* ============== العمليات: أوامر الشغل ============== */
@@ -905,7 +864,7 @@ function orderModal(m,id){
    '<label class="f">الفئة<input type="text" id="o-den" list="cats" autocomplete="off" value="'+esc(o?o.denom:'')+'"><datalist id="cats">'+cats.map(c=>'<option value="'+esc(c)+'">').join('')+'</datalist></label>'+
    '<label class="f span2">ملاحظات<textarea id="o-notes" rows="3">'+esc(o?o.notes:'')+'</textarea></label>'+
    (isAdmin()?'<label class="f gd">رصيد افتتاحي — سليم<input type="text" inputmode="numeric" class="num" id="o-og" value="'+(o?o.og:0)+'"></label><label class="f bd">رصيد افتتاحي — معيب<input type="text" inputmode="numeric" class="num" id="o-ob" value="'+(o?o.ob:0)+'"></label>':'')+
-   '</div>'+(o&&!(Number.isSafeInteger(Number(o.qty))&&Number(o.qty)>0)?'<div class="note-box sec">الكمية الفعلية للأمر مش متسجلة في البيانات القديمة. القيمة الظاهرة 1,200,000 هي حد النظام الافتراضي؛ اكتب الكمية الصحيحة قبل الحفظ.</div>':'')+'<div class="err-txt" id="o-err"></div><div class="actions"><button class="btn primary" type="submit">حفظ</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
+   '</div><div class="err-txt" id="o-err"></div><div class="actions"><button class="btn primary" type="submit">حفظ</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
 }
 function saveOrder(m,id){
   const err=t=>{$('#o-err').textContent=t};
@@ -917,19 +876,29 @@ function saveOrder(m,id){
   if(!(o&&o.number===number)&&!/^\d+\/\d+$/.test(number))return err('رقم الأمر لازم يكون بالشكل 6029/1 (رقم ثم / ثم رقم)');
   if(DB.orders.some(x=>x.number===number&&x.machine===m&&x.id!==id))return err('رقم الأمر '+number+' موجود بالفعل في هذه الماكينة');
   const qty=parseNum($('#o-qty').value);
-  if(!Number.isSafeInteger(qty)||qty<1)return err('اكتب كمية صحيحة للأمر بالفرخ');
+  if(isNaN(qty)||qty<1)return err('اكتب كمية الأمر بالفرخ');
   if(qty>MAXQ)return err('كمية الأمر لا يمكن أن تتجاوز '+fmt(MAXQ)+' فرخ');
   let og=o?o.og:0,ob=o?o.ob:0;
-  if(isAdmin()){og=parseNum($('#o-og').value);ob=parseNum($('#o-ob').value);if(!Number.isSafeInteger(og)||og<0||!Number.isSafeInteger(ob)||ob<0)return err('الأرصدة الافتتاحية لازم تكون أعداد صحيحة غير سالبة')}
+  if(isAdmin()){og=parseNum($('#o-og').value);ob=parseNum($('#o-ob').value);if(isNaN(og)||isNaN(ob))return err('الرصيد الافتتاحي رقم صحيح غير سالب')}
   const now=new Date().toISOString();
   if(o){
     const t=totals({...o,og,ob},DB.entries);
     if(t.sg<0||t.sb<0)return err('هذا الرصيد الافتتاحي يجعل رصيد الأمر بالسالب');
     if(t.prod>qty)return err('المنتج فعلياً ('+fmt(t.prod)+') أكبر من الكمية المكتوبة — اكتب كمية لا تقل عن المنتج');
+    const chg=[];
+    if(o.number!==number)chg.push('الرقم '+o.number+' ← '+number);
+    if((o.denom||'')!==denom)chg.push('الفئة «'+(o.denom||'—')+'» ← «'+(denom||'—')+'»');
+    if(qtyOf(o)!==qty)chg.push('الكمية '+fmt(qtyOf(o))+' ← '+fmt(qty));
+    if((o.og||0)!==og)chg.push('افتتاحي سليم '+fmt(o.og)+' ← '+fmt(og));
+    if((o.ob||0)!==ob)chg.push('افتتاحي معيب '+fmt(o.ob)+' ← '+fmt(ob));
+    if((o.notes||'')!==notes)chg.push('الملاحظات');
+    const oldNo=o.number;
     Object.assign(o,{number,denom,notes,og,ob,qty,modified:now});cloudOrder(o);
+    if(chg.length)auditLog('تعديل أمر',MNAME(m)+' · '+oldNo+': '+chg.join(' · '));
   }else{
     const n={id:uid('o'),machine:m,number,denom,notes,og,ob,qty,modified:now};
     DB.orders.push(n);SEL[m]=n.id;cloudOrder(n);
+    auditLog('أمر جديد',MNAME(m)+' · '+number+(denom?' · '+denom:'')+' · كمية '+fmt(qty));
   }
   persist();closeModal();render();toast('تم حفظ الأمر ✓','ok');
 }
@@ -939,6 +908,8 @@ function delOrder(id){
   const n=DB.entries.filter(e=>e.order===id).length;
   confirmBox('حذف الأمر '+o.number+(n?' مع '+n+' حركة مسجلة عليه':'')+' نهائياً؟',()=>{
     const eids=DB.entries.filter(e=>e.order===id).map(e=>e.id);
+    saveRestorePoint('قبل حذف الأمر '+o.number);
+    auditLog('حذف أمر',MNAME(o.machine)+' · '+o.number+(eids.length?' مع '+eids.length+' حركة':''));
     DB.orders=DB.orders.filter(x=>x.id!==id);DB.entries=DB.entries.filter(e=>e.order!==id);
     if(CLOUD&&FB){const u={};u['orders/'+id]=null;eids.forEach(x=>u['entries/'+x]=null);cw(()=>FB.update(FB.ref(FB.db),u))}
     persist();render();toast('تم حذف الأمر');
@@ -961,7 +932,7 @@ function settingsHTML(){
     const a=DB.users[k];
     h+='<div class="acc"><div class="nm">'+(k==='admin'?'👑 المدير العام':MNAME(k))+'</div>'+
       '<input type="text" id="u-'+k+'" value="'+esc(a.user)+'" placeholder="اسم المستخدم" autocomplete="off" style="direction:ltr;text-align:right">'+
-      '<input type="password" id="p-'+k+'" value="'+esc(a.pass)+'" placeholder="كلمة المرور" autocomplete="new-password" style="direction:ltr;text-align:right"></div>';
+      '<input type="text" id="p-'+k+'" value="'+esc(a.pass)+'" placeholder="كلمة المرور" autocomplete="off" style="direction:ltr;text-align:right"></div>';
   }
   h+='<div class="err-txt" id="s-err"></div><div class="actions"><button class="btn primary" onclick="saveUsers()">💾 حفظ الحسابات</button></div></div>';
   }
@@ -973,11 +944,13 @@ function settingsHTML(){
    '<div class="muted" style="margin-bottom:12px">'+(CLOUD?'حمّل نسخة احتياطية بشكل دوري كإجراء احتياط. «استبدال» و«دمج» يكتبان مباشرة على السحابة لكل الأجهزة.':'البيانات تُحفظ على هذا الجهاز فقط. لجمع بيانات عدة أجهزة: صدّر نسخة من كل جهاز ثم استخدم «دمج نسخة» على الجهاز الرئيسي.')+'</div>'+
    '<div class="actions" style="margin-top:0">'+
    '<button class="btn primary" onclick="exportJSON()">⬇️ تصدير نسخة (JSON)</button>'+
-   '<button class="btn green" onclick="exportCSV()">📄 تصدير السجل (Excel/CSV)</button>'+
+   '<button class="btn green" onclick="exportXLSX()">📊 تصدير Excel (.xlsx)</button>'+
+   '<button class="btn light" onclick="exportCSV()">📄 تصدير CSV</button>'+
    '<button class="btn light" onclick="pickFile(\'merge\')">🔀 دمج نسخة من جهاز آخر</button>'+
    '<button class="btn light" onclick="pickFile(\'replace\')">♻️ استبدال البيانات بنسخة</button>'+
    '</div></div>';
 
+  h+=restoreHTML()+auditHTML();
   h+='<div class="card sec" style="border:1px solid #fecdd3"><h3 style="color:#be123c">منطقة الخطر</h3>'+
    '<div class="muted" style="margin-bottom:10px">يمسح كل الحركات المسجلة ويعيد الأرصدة الافتتاحية من ملف Excel الأصلي.</div>'+
    '<button class="btn danger" onclick="resetAll()">إعادة ضبط البيانات للوضع الأصلي</button></div>';
@@ -1003,7 +976,8 @@ function exportJSON(){
   download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
 }
 function exportCSV(){
-  const q=v=>{let z=String(v==null?'':v);if(/^[\s]*[=+@\-\t\r]/.test(z))z="'"+z;return '"'+z.replace(/"/g,'""')+'"'};
+  /* حماية من حقن المعادلات: النص اللي يبدأ بـ = + - @ يتحول لنص عادي في Excel */
+  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
   const OM={};DB.orders.forEach(o=>OM[o.id]=o);
   const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
   [...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{
@@ -1016,60 +990,37 @@ function exportCSV(){
   download('tarqeem-log-'+todayStr()+'.csv','﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
   toast('تم تنزيل السجل','ok');
 }
-function validateBackup(d){
-  const fail=message=>({ok:false,message});
-  if(!d||typeof d!=='object'||!Array.isArray(d.orders)||!Array.isArray(d.entries))return fail('الملف لازم يحتوي على أوامر وحركات بصيغة النسخة الاحتياطية.');
-  d={...d,
-    orders:d.orders.map(o=>({...o,id:String(o?.id??''),machine:Number(o?.machine),number:String(o?.number??''),og:o?.og==null?0:Number(o.og),ob:o?.ob==null?0:Number(o.ob),qty:o?.qty==null?null:Number(o.qty)})),
-    entries:d.entries.map(e=>({...e,id:String(e?.id??''),order:String(e?.order??''),date:String(e?.date??''),g:e?.g==null?0:Number(e.g),b:e?.b==null?0:Number(e.b),dg:e?.dg==null?0:Number(e.dg),db:e?.db==null?0:Number(e.db)}))
-  };
-  const orderIds=new Set(),entryIds=new Set(),orderKeys=new Set();
-  for(const o of d.orders){
-    if(!o||typeof o!=='object'||!o.id||!/^[A-Za-z0-9_-]{1,100}$/.test(String(o.id))||!MACHINES.includes(Number(o.machine))||!String(o.number||'').trim())return fail('فيه أمر شغل ناقص أو فيه ماكينة/رقم أمر غير صالح.');
-    if(orderIds.has(String(o.id)))return fail('فيه رقم تعريفي مكرر لأمر شغل.');orderIds.add(String(o.id));
-    const orderKey=Number(o.machine)+'|'+String(o.number);if(orderKeys.has(orderKey))return fail('فيه رقم أمر مكرر داخل نفس الماكينة.');orderKeys.add(orderKey);
-    for(const k of ['og','ob']){const n=o[k]==null?0:Number(o[k]);if(!Number.isSafeInteger(n)||n<0)return fail('رصيد افتتاحي غير صالح في الأمر '+o.number+'.');}
-    if(o.qty!=null){const n=Number(o.qty);if(!Number.isSafeInteger(n)||n<1||n>MAXQ)return fail('كمية الأمر غير صالحة في الأمر '+o.number+'.');}
-  }
-  for(const e of d.entries){
-    if(!e||typeof e!=='object'||!e.id||!/^[A-Za-z0-9_-]{1,100}$/.test(String(e.id))||!orderIds.has(String(e.order)))return fail('فيه حركة بدون رقم تعريفي صالح أو مرتبطة بأمر غير موجود.');
-    if(entryIds.has(String(e.id)))return fail('فيه رقم تعريفي مكرر لحركة.');entryIds.add(String(e.id));
-    if(!validYmd(e.date))return fail('فيه حركة بتاريخ غير صحيح.');
-    for(const k of ['g','b','dg','db']){const n=e[k]==null?0:Number(e[k]);if(!Number.isSafeInteger(n)||n<0)return fail('فيه كمية غير صحيحة في حركة بتاريخ '+e.date+'.');}
-  }
-  for(const o of d.orders){
-    const movements=d.entries.filter(e=>String(e.order)===String(o.id));
-    const produced=Number(o.og||0)+Number(o.ob||0)+sum(movements,e=>Number(e.g||0)+Number(e.b||0));
-    const good=Number(o.og||0)+sum(movements,e=>Number(e.g||0)-Number(e.dg||0));
-    const bad=Number(o.ob||0)+sum(movements,e=>Number(e.b||0)-Number(e.db||0));
-    if(!Number.isSafeInteger(produced)||!Number.isSafeInteger(good)||!Number.isSafeInteger(bad))return fail('إجمالي الكميات أكبر من النطاق المسموح به في الأمر '+o.number+'.');
-    if(good<0||bad<0)return fail('النسخة فيها تسليمات تتجاوز الرصيد المتاح في الأمر '+o.number+'.');
-    if(o.qty!=null&&produced>Number(o.qty))return fail('إجمالي الإنتاج أكبر من كمية الأمر '+o.number+'.');
-  }
-  return {ok:true,data:d};
-}
 let IMPORT_MODE='merge';
 function pickFile(mode){IMPORT_MODE=mode;const f=$('#file-in');f.value='';f.click()}
+/* يطبّق مجموعة بيانات كاملة (استبدال / استرجاع) محلياً أو على السحابة */
+function applyDataset(d){
+  if(CLOUD&&FB){
+    const O={},E={};
+    d.orders.forEach(o=>O[o.id]=plain(o));
+    d.entries.forEach(e=>{const x=plain(e);if(x.m==null){const oo=d.orders.find(z=>z.id===x.order);if(oo)x.m=oo.machine}E[x.id]=x});
+    cw(()=>FB.update(FB.ref(FB.db),{orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null}));
+    return;
+  }
+  const keepUsers=DB.users,keepAudit=DB.audit;
+  DB={v:1,users:d.users||keepUsers||seed().users,orders:d.orders,entries:d.entries,audit:d.audit||keepAudit||[]};
+  persist();render();
+}
 $('#file-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
+  if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
   const r=new FileReader();
   r.onload=()=>{
     let d;try{d=JSON.parse(r.result)}catch(e){toast('الملف غير صالح','err');return}
-    const checked=validateBackup(d);
-    if(!checked.ok){toast(checked.message,'err');return}
-    d=checked.data;
+    if(!d||!Array.isArray(d.orders)||!Array.isArray(d.entries)){toast('هذا ليس ملف نسخة احتياطية صالح','err');return}
     if(IMPORT_MODE==='replace'){
-      confirmBox('سيتم استبدال كل البيانات الحالية بمحتوى الملف. متأكد؟',()=>{
-        if(CLOUD&&FB){
-          const O={},E={};
-          d.orders.forEach(o=>O[o.id]=plain(o));
-          d.entries.forEach(e=>{const x=withM.call(null,{...e}); if(x.m==null){const oo=d.orders.find(z=>z.id===e.order);if(oo)x.m=oo.machine} E[x.id]=plain(x)});
-          cw(()=>FB.update(FB.ref(FB.db),{orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null}));
-          toast('تم الاستبدال ✓','ok');return;
-        }
-        DB=d;if(!DB.users)DB.users=seed().users;persist();render();toast('تم الاستبدال ✓','ok');
-      },'استبدال');
+      confirmBox('سيتم استبدال كل البيانات الحالية ('+DB.orders.length+' أمر / '+DB.entries.length+' حركة) بمحتوى الملف ('+d.orders.length+' أمر / '+d.entries.length+' حركة). تُحفظ نسخة تلقائية قبل الاستبدال للرجوع إليها من «نقطة الاسترجاع».',()=>{
+        saveRestorePoint('قبل استبدال البيانات');
+        applyDataset(d);
+        auditLog('استبدال البيانات','من ملف: '+d.orders.length+' أمر / '+d.entries.length+' حركة');
+        toast('تم الاستبدال ✓','ok');
+      },'استبدال','استبدال');
     }else{
+      saveRestorePoint('قبل دمج نسخة');
       const oi=new Set(DB.orders.map(o=>o.id)),ei=new Set(DB.entries.map(e=>e.id));
       let no=0,ne=0;
       d.orders.forEach(o=>{
@@ -1077,20 +1028,25 @@ $('#file-in').addEventListener('change',ev=>{
         else{const cur=DB.orders.find(x=>x.id===o.id);if(cur&&String(o.modified)>String(cur.modified)){cur.modified=o.modified;cloudOrderTouch(cur)}}
       });
       d.entries.forEach(e=>{if(!ei.has(e.id)&&oi.has(e.order)){const x=withM(e);DB.entries.push(x);cloudEntry(x);ei.add(e.id);ne++}});
+      auditLog('دمج نسخة',ne+' حركة جديدة و '+no+' أمر جديد');
       persist();render();toast('تم الدمج: '+ne+' حركة جديدة و '+no+' أمر جديد','ok');
     }
   };
   r.readAsText(f);
 });
 function resetAll(){
-  confirmBox('سيتم مسح كل الحركات المسجلة والرجوع للأرصدة الافتتاحية الأصلية (الحسابات تبقى كما هي). متأكد؟',()=>{
+  if(!isAdmin())return;
+  confirmBox('سيتم مسح كل الحركات المسجلة والرجوع للأرصدة الافتتاحية الأصلية على كل الأجهزة (الحسابات تبقى كما هي). تُحفظ نسخة تلقائية قبل ذلك للرجوع إليها.',()=>{
+    saveRestorePoint('قبل إعادة الضبط');
     if(CLOUD&&FB){
       const O={};seed().orders.forEach(o=>O[o.id]=plain(o));
       cw(()=>FB.update(FB.ref(FB.db),{orders:O,entries:null}));
-      toast('تمت إعادة الضبط');return;
+    }else{
+      const u=DB.users,au=DB.audit;DB=seed();DB.users=u;DB.audit=au||[];persist();render();
     }
-    const u=DB.users;DB=seed();DB.users=u;persist();render();toast('تمت إعادة الضبط');
-  },'إعادة ضبط');
+    auditLog('إعادة ضبط البيانات','الرجوع للأرصدة الافتتاحية الأصلية');
+    toast('تمت إعادة الضبط');
+  },'إعادة ضبط','مسح');
 }
 
 /* ============== استيراد من Excel ============== */
@@ -1215,6 +1171,7 @@ function buildImportPlan(rows){
 function applyImport(){
   if(!isAdmin())return;
   const plan=buildImportPlan(IMPORT_ROWS),now=new Date().toISOString(),up={};
+  if(IMPORT_SEL.size)saveRestorePoint('قبل استيراد Excel');
   let nn=0,nu=0;
   for(const p of plan){
     if(!IMPORT_SEL.has(p.key)||(p.status!=='new'&&p.status!=='upd'))continue;
@@ -1223,13 +1180,14 @@ function applyImport(){
       o=DB.orders.find(z=>z.id===p.oid);if(!o)continue;
       o.og=p.og;o.ob=p.ob;if(p.denom)o.denom=p.denom;if(p.notes)o.notes=p.notes;o.modified=p.mod||now;nu++;
     }else{
-      o={id:uid('o'),machine:p.machine,number:p.number,denom:p.denom,notes:p.notes,og:p.g,ob:p.b,qty:null,modified:p.mod||now};
+      o={id:uid('o'),machine:p.machine,number:p.number,denom:p.denom,notes:p.notes,og:p.g,ob:p.b,qty:MAXQ,modified:p.mod||now};
       DB.orders.push(o);nn++;
     }
     up['orders/'+o.id]=plain(o);
   }
   if(!nn&&!nu){toast('لا يوجد ما يُستورد','err');return}
   if(CLOUD&&FB)cw(()=>FB.update(FB.ref(FB.db),up));
+  auditLog('استيراد Excel',nn+' أمر جديد · '+nu+' أمر محدّث');
   persist();closeModal();render();
   toast('تم الاستيراد ✓ — '+nn+' أمر جديد · '+nu+' أمر محدّث','ok');
 }
@@ -1299,6 +1257,310 @@ $('#xl-in').addEventListener('change',ev=>{
   };
   r.readAsArrayBuffer(f);
 });
+
+/* ============== أدوات التاريخ والإحصاء ============== */
+function addDays(s,n){const p=String(s).split('-');return ymd(new Date(+p[0],+p[1]-1,+p[2]+n))}
+function daysBetween(a,b){const p=s=>{const x=String(s).split('-');return Date.UTC(+x[0],+x[1]-1,+x[2])};return Math.round((p(b)-p(a))/864e5)}
+const WD=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function dayName(s){const p=String(s).split('-');return WD[new Date(+p[0],+p[1]-1,+p[2]).getDay()]}
+/* مجموع الإنتاج والتسليمات لكل ماكينة في فترة (تواريخ نصية YYYY-MM-DD) — مرور واحد على الحركات */
+function statsBy(from,to){
+  const OM=orderMachineMap(),r={};
+  MACHINES.forEach(m=>r[m]={g:0,b:0,dg:0,db:0,n:0});
+  for(const e of DB.entries){
+    if(e.date<from||e.date>to)continue;
+    const m=OM[e.order];if(!m)continue;
+    const x=r[m];x.g+=e.g||0;x.b+=e.b||0;x.dg+=e.dg||0;x.db+=e.db||0;x.n++;
+  }
+  return r;
+}
+function lastActivity(o){
+  let d=String(o.modified||'').slice(0,10);
+  for(const e of entsOf(o.id))if(e.date>d)d=e.date;
+  return d;
+}
+
+/* ============== توقع اكتمال الأمر ============== */
+function forecast(o){
+  const t=totals(o,DB.entries),rem=qtyOf(o)-t.prod;
+  if(rem<=0)return {done:true};
+  const today=todayStr(),from=addDays(today,-13);
+  let p=0;for(const e of entsOf(o.id))if(e.date>=from&&e.date<=today)p+=(e.g||0)+(e.b||0);
+  if(!p)return null;
+  const rate=p/14,days=Math.ceil(rem/rate);
+  return {rate,days,date:addDays(today,Math.min(days,3650))};
+}
+function fcHTML(o){
+  const f=forecast(o);
+  if(!f)return '';
+  if(f.done)return '<div class="fc">🏁 <b>اكتملت كمية الأمر</b></div>';
+  return '<div class="fc">⏳ متوقع الاكتمال '+(f.days>365?'<b>بعد أكثر من سنة</b>':'بعد <b>≈ '+fmt(f.days)+' يوم</b> ('+fmtDate(f.date)+')')+' · المعدل '+fmt(Math.round(f.rate))+' فرخ/يوم</div>';
+}
+
+/* ============== التنبيهات الذكية ============== */
+function buildAlerts(){
+  const out=[],today=todayStr(),st=statsBy(addDays(today,-6),today),st1=statsBy(today,today);
+  const now=new Date(),hr=now.getHours(),notFri=now.getDay()!==5;
+  for(const m of MACHINES){
+    const s=st[m],prod=s.g+s.b;
+    if(prod>=5000){
+      const d=s.b/prod*100;
+      if(d>=DEFECT_WARN)out.push({lvl:d>=DEFECT_WARN*1.5?'hi':'md',m,ic:'⚠️',txt:MNAME(m)+': نسبة المعيب آخر 7 أيام '+d.toFixed(1)+'% (الحد المقبول '+DEFECT_WARN+'%)'});
+    }
+    if(hr>=15&&notFri&&ordersOf(m).length&&!st1[m].n)
+      out.push({lvl:'lo',m,ic:'📝',txt:MNAME(m)+': لم تُسجَّل أي حركة اليوم حتى الآن'});
+  }
+  for(const o of DB.orders){
+    const t=totals(o,DB.entries),q=qtyOf(o),la=lastActivity(o),idle=la?daysBetween(la,today):0;
+    if(t.prod>=q){
+      if(idle<=7)out.push({lvl:'lo',m:o.machine,ic:'🏁',txt:MNAME(o.machine)+' · الأمر '+o.number+': اكتملت كمية الأمر ('+fmt(q)+' فرخ)'});
+    }else if(t.prod/q>=NEAR_DONE){
+      out.push({lvl:'md',m:o.machine,ic:'📈',txt:MNAME(o.machine)+' · الأمر '+o.number+': قارب على الاكتمال ('+Math.round(t.prod/q*100)+'%) — متبقي '+fmt(q-t.prod)+' فرخ، جهّز الأمر التالي'});
+    }
+    if(t.stock>0&&idle>=IDLE_DAYS)
+      out.push({lvl:'lo',m:o.machine,ic:'🕸️',txt:MNAME(o.machine)+' · الأمر '+o.number+': رصيد راكد '+fmt(t.stock)+' فرخ — بدون حركة منذ '+idle+' يوم'});
+  }
+  const rank={hi:0,md:1,lo:2};
+  return out.sort((a,b)=>rank[a.lvl]-rank[b.lvl]);
+}
+function alertsHTML(list,limit,noOpen){
+  if(!list.length)return '<div class="al lo"><span class="ic">✅</span><span>لا توجد تنبيهات — كل المؤشرات ضمن الحدود المعتادة.</span></div>';
+  const shown=limit?list.slice(0,limit):list;
+  let h=shown.map(a=>'<div class="al '+a.lvl+'"><span class="ic">'+a.ic+'</span><span style="flex:1">'+esc(a.txt)+'</span>'+(a.m&&!noOpen?'<button class="btn light sm" onclick="go('+a.m+')">فتح</button>':'')+'</div>').join('');
+  if(limit&&list.length>limit)h+='<button class="btn light sm" onclick="ALL_AL=true;render()">عرض كل التنبيهات ('+list.length+')</button>';
+  else if(ALL_AL&&list.length>5&&!noOpen)h+='<button class="btn light sm" onclick="ALL_AL=false;render()">عرض أقل</button>';
+  return h;
+}
+function perfHTML(){
+  const today=todayStr(),st=statsBy(addDays(today,-6),today);
+  const rows=MACHINES.map(m=>{const s=st[m],prod=s.g+s.b;return {m,prod,def:prod?s.b/prod*100:null,del:s.dg+s.db,avg:prod/7}});
+  const maxP=Math.max(...rows.map(r=>r.prod));
+  /* شارة «الأقل معيباً» تظهر فقط لو فيه فائز واضح (مش لو الماكينات متعادلة) */
+  const elig=rows.filter(r=>r.def!=null&&r.prod>=1000),rd=r=>Math.round(r.def*10);
+  const minD=elig.length?Math.min(...elig.map(rd)):null,showBest=minD!=null&&elig.filter(r=>rd(r)===minD).length<elig.length;
+  return '<div class="card sec"><div class="sec-title"><h3>🏆 أداء آخر 7 أيام</h3><span class="muted">مقارنة بين الماكينات</span></div><div class="tw"><table style="min-width:560px"><thead><tr><th>الماكينة</th><th>الإنتاج</th><th>متوسط يومي</th><th>نسبة المعيب</th><th>التسليمات</th><th>التميّز</th></tr></thead><tbody>'+
+   rows.map(r=>'<tr><td class="l"><b style="color:'+MCOL[r.m]+'">'+MNAME(r.m)+'</b></td><td><b>'+fmt(r.prod)+'</b></td><td>'+fmt(Math.round(r.avg))+'</td><td>'+(r.def==null?'—':r.def.toFixed(1)+'%')+'</td><td>'+fmt(r.del)+'</td><td>'+
+     (r.prod>0&&r.prod===maxP?'<span class="badge" style="--mc:#d97706">🥇 الأعلى إنتاجاً</span> ':'')+
+     (showBest&&r.def!=null&&r.prod>=1000&&rd(r)===minD?'<span class="badge" style="--mc:#059669">🎯 الأقل معيباً</span>':'')+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+}
+
+/* ============== سجل الحركات: بحث وفلاتر ============== */
+function logFiltersHTML(os){
+  return '<div class="filters">'+
+   '<label class="f">الأمر<select id="lg-o" onchange="logFilter()"><option value="">كل الأوامر</option>'+os.map(o=>'<option value="'+o.id+'"'+(LOGF.o===o.id?' selected':'')+'>'+esc(o.number)+(o.denom?' — '+esc(o.denom):'')+'</option>').join('')+'</select></label>'+
+   '<label class="f">من تاريخ<input type="date" id="lg-f" value="'+esc(LOGF.from)+'" onchange="logFilter()"></label>'+
+   '<label class="f">إلى تاريخ<input type="date" id="lg-t" value="'+esc(LOGF.to)+'" onchange="logFilter()"></label>'+
+   '<label class="f">بحث (ملاحظة / مستخدم / فئة)<input type="text" id="lg-q" value="'+esc(LOGF.q)+'" placeholder="اكتب للبحث…" autocomplete="off" oninput="logFilter()"></label></div>';
+}
+function logFilter(){
+  LOGF={o:$('#lg-o').value,from:$('#lg-f').value,to:$('#lg-t').value,q:$('#lg-q').value};
+  SHOWALL=false;logRefresh();
+}
+function logRefresh(){const b=$('#log-box');if(b&&typeof VIEW==='number')b.innerHTML=logHTML(VIEW)}
+function logClear(){LOGF={o:'',from:'',to:'',q:''};SHOWALL=false;render()}
+function logCardHTML(m){
+  const os=ordersOf(m),oSet=new Set(os.map(o=>o.id)),has=DB.entries.some(e=>oSet.has(e.order));
+  return '<div class="card sec"><div class="sec-title"><h3>📒 سجل الإنتاج والتسليمات</h3></div>'+(has?logFiltersHTML(os):'')+'<div id="log-box">'+logHTML(m)+'</div></div>';
+}
+function logHTML(m){
+  const os=ordersOf(m),ce=canEdit(m),oMap={};os.forEach(o=>oMap[o.id]=o);
+  const all=DB.entries.filter(e=>oMap[e.order]);
+  if(!all.length)return '<div class="empty">لا توجد حركات مُدخلة بعد</div>';
+  const q=normDigits(LOGF.q).trim().toLowerCase(),active=!!(LOGF.o||LOGF.from||LOGF.to||q);
+  const ents=all.filter(e=>{
+    const o=oMap[e.order];
+    if(LOGF.o&&e.order!==LOGF.o)return false;
+    if(LOGF.from&&e.date<LOGF.from)return false;
+    if(LOGF.to&&e.date>LOGF.to)return false;
+    if(q&&!(o.number+' '+o.denom+' '+(e.note||'')+' '+(e.by||'')).toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>cmpDT(b,a));
+  if(!ents.length)return '<div class="empty">لا توجد حركات تطابق البحث</div><div class="actions"><button class="btn light sm" onclick="logClear()">مسح الفلاتر</button></div>';
+  const shown=SHOWALL?ents:ents.slice(0,40);
+  const bal={},need=new Set(shown.map(e=>e.order));os.forEach(o=>{if(need.has(o.id))Object.assign(bal,runningBalances(o))});
+  let h='<div class="muted" style="margin:0 0 8px">'+ents.length+' حركة'+(active?' من '+all.length+' · سليم '+fmt(sum(ents,e=>e.g||0))+' · معيب '+fmt(sum(ents,e=>e.b||0))+' · تسليمات '+fmt(sum(ents,e=>(e.dg||0)+(e.db||0)))+' <button class="btn light sm" onclick="logClear()">مسح الفلاتر</button>':'')+'</div>';
+  h+='<div class="tw"><table><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
+  for(const e of shown){
+    const o=oMap[e.order],b=bal[e.id]||{sg:0,sb:0};
+    h+='<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.by||'')+'</small></td>'+
+      '<td class="l"><b class="ltr">'+esc(o.number)+'</b><small>'+esc(o.denom)+(e.note?' · '+esc(e.note):'')+'</small></td>'+
+      '<td class="g"><b>'+fmt(e.g)+'</b></td><td class="b"><b>'+fmt(e.b)+'</b></td><td><b>'+fmt(e.g+e.b)+'</b></td>'+
+      '<td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td>'+
+      '<td class="g">'+fmt(b.sg)+'</td><td class="b">'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td>'+
+      (ce?'<td><button class="btn light sm" onclick="editEntry(\''+e.id+'\')">تعديل</button> <button class="btn danger sm" onclick="delEntry(\''+e.id+'\')">حذف</button></td>':'')+'</tr>';
+  }
+  h+='</tbody></table></div>';
+  if(ents.length>40)h+='<div class="actions"><button class="btn light sm" onclick="SHOWALL='+(!SHOWALL)+';logRefresh()">'+(SHOWALL?'عرض آخر 40 فقط':'عرض كل الحركات ('+ents.length+')')+'</button></div>';
+  return h;
+}
+
+/* ============== سجل التدقيق ============== */
+let AUDIT=[];
+function auditLog(act,txt){
+  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act,txt};
+  if(CLOUD){
+    /* كتابة صامتة: لو قواعد Firebase مش بتسمح بالعقدة audit ما نزعجش المستخدم */
+    if(FB){try{const p=FB.set(FB.ref(FB.db,'audit/'+rec.id),rec);if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+  }else{
+    (DB.audit=DB.audit||[]).push(rec);
+    if(DB.audit.length>500)DB.audit.splice(0,DB.audit.length-500);
+    persist();
+  }
+}
+function auditListen(){
+  if(!CLOUD||!FB||!isAdmin()||FB.auditOn)return;
+  FB.auditOn=true;
+  try{
+    FB.auditOff=FB.onValue(FB.query(FB.ref(FB.db,'audit'),FB.limitToLast(200)),
+      s=>{AUDIT=toArr(s).sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));if(VIEW==='settings')sched()},
+      ()=>{AUDIT=null;if(VIEW==='settings')sched()});
+  }catch(e){FB.auditOn=false}
+}
+function auditStop(){
+  if(FB){if(FB.auditOff){try{FB.auditOff()}catch(e){}}FB.auditOn=false;FB.auditOff=null}
+  AUDIT=[];
+}
+function auditHTML(){
+  const list=CLOUD?AUDIT:(DB.audit||[]).slice().reverse();
+  let h='<div class="card sec"><h3>📜 سجل التدقيق</h3><div class="muted" style="margin-bottom:10px">كل تعديل أو حذف للحركات وأوامر الشغل وعمليات الإدارة: من قام بها ومتى.</div>';
+  if(list==null)h+='<div class="empty">لا تتوفر صلاحية قراءة سجل التدقيق من Firebase — أضف قاعدة قراءة وكتابة للعقدة <b class="ltr">audit</b> للمدير.</div>';
+  else if(!list.length)h+='<div class="empty">لا توجد عمليات مسجلة بعد</div>';
+  else h+='<div class="tw" style="max-height:340px"><table style="min-width:640px"><thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody>'+
+    list.slice(0,100).map(a=>'<tr><td>'+esc(fmtTime(a.ts))+'</td><td>'+esc(a.by)+'</td><td><b>'+esc(a.act)+'</b></td><td class="l">'+esc(a.txt)+'</td></tr>').join('')+'</tbody></table></div>';
+  return h+'</div>';
+}
+
+/* ============== نقطة الاسترجاع ============== */
+const RP_KEY='tarqeem_restore_v1';
+function saveRestorePoint(label){
+  try{
+    const s={ts:new Date().toISOString(),label,orders:DB.orders,entries:DB.entries};
+    if(!CLOUD){s.users=DB.users;s.audit=DB.audit||[]}
+    localStorage.setItem(RP_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+function getRestorePoint(){
+  try{const s=JSON.parse(localStorage.getItem(RP_KEY));if(s&&Array.isArray(s.orders)&&Array.isArray(s.entries))return s}catch(e){}
+  return null;
+}
+function restoreLast(){
+  const r=getRestorePoint();if(!r||!isAdmin())return;
+  confirmBox('استرجاع نسخة «'+r.label+'» ('+fmtTime(r.ts)+')؟ سيتم استبدال البيانات الحالية (وتُحفظ نسخة منها قبل ذلك).',()=>{
+    saveRestorePoint('قبل الاسترجاع');
+    applyDataset({orders:r.orders,entries:r.entries,users:r.users,audit:r.audit});
+    auditLog('استرجاع نسخة','«'+r.label+'» بتاريخ '+fmtTime(r.ts));
+    toast('تم الاسترجاع ✓','ok');
+  },'استرجاع');
+}
+function restoreHTML(){
+  const r=getRestorePoint();
+  return '<div class="card sec"><h3>↩️ نقطة الاسترجاع</h3><div class="muted" style="margin-bottom:10px;line-height:1.9">قبل أي عملية كبيرة (استبدال، دمج، استيراد Excel، إعادة ضبط، حذف أمر) يحفظ البرنامج نسخة تلقائية على هذا الجهاز، وتقدر ترجع لها.</div>'+
+   (r?'<div class="actions" style="margin-top:0"><span class="chip-user" style="background:#eef2ff;color:#3730a3">'+esc(r.label)+' · '+esc(fmtTime(r.ts))+' · '+r.orders.length+' أمر / '+r.entries.length+' حركة</span><button class="btn light" onclick="restoreLast()">↩️ استرجاع هذه النسخة</button></div>':'<div class="muted">لا توجد نقطة استرجاع محفوظة بعد.</div>')+'</div>';
+}
+
+/* ============== التقارير (واتساب / طباعة) ============== */
+function reportData(from,to){
+  const st=statsBy(from,to);
+  const rows=MACHINES.map(m=>{
+    const s=st[m];let sg=0,sb=0;
+    for(const o of ordersOf(m)){
+      sg+=o.og||0;sb+=o.ob||0;
+      for(const e of entsOf(o.id))if(e.date<=to){sg+=(e.g||0)-(e.dg||0);sb+=(e.b||0)-(e.db||0)}
+    }
+    const prod=s.g+s.b;
+    return {m,g:s.g,b:s.b,prod,del:s.dg+s.db,sg,sb,stock:sg+sb,def:prod?s.b/prod*100:0};
+  });
+  const tot={g:0,b:0,prod:0,del:0,sg:0,sb:0,stock:0};
+  rows.forEach(r=>{for(const k in tot)tot[k]+=r[k]});
+  tot.def=tot.prod?tot.b/tot.prod*100:0;
+  return {rows,tot};
+}
+function reportText(from,to,d){
+  const label=from===to?dayName(from)+' '+fmtDate(from):'من '+fmtDate(from)+' إلى '+fmtDate(to);
+  const L=['📦 *تقرير مخزن الترقيمات*','📅 '+label,'━━━━━━━━━━━━'];
+  d.rows.forEach(r=>{
+    L.push('🏭 *'+MNAME(r.m)+'*');
+    L.push('• الإنتاج: '+fmt(r.prod)+' (سليم '+fmt(r.g)+' · معيب '+fmt(r.b)+(r.prod?' — '+r.def.toFixed(1)+'%':'')+')');
+    L.push('• التسليمات: '+fmt(r.del));
+    L.push('• رصيد المخزن: '+fmt(r.stock)+' (سليم '+fmt(r.sg)+' · معيب '+fmt(r.sb)+')');
+    L.push('');
+  });
+  L.push('━━━━━━━━━━━━','📊 *الإجمالي*');
+  L.push('• الإنتاج: '+fmt(d.tot.prod)+' (معيب '+d.tot.def.toFixed(1)+'%)');
+  L.push('• التسليمات: '+fmt(d.tot.del));
+  L.push('• رصيد المخزن: '+fmt(d.tot.stock)+' (سليم '+fmt(d.tot.sg)+' · معيب '+fmt(d.tot.sb)+')');
+  return L.join('\n');
+}
+let REP=null;
+function reportModal(){
+  const t=todayStr();
+  openModal('<h3>📋 تقرير الإنتاج والمخزون</h3>'+
+   '<div class="seg noprint" style="margin-bottom:10px;flex-wrap:wrap"><button onclick="repPreset(0)">اليوم</button><button onclick="repPreset(1)">أمس</button><button onclick="repPreset(7)">آخر 7 أيام</button><button onclick="repPreset(30)">آخر 30 يوم</button></div>'+
+   '<div class="fgrid noprint" style="margin-bottom:12px"><label class="f">من<input type="date" id="rp-f" onchange="repChange()"></label><label class="f">إلى<input type="date" id="rp-t" onchange="repChange()"></label></div>'+
+   '<div id="rep-body"></div>'+
+   '<div class="actions noprint"><button class="btn primary" onclick="repCopy()">📋 نسخ النص</button><button class="btn green" onclick="repWA()">💬 إرسال واتساب</button><button class="btn light" onclick="repPrint()">🖨️ طباعة</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>',true);
+  $('#rp-f').value=t;$('#rp-t').value=t;repChange();
+  const md=$('#modal-root .modal');if(md){md.setAttribute('tabindex','-1');md.focus({preventScroll:true})}
+}
+function repPreset(n){
+  const t=todayStr();
+  $('#rp-f').value=n===0?t:n===1?addDays(t,-1):addDays(t,-(n-1));
+  $('#rp-t').value=n===1?addDays(t,-1):t;
+  repChange();
+}
+function repChange(){
+  let f=$('#rp-f').value,t=$('#rp-t').value;
+  if(!f||!t)return;
+  if(f>t){const x=f;f=t;t=x}
+  const d=reportData(f,t);
+  REP={from:f,to:t,text:reportText(f,t,d)};
+  const row=(r,cls)=>'<tr'+(cls?' class="'+cls+'"':'')+'><td class="l"><b>'+(r.m?MNAME(r.m):'الإجمالي')+'</b></td><td class="g">'+fmt(r.g)+'</td><td class="b">'+fmt(r.b)+'</td><td><b>'+fmt(r.prod)+'</b></td><td>'+r.def.toFixed(1)+'%</td><td>'+fmt(r.del)+'</td><td><b>'+fmt(r.stock)+'</b><small>سليم '+fmt(r.sg)+' · معيب '+fmt(r.sb)+'</small></td></tr>';
+  $('#rep-body').innerHTML='<div class="muted" style="margin-bottom:8px">'+(f===t?'📅 '+dayName(f)+' '+fmtDate(f):'📅 من '+fmtDate(f)+' إلى '+fmtDate(t))+' — الأرصدة كما هي في نهاية الفترة</div>'+
+   '<div class="tw"><table style="min-width:620px"><thead><tr><th>الماكينة</th><th>سليم</th><th>معيب</th><th>الإنتاج</th><th>% معيب</th><th>التسليمات</th><th>رصيد المخزن</th></tr></thead><tbody>'+d.rows.map(r=>row(r)).join('')+row(d.tot,'tot')+'</tbody></table></div>';
+}
+function fallbackCopy(t,done){
+  const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy');done()}catch(e){toast('تعذر النسخ','err')}
+  a.remove();
+}
+function repCopy(){
+  const t=REP&&REP.text;if(!t)return;
+  const done=()=>toast('تم نسخ التقرير ✓','ok');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,()=>fallbackCopy(t,done));
+  else fallbackCopy(t,done);
+}
+function repWA(){if(REP&&REP.text)window.open('https://wa.me/?text='+encodeURIComponent(REP.text),'_blank','noopener')}
+function repPrint(){document.body.classList.add('pr');try{window.print()}finally{setTimeout(()=>document.body.classList.remove('pr'),400)}}
+
+/* ============== تصدير Excel حقيقي (.xlsx) بعدة أوراق ============== */
+function exportXLSX(){
+  toast('جاري تجهيز ملف Excel…');
+  loadXLSX().then(X=>{
+    const OM={};DB.orders.forEach(o=>OM[o.id]=o);
+    const ords=[...DB.orders].sort((a,b)=>a.machine-b.machine||String(a.number).localeCompare(String(b.number)));
+    const bal=[['الماكينة','رقم الأمر','الفئة','كمية الأمر','إجمالي الإنتاج','إجمالي التسليمات','رصيد السليم','رصيد المعيب','إجمالي المخزن','% المنتج من الكمية','آخر تعديل','ملاحظات']];
+    ords.forEach(o=>{const t=totals(o,DB.entries),q=qtyOf(o);bal.push([MNAME(o.machine),o.number,o.denom,q,t.prod,t.del,t.sg,t.sb,t.stock,Math.round(t.prod/q*1000)/10,fmtTime(o.modified),o.notes||''])});
+    const sorted=[...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts)));
+    const log=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
+    const day={};
+    sorted.forEach(e=>{
+      const o=OM[e.order];if(!o)return;
+      log.push([e.date,MNAME(o.machine),o.number,o.denom,e.g||0,e.b||0,(e.g||0)+(e.b||0),e.dg||0,e.db||0,e.note||'',e.by||'',fmtTime(e.ts)]);
+      const k=e.date+'|'+o.machine,x=day[k]||(day[k]={d:e.date,m:o.machine,g:0,b:0,del:0});
+      x.g+=e.g||0;x.b+=e.b||0;x.del+=(e.dg||0)+(e.db||0);
+    });
+    const sum1=[['التاريخ','الماكينة','إنتاج سليم','إنتاج معيب','إجمالي الإنتاج','% معيب','تسليمات']];
+    Object.values(day).sort((a,b)=>a.d.localeCompare(b.d)||a.m-b.m).forEach(x=>sum1.push([x.d,MNAME(x.m),x.g,x.b,x.g+x.b,(x.g+x.b)?Math.round(x.b/(x.g+x.b)*1000)/10:0,x.del]));
+    const wb=X.utils.book_new();
+    [['الأرصدة',bal,[11,13,14,12,14,15,12,12,13,16,18,40]],['السجل',log,[12,11,13,14,10,10,12,12,12,30,14,18]],['ملخص يومي',sum1,[12,11,12,12,14,10,12]]].forEach(s=>{
+      const ws=X.utils.aoa_to_sheet(s[1]);ws['!cols']=s[2].map(w=>({wch:w}));X.utils.book_append_sheet(wb,ws,s[0]);
+    });
+    wb.Workbook={Views:[{RTL:true}]};
+    X.writeFile(wb,'tarqeem-'+todayStr()+'.xlsx');
+    toast('تم تنزيل ملف Excel ✓','ok');
+  }).catch(e=>{if(e)console.error(e);toast('تعذر إنشاء ملف Excel (يحتاج إنترنت أول مرة) — تم تنزيل CSV بدلاً منه','err');exportCSV()});
+}
 
 /* ============== بدء التشغيل ============== */
 if(CLOUD){
