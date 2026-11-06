@@ -217,7 +217,7 @@ body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;p
 .sr:hover{background:#f5f7ff}
 .sr b{direction:ltr}
 .pbar{height:8px;border-radius:99px;background:#e2e8f0;overflow:hidden;min-width:70px}
-.pbar i{display:block;height:100%;background:var(--brand);border-radius:99px}
+.pbar i{display:block;height:100%;background:var(--brand);border-radius:99px}\n.audit-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:10px 0}.audit-status{padding:9px 12px;border-radius:11px;font-size:12.5px;font-weight:700;margin:8px 0}.audit-status.ok{background:#ecfdf5;color:#047857}.audit-status.warn{background:#fffbeb;color:#92400e}.audit-status.bad{background:#fff1f2;color:#9f1239}
 @media print{.noprint{display:none!important}}
 </style>
 </head>
@@ -366,9 +366,11 @@ async function onAuth(user){
   if(tk!==AUTH_TK)return;
   if(R.role==null){cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
   const role=R.role;
-  setSession({role});
+  setSession({role,displayName:R.displayName||''});
+  auditLog('تسجيل دخول','دخول المستخدم '+whoName());
   if(role==='admin'){auditListen();profListen()}
-  if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;toast('أهلاً '+whoName(),'ok')}
+  if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;}
+  toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');
   render(true);
 }
 async function initCloud(){
@@ -397,6 +399,7 @@ function seedCloud(){
   const s=seed(),u={};
   s.orders.forEach(o=>u['orders/'+o.id]=plain(o));
   cw(()=>FB.update(FB.ref(FB.db),u));
+  auditLog('رفع بيانات البداية','تم رفع '+s.orders.length+' أمر إلى السحابة');
   toast('تم رفع بيانات البداية ✓','ok');
 }
 function loadSession(){try{const s=JSON.parse(sessionStorage.getItem(SS_KEY));if(s&&s.role!=null)return s}catch(e){}return null}
@@ -459,16 +462,16 @@ function profStop(){
 /* الدور من بريد الحسابات الأساسية، أو من ملف التعريف للحسابات المضافة */
 async function resolveRole(user){
   const name=String(user.email||'').split('@')[0].toLowerCase();
-  if(name==='admin')return {role:'admin'};
-  const mm=/^machine([1-4])$/.exec(name);if(mm)return {role:Number(mm[1])};
+  const baseRole=name==='admin'?'admin':(/^machine([1-4])$/.test(name)?Number(name.match(/^machine([1-4])$/)[1]):null);
   try{
     const p=(await FB.get(FB.ref(FB.db,'profiles/'+user.uid))).val();
     if(p){
       if(p.active===false)return {off:true};
-      const r=p.role==='admin'?'admin':Number(p.role);
-      if(r==='admin'||MACHINES.includes(r))return {role:r,user:p.user||name};
+      const r=baseRole!==null?baseRole:(p.role==='admin'?'admin':Number(p.role));
+      if(r==='admin'||MACHINES.includes(r))return {role:r,user:p.user||name,displayName:p.displayName||''};
     }
   }catch(e){}
+  if(baseRole!==null)return {role:baseRole};
   return {};
 }
 
@@ -510,11 +513,11 @@ const mActions=(go,label)=>'<div class="err-txt" id="um-err"></div><div class="a
 function userRows(){
   const rows=[];
   if(CLOUD){
-    BASE_USERS.forEach(b=>rows.push({id:'b:'+b.k,user:b.user,role:b.role,base:true,active:true}));
-    (PROFILES||[]).forEach(p=>rows.push({id:'p:'+p.id,uid:p.id,user:p.user||'؟',role:p.role==='admin'?'admin':Number(p.role),active:p.active!==false}));
+    BASE_USERS.forEach(b=>rows.push({id:'b:'+b.k,user:b.user,displayName:((PROFILES||[]).find(p=>p.user===b.user)||{}).displayName||'',uid:((PROFILES||[]).find(p=>p.user===b.user)||{}).id,role:b.role,base:true,active:true}));
+    (PROFILES||[]).forEach(p=>rows.push({id:'p:'+p.id,uid:p.id,user:p.user||'؟',displayName:p.displayName||'',role:p.role==='admin'?'admin':Number(p.role),active:p.active!==false}));
   }else{
-    BASE_USERS.forEach(b=>{const a=DB.users[b.k];if(a)rows.push({id:'b:'+b.k,user:a.user,role:b.role,base:true,active:a.active!==false,weak:a.pass===DEFAULT_PASS[b.k]})});
-    Object.keys(DB.users).filter(k=>k.charAt(0)==='x').forEach(k=>{const a=DB.users[k];rows.push({id:'x:'+k,user:a.user,role:a.role,active:a.active!==false})});
+    BASE_USERS.forEach(b=>{const a=DB.users[b.k];if(a)rows.push({id:'b:'+b.k,user:a.user,displayName:a.displayName||'',role:b.role,base:true,active:a.active!==false,weak:a.pass===DEFAULT_PASS[b.k]})});
+    Object.keys(DB.users).filter(k=>k.charAt(0)==='x').forEach(k=>{const a=DB.users[k];rows.push({id:'x:'+k,user:a.user,displayName:a.displayName||'',role:a.role,active:a.active!==false})});
   }
   return rows;
 }
@@ -525,10 +528,10 @@ function usersHTML(){
   if(CLOUD&&PROFILES===null)h+='<div class="al md" style="margin-bottom:10px"><span class="ic">⚠️</span><span>تعذّرت قراءة الحسابات المضافة — انشر قواعد Firebase الجديدة (ملف firebase-rules-strict.json).</span></div>';
   if(!CLOUD&&!DB.gate)h+='<div class="al lo" style="margin-bottom:10px"><span class="ic">🛡️</span><span>لم تُعيَّن كلمة سر الموافقة بعد — ستُطلب منك عند أول عملية.</span></div>';
   h+='<div class="tw"><table style="min-width:560px"><thead><tr><th>المستخدم</th><th>الصلاحية</th><th>الحالة</th><th></th></tr></thead><tbody>'+
-   rows.map(r=>'<tr><td class="l"><b class="ltr">'+esc(r.user)+'</b>'+(r.base?' <span class="chip" style="margin:0">أساسي</span>':'')+(r.weak?'<div class="wn">⚠ كلمة السر افتراضية — غيّرها</div>':'')+'</td>'+
+   rows.map(r=>'<tr><td class="l"><b>'+esc(r.displayName||r.user)+'</b><div class="muted ltr" style="font-size:11px">'+esc(r.user)+'</div>'+(r.base?' <span class="chip" style="margin:0">أساسي</span>':'')+(r.weak?'<div class="wn">⚠ كلمة السر افتراضية — غيّرها</div>':'')+'</td>'+
      '<td>'+esc(roleLabel(r.role))+'</td>'+
      '<td>'+(r.active?'<span class="badge st-new">نشط</span>':'<span class="badge st-err">معطّل</span>')+'</td>'+
-     '<td><button class="btn light sm" onclick="userPassModal(\''+esc(r.id)+'\')">🔑 كلمة السر</button>'+
+     '<td>'+(r.uid||!CLOUD?'<button class="btn light sm" onclick="userNameModal(\''+esc(r.id)+'\')">✏️ الاسم الظاهر</button> ':'')+'<button class="btn light sm" onclick="userPassModal(\''+esc(r.id)+'\')">🔑 كلمة السر</button>'+
      (r.base?'':' <button class="btn light sm" onclick="userStatusModal(\''+esc(r.id)+'\',\'toggle\')">'+(r.active?'⏸ تعطيل':'▶ تفعيل')+'</button> <button class="btn danger sm" onclick="userStatusModal(\''+esc(r.id)+'\',\'del\')">🗑 حذف</button>')+'</td></tr>').join('')+
    '</tbody></table></div></div>';
   return h;
@@ -538,6 +541,7 @@ function usersHTML(){
 function userAddModal(){
   if(!isAdmin())return;
   openModal('<h3>➕ مستخدم جديد</h3><div class="fgrid" style="grid-template-columns:1fr">'+
+   '<label class="f">الاسم الظاهر بالعربية<input type="text" id="nu-name" autocomplete="name" placeholder="مثال: أحمد محمد"></label>'+
    '<label class="f">اسم المستخدم (إنجليزي)<input type="text" id="nu-u" autocomplete="off" autocapitalize="off" placeholder="مثال: ahmed" style="direction:ltr;text-align:right"></label>'+
    '<label class="f">الصلاحية<select id="nu-r">'+MACHINES.map(m=>'<option value="'+m+'">'+MNAME(m)+' (يعدّل ماكينته فقط)</option>').join('')+'<option value="admin">مدير عام (يعدّل كل شيء)</option></select></label>'+
    '<label class="f">كلمة المرور (6 أحرف على الأقل)<input type="password" id="nu-p" autocomplete="new-password"></label>'+
@@ -546,9 +550,9 @@ function userAddModal(){
 }
 async function userAddGo(){
   if(!isAdmin())return;
-  const u=$('#nu-u').value.trim().toLowerCase(),r=$('#nu-r').value,p=$('#nu-p').value,p2=$('#nu-p2').value,gp=$('#g-pw').value;
+  const u=$('#nu-u').value.trim().toLowerCase(),displayName=$('#nu-name').value.trim(),r=$('#nu-r').value,p=$('#nu-p').value,p2=$('#nu-p2').value,gp=$('#g-pw').value;
   const role=r==='admin'?'admin':Number(r);
-  const bad=valUser(u)||valPass(p,p2,u)||(gp?'':'اكتب كلمة سر الموافقة');
+  const bad=(!displayName?'اكتب الاسم الظاهر بالعربية':(displayName.length>60?'الاسم الظاهر يجب ألا يزيد عن 60 حرفاً':''))||valUser(u)||valPass(p,p2,u)||(gp?'':'اكتب كلمة سر الموافقة');
   if(bad)return umErr(bad);
   umErr('');umBusy(true);
   let g=null,g2=null;
@@ -567,16 +571,48 @@ async function userAddGo(){
         if(String(e&&e.code)!=='auth/email-already-in-use')throw e;
         try{uidNew=(await M.U.signInWithEmailAndPassword(g2.auth,email,p)).user.uid}catch(e2){throw {code:'orphan-pw'}}
       }
-      await M.D.set(M.D.ref(g.db,'profiles/'+uidNew),{user:u,role,active:true,created:new Date().toISOString(),by:whoName()});
+      await M.D.set(M.D.ref(g.db,'profiles/'+uidNew),{user:u,displayName,role,active:true,created:new Date().toISOString(),by:whoName()});
     }else{
       await gateCheckLocal(gp);
       if(Object.values(DB.users).some(a=>String(a.user).toLowerCase()===u))throw {code:'dup'};
-      DB.users[uid('x')]={user:u,pass:p,role,active:true};
+      DB.users[uid('x')]={user:u,displayName,pass:p,role,active:true};
     }
-    auditLog('مستخدم جديد',u+' · '+roleLabel(role));
-    closeModal();render();toast('تمت إضافة المستخدم «'+u+'» ✓','ok');
+    auditLog('مستخدم جديد',displayName+' ('+u+') · '+roleLabel(role));
+    closeModal();render();toast('تمت إضافة المستخدم «'+displayName+'» ✓','ok');
   }catch(e){umErr(userErrMsg(e))}
   finally{if(g)g.done();if(g2)g2.done();umBusy(false)}
+}
+
+/* ---------- تعديل الاسم الظاهر للمستخدم ---------- */
+function userNameModal(id){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===id);if(!r)return;
+  UM_TARGET=id;
+  openModal('<h3>✏️ تعديل الاسم الظاهر</h3><div class="muted" style="margin-bottom:10px">اسم الدخول: <b class="ltr">'+esc(r.user)+'</b></div><div class="fgrid" style="grid-template-columns:1fr">'+
+   '<label class="f">الاسم الذي سيظهر في البرنامج وسجل التدقيق<input type="text" id="un-name" maxlength="60" value="'+esc(r.displayName||'')+'" placeholder="مثال: أحمد محمد"></label>'+gateFieldHTML()+'</div>'+mActions('userNameGo()','حفظ الاسم'));
+}
+async function userNameGo(){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===UM_TARGET);if(!r)return;
+  const displayName=$('#un-name').value.trim(),gp=$('#g-pw').value;
+  if(!displayName||displayName.length>60)return umErr('اكتب اسماً صحيحاً لا يزيد عن 60 حرفاً');
+  if(!gp)return umErr('اكتب كلمة سر الموافقة');
+  umErr('');umBusy(true);let g=null;
+  try{
+    if(CLOUD){
+      if(!r.uid)throw {code:'no-profile'};
+      g=await secApp();await gateSignIn(g,gp);
+      await FB.mods.D.set(FB.mods.D.ref(g.db,'profiles/'+r.uid+'/displayName'),displayName);
+      const p=(PROFILES||[]).find(x=>x.id===r.uid);if(p)p.displayName=displayName;
+    }else{
+      await gateCheckLocal(gp);
+      const k=UM_TARGET.slice(2);if(!DB.users[k])throw {code:'error'};
+      DB.users[k].displayName=displayName;persist();
+    }
+    auditLog('تعديل الاسم الظاهر',r.user+' ← '+displayName);
+    closeModal();render();toast('تم حفظ الاسم الظاهر ✓','ok');
+  }catch(e){umErr(String(e&&e.code)==='no-profile'?'هذا المستخدم الأساسي لا يملك ملف تعريف قابلًا للتعديل من هذه الشاشة.':'تعذر حفظ الاسم: '+userErrMsg(e))}
+  finally{if(g)g.done();umBusy(false)}
 }
 
 /* ---------- تغيير كلمة سر مستخدم ---------- */
@@ -738,7 +774,7 @@ function dailySeries(days,metric){
 /* ============== الصلاحيات ============== */
 const isAdmin=()=>!!SESSION&&SESSION.role==='admin';
 const canEdit=m=>!!SESSION&&(SESSION.role==='admin'||SESSION.role===m);
-const whoName=()=>!SESSION?'':SESSION.role==='admin'?'المدير العام':MNAME(SESSION.role);
+const whoName=()=>!SESSION?'':(SESSION.displayName|| (SESSION.role==='admin'?'المدير العام':MNAME(SESSION.role)));
 
 /* ============== واجهة عامة ============== */
 let toastT;
@@ -807,15 +843,16 @@ async function doLogin(){
     const a=DB.users[k];
     if(a.active!==false&&a.user.toLowerCase()===u&&a.pass===p){
       const rl=k==='admin'?'admin':(a.role!=null?a.role:Number(k));
-      setSession({role:rl});
+      setSession({role:rl,displayName:a.displayName||''});
+      auditLog('تسجيل دخول','دخول المستخدم '+whoName());
       closeModal();
       if(rl!=='admin')VIEW=rl;
-      render();toast('أهلاً '+whoName(),'ok');return;
+      render();toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');return;
     }
   }
   $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
-function logout(){if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
+function logout(){if(SESSION)auditLog('تسجيل خروج','خروج المستخدم '+whoName());if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
 
 /* ============== الرسم ============== */
 function renderHeader(){
@@ -1043,7 +1080,7 @@ function machineHTML(m){
       '<div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>'+
       fcHTML(o)+
       '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>معيب '+(x.prod?(x.pb/x.prod*100).toFixed(1):'0')+'%</span><span>'+fmtTime(o.modified)+'</span></div>'+
-      '<div class="oc-b"><button class="btn light sm" onclick="orderDetail(\''+o.id+'\')">📈 تفاصيل وكشف حساب</button></div>'+
+      '<div class="oc-b"><button class="btn light sm" onclick="orderDetail(\''+o.id+'\')">📈 تفاصيل الأمر</button></div>'+
       (ce?'<div class="oc-b"><button class="btn primary sm" onclick="pickOrder('+m+',\''+o.id+'\')">＋ إدخال</button><button class="btn light sm" onclick="orderModal('+m+',\''+o.id+'\')">تعديل</button>'+(isAdmin()?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">حذف</button>':'')+'</div>':'')+
     '</div>';
   }
@@ -1125,6 +1162,7 @@ function saveEntry(m,force){
   }
   DB.entries=test;o.modified=rec.ts;cloudEntry(rec);cloudOrderTouch(o);
   if(old)auditLog('تعديل حركة',MNAME(m)+' · أمر '+o.number+' · '+fmtDate(old.date)+': ['+entSum(old)+'] ← ['+entSum(rec)+']');
+  else auditLog('إضافة حركة',MNAME(m)+' · أمر '+o.number+' · '+fmtDate(rec.date)+': ['+entSum(rec)+']'+(rec.note?' · ملاحظة: '+rec.note:''));
   const was=!!EDITING;EDITING=null;LASTDATE=date;SEL[m]=o.id;
   persist();render();toast(was?'تم حفظ التعديل ✓':'تم الحفظ ✓ — رصيد الأمر: '+fmt(t.stock),'ok');
 }
@@ -1259,7 +1297,7 @@ function download(name,text,type){
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},600);
 }
 function exportJSON(){
-  const out={v:1,orders:DB.orders,entries:DB.entries};
+  const out={v:2,orders:DB.orders,entries:DB.entries,audit:CLOUD?[...(AUDIT||[]),...AUDIT_LOCAL]:((DB.audit||[]).slice())};
   markBackup();download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
 }
 function exportCSV(){
@@ -1282,10 +1320,13 @@ function pickFile(mode){IMPORT_MODE=mode;const f=$('#file-in');f.value='';f.clic
 /* يطبّق مجموعة بيانات كاملة (استبدال / استرجاع) محلياً أو على السحابة */
 function applyDataset(d){
   if(CLOUD&&FB){
-    const O={},E={};
+    const O={},E={},A={};
     d.orders.forEach(o=>O[o.id]=plain(o));
     d.entries.forEach(e=>{const x=plain(e);if(x.m==null){const oo=d.orders.find(z=>z.id===x.order);if(oo)x.m=oo.machine}E[x.id]=x});
-    cw(()=>FB.update(FB.ref(FB.db),{orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null}));
+    (d.audit||[]).forEach(a=>{if(a&&a.id)A[a.id]=plain(a)});
+    const patch={orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null};
+    if(Array.isArray(d.audit))patch.audit=Object.keys(A).length?A:null;
+    cw(()=>FB.update(FB.ref(FB.db),patch));
     return;
   }
   const keepUsers=DB.users,keepAudit=DB.audit,keepGate=DB.gate;
@@ -1315,6 +1356,7 @@ $('#file-in').addEventListener('change',ev=>{
         else{const cur=DB.orders.find(x=>x.id===o.id);if(cur&&String(o.modified)>String(cur.modified)){cur.modified=o.modified;cloudOrderTouch(cur)}}
       });
       d.entries.forEach(e=>{if(!ei.has(e.id)&&oi.has(e.order)){const x=withM(e);DB.entries.push(x);cloudEntry(x);ei.add(e.id);ne++}});
+      if(!CLOUD&&Array.isArray(d.audit)){const ai=new Set((DB.audit||[]).map(a=>a.id));DB.audit=DB.audit||[];d.audit.forEach(a=>{if(a&&a.id&&!ai.has(a.id)){DB.audit.push(a);ai.add(a.id)}});if(DB.audit.length>500)DB.audit=DB.audit.slice(-500)}
       auditLog('دمج نسخة',ne+' حركة جديدة و '+no+' أمر جديد');
       persist();render();toast('تم الدمج: '+ne+' حركة جديدة و '+no+' أمر جديد','ok');
     }
@@ -1683,42 +1725,87 @@ function logHTML(m){
   return h;
 }
 
-/* ============== سجل التدقيق ============== */
-let AUDIT=[];
+/* ============== سجل التدقيق المحسّن ============== */
+const AUDIT_LOCAL_KEY='tarqeem_audit_fallback_v1';
+let AUDIT=[],AUDIT_LOCAL=[],AUDIT_STATUS='لم يتم فحص سجل التدقيق بعد',AUDIT_Q='';
+function loadAuditFallback(){
+  try{const a=JSON.parse(localStorage.getItem(AUDIT_LOCAL_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}
+}
+AUDIT_LOCAL=loadAuditFallback();
+function saveAuditFallback(){
+  try{if(AUDIT_LOCAL.length>500)AUDIT_LOCAL=AUDIT_LOCAL.slice(-500);localStorage.setItem(AUDIT_LOCAL_KEY,JSON.stringify(AUDIT_LOCAL))}catch(e){}
+}
+function auditLocalFallback(rec,reason){
+  AUDIT_LOCAL=AUDIT_LOCAL.filter(x=>x.id!==rec.id);
+  AUDIT_LOCAL.push({...rec,localOnly:true,error:String(reason||'تعذر الاتصال')});
+  saveAuditFallback();
+  AUDIT_STATUS='⚠️ توجد عمليات محفوظة محلياً فقط ولم تصل إلى السحابة';
+  if(VIEW==='settings')sched();
+  toast('تنبيه: تعذر حفظ عملية في سجل التدقيق السحابي. تم الاحتفاظ بها محلياً على هذا الجهاز فقط.','err');
+}
 function auditLog(act,txt){
-  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act,txt};
+  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act:String(act||'عملية'),txt:String(txt||'')};
   if(CLOUD){
-    /* كتابة صامتة: لو قواعد Firebase مش بتسمح بالعقدة audit ما نزعجش المستخدم */
-    if(FB){try{const p=FB.set(FB.ref(FB.db,'audit/'+rec.id),rec);if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+    if(!FB){auditLocalFallback(rec,'لم تكتمل تهيئة Firebase');return rec}
+    AUDIT_STATUS='جاري تسجيل آخر عملية…';
+    try{
+      FB.set(FB.ref(FB.db,'audit/'+rec.id),plain(rec)).then(()=>{
+        AUDIT_LOCAL=AUDIT_LOCAL.filter(x=>x.id!==rec.id);saveAuditFallback();
+        AUDIT_STATUS='تم تسجيل آخر عملية على السحابة';
+        if(VIEW==='settings')sched();
+      }).catch(e=>auditLocalFallback(rec,(e&&e.code)||e));
+    }catch(e){auditLocalFallback(rec,e)}
   }else{
     (DB.audit=DB.audit||[]).push(rec);
     if(DB.audit.length>500)DB.audit.splice(0,DB.audit.length-500);
     persist();
   }
+  return rec;
 }
 function auditListen(){
   if(!CLOUD||!FB||!isAdmin()||FB.auditOn)return;
   FB.auditOn=true;
+  AUDIT_STATUS='جاري تحميل سجل التدقيق…';
   try{
-    FB.auditOff=FB.onValue(FB.query(FB.ref(FB.db,'audit'),FB.limitToLast(200)),
-      s=>{AUDIT=toArr(s).sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));if(VIEW==='settings')sched()},
-      ()=>{AUDIT=null;if(VIEW==='settings')sched()});
-  }catch(e){FB.auditOn=false}
+    FB.auditOff=FB.onValue(FB.query(FB.ref(FB.db,'audit'),FB.limitToLast(500)),
+      s=>{AUDIT=toArr(s).sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));AUDIT_STATUS='تم الاتصال بسجل التدقيق — آخر '+AUDIT.length+' عملية سحابية';if(VIEW==='settings')sched()},
+      e=>{AUDIT=null;AUDIT_STATUS='تعذر قراءة سجل التدقيق: '+String((e&&e.code)||'تحقق من قواعد Firebase');if(VIEW==='settings')sched()});
+  }catch(e){FB.auditOn=false;AUDIT=null;AUDIT_STATUS='تعذر تشغيل سجل التدقيق: '+String(e&&e.message||e)}
 }
 function auditStop(){
   if(FB){if(FB.auditOff){try{FB.auditOff()}catch(e){}}FB.auditOn=false;FB.auditOff=null}
   AUDIT=[];
 }
+function auditExport(){
+  const list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice());
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['الوقت','المستخدم','العملية','التفاصيل','حالة الحفظ']];
+  list.sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).forEach(a=>rows.push([fmtTime(a.ts),a.by,a.act,a.txt,a.localOnly?'محلي فقط':'مسجل']));
+  download('tarqeem-audit-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
+  toast('تم تصدير سجل التدقيق','ok');
+}
 function auditHTML(){
-  const list=CLOUD?AUDIT:(DB.audit||[]).slice().reverse();
-  let h='<div class="card sec"><h3>📜 سجل التدقيق</h3><div class="muted" style="margin-bottom:10px">كل تعديل أو حذف للحركات وأوامر الشغل وعمليات الإدارة: من قام بها ومتى.</div>';
-  if(list==null)h+='<div class="empty">لا تتوفر صلاحية قراءة سجل التدقيق من Firebase — أضف قاعدة قراءة وكتابة للعقدة <b class="ltr">audit</b> للمدير.</div>';
-  else if(!list.length)h+='<div class="empty">لا توجد عمليات مسجلة بعد</div>';
-  else h+='<div class="tw" style="max-height:340px"><table style="min-width:640px"><thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody>'+
-    list.slice(0,100).map(a=>'<tr><td>'+esc(fmtTime(a.ts))+'</td><td>'+esc(a.by)+'</td><td><b>'+esc(a.act)+'</b></td><td class="l">'+esc(a.txt)+'</td></tr>').join('')+'</tbody></table></div>';
+  let list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice().reverse());
+  const unique=new Map();list.forEach(a=>unique.set(a.id,a));list=[...unique.values()].sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));
+  const q=String(AUDIT_Q||'').trim().toLowerCase();
+  const shown=q?list.filter(a=>(String(a.by)+' '+String(a.act)+' '+String(a.txt)).toLowerCase().includes(q)):list;
+  let h='<div class="card sec" id="audit-card"><div class="sec-title"><h3>📜 سجل التدقيق</h3><button class="btn light sm" onclick="auditExport()">⬇️ تصدير السجل CSV</button></div>'+
+   '<div class="muted" style="margin-bottom:10px">يسجل الإضافات والتعديلات والحذف والاسترجاع والإجراءات الإدارية، مع اسم المستخدم والتوقيت. في وضع السحابة يتم توضيح أي عملية لم يصل تأكيد حفظها.</div>';
+  if(CLOUD)h+='<div class="audit-status '+(AUDIT===null?'bad':AUDIT_LOCAL.length?'warn':'ok')+'">'+esc(AUDIT_STATUS)+' · محلي غير متزامن: '+AUDIT_LOCAL.length+'</div>';
+  h+='<div class="audit-tools"><input type="text" id="audit-q" placeholder="بحث بالمستخدم أو العملية أو التفاصيل" value="'+esc(AUDIT_Q)+'" oninput="AUDIT_Q=this.value;auditRefresh()"></div>';
+  if(CLOUD&&AUDIT===null&&!AUDIT_LOCAL.length)h+='<div class="empty">تعذرت قراءة السجل السحابي. راجع قواعد Firebase وصلاحية قراءة العقدة <b class="ltr">audit</b>.</div>';
+  else if(!shown.length)h+='<div class="empty">'+(q?'لا توجد عمليات تطابق البحث':'لا توجد عمليات مسجلة بعد')+'</div>';
+  else h+='<div class="muted">عرض '+shown.length+' من '+list.length+' عملية</div><div class="tw" style="max-height:420px"><table style="min-width:700px"><thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th><th>الحالة</th></tr></thead><tbody>'+
+    shown.slice(0,300).map(a=>'<tr><td>'+esc(fmtTime(a.ts))+'</td><td>'+esc(a.by)+'</td><td><b>'+esc(a.act)+'</b></td><td class="l">'+esc(a.txt)+'</td><td>'+(a.localOnly?'<span class="badge st-err">محلي فقط</span>':'<span class="badge st-new">مسجل</span>')+'</td></tr>').join('')+'</tbody></table></div>';
   return h+'</div>';
 }
-
+function auditRefresh(){
+  const card=$('#audit-card');if(!card)return;
+  const old=$('#audit-q'),pos=old?old.selectionStart:0,end=old?old.selectionEnd:pos;
+  const tmp=document.createElement('div');tmp.innerHTML=auditHTML();
+  if(tmp.firstElementChild)card.replaceWith(tmp.firstElementChild);
+  const n=$('#audit-q');if(n){n.focus();try{n.setSelectionRange(pos,end)}catch(e){}}
+}
 /* ============== نقطة الاسترجاع ============== */
 const RP_KEY='tarqeem_restore_v1';
 function saveRestorePoint(label){
@@ -1914,7 +2001,7 @@ function heatHTML(){
   return h+'</div></div>';
 }
 
-/* تفاصيل أمر + كشف حساب قابل للطباعة */
+/* بطاقة تفاصيل الأمر القابلة للطباعة */
 function orderDetail(id){
   const o=DB.orders.find(x=>x.id===id);if(!o)return;
   const t=totals(o,DB.entries),q=qtyOf(o),ents=[...entsOf(id)].sort(cmpDT),bal=runningBalances(o);
@@ -1927,19 +2014,29 @@ function orderDetail(id){
   const f=forecast(o),defect=t.prod?(t.pb/t.prod*100):0;
   const active=dates.filter(d=>byD[d].p>0).length;
   const dels=ents.filter(e=>(e.dg||0)+(e.db||0)>0);
+  const prodDates=dates.filter(d=>byD[d].p>0);
+  const lastProd=prodDates.length?prodDates[prodDates.length-1]:'';
+  const lastAct=dates.length?dates[dates.length-1]:'';
+  const peak=prodDates.reduce((best,d)=>!best||byD[d].p>byD[best].p?d:best,'');
+  const state=t.prod>=q?'مكتمل':t.prod>0?'جارٍ التنفيذ':'لم يبدأ';
+  const deliveryPct=t.prod?t.del/t.prod*100:0;
   const k=(l,v,c)=>'<div class="pv"><div class="l">'+l+'</div><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+v+'</div></div>';
   let h='<h3>📈 الأمر <span class="ltr">'+esc(o.number)+'</span> — '+MNAME(o.machine)+(o.denom?' — '+esc(o.denom):'')+'</h3>'+
    (o.notes?'<div class="oc-n" style="margin-bottom:10px">📝 '+esc(o.notes)+'</div>':'')+
    '<div class="preview">'+k('كمية الأمر',fmt(q)+' فرخ')+k('المنتج ('+(t.prod/q*100).toFixed(1)+'%)',fmt(t.prod))+k('المتبقي',fmt(Math.max(0,q-t.prod)))+k('سليم بالمخزن',fmt(t.sg),'#059669')+k('معيب بالمخزن',fmt(t.sb),'#e11d48')+k('نسبة المعيب',defect.toFixed(1)+'%',defect>=DEFECT_WARN?'#e11d48':'')+k('إجمالي التسليمات',fmt(t.del))+k('أيام الإنتاج',fmt(active)+' يوم')+
-   k('متوسط يومي',active?fmt(Math.round(sum(ents,e=>(e.g||0)+(e.b||0))/active)):'—')+k('الاكتمال المتوقع',f?(f.done?'مكتمل':f.days>365?'> سنة':fmtDate(f.date)):'—')+'</div>';
+   k('متوسط يومي',active?fmt(Math.round(sum(ents,e=>(e.g||0)+(e.b||0))/active)):'—')+k('الاكتمال المتوقع',f?(f.done?'مكتمل':f.days>365?'> سنة':fmtDate(f.date)):'—')+
+   k('حالة الأمر',state,t.prod>=q?'#059669':'')+k('نسبة التسليم من الإنتاج',deliveryPct.toFixed(1)+'%')+
+   k('تسليم سليم',fmt(t.dg),'#059669')+k('تسليم معيب',fmt(t.db),'#e11d48')+
+   k('آخر يوم إنتاج',lastProd?fmtDate(lastProd):'—')+k('مدة التوقف',lastProd?fmt(daysBetween(lastProd,todayStr()))+' يوم':'لا يوجد إنتاج مسجل')+
+   k('آخر حركة',lastAct?fmtDate(lastAct):'—')+k('أعلى إنتاج يومي',peak?fmt(byD[peak].p)+' ('+fmtDate(peak)+')':'—')+'</div>';
   if(dates.length>=2)h+='<div class="noprint">'+legendHTML([sp,sd])+lineChartSVG(labels,[sp,sd])+'</div>';
-  h+='<h4 style="margin:12px 0 6px">كشف الحركات'+(dels.length?' (التسليمات '+dels.length+')':'')+'</h4>';
+  h+='<h4 style="margin:12px 0 6px">سجل حركات الأمر'+(dels.length?' (التسليمات '+dels.length+')':'')+'</h4>';
   if(!ents.length)h+='<div class="empty">لا توجد حركات على هذا الأمر</div>';
   else h+='<div class="tw"><table style="min-width:640px"><thead><tr><th>التاريخ</th><th>سليم</th><th>معيب</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد</th></tr></thead><tbody>'+
     '<tr class="tot"><td>رصيد افتتاحي</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>—</td><td>—</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>'+fmt((o.og||0)+(o.ob||0))+'</td></tr>'+
     ents.map(e=>{const b=bal[e.id]||{sg:0,sb:0};return '<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.note||'')+'</small></td><td class="g">'+fmt(e.g)+'</td><td class="b">'+fmt(e.b)+'</td><td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td><td>'+fmt(b.sg)+'</td><td>'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td></tr>'}).join('')+
     '<tr class="tot"><td>الإجمالي الحالي</td><td>'+fmt(t.pg)+'</td><td>'+fmt(t.pb)+'</td><td>'+fmt(t.dg)+'</td><td>'+fmt(t.db)+'</td><td>'+fmt(t.sg)+'</td><td>'+fmt(t.sb)+'</td><td>'+fmt(t.stock)+'</td></tr></tbody></table></div>';
-  h+='<div class="muted" style="margin-top:8px">تاريخ الطباعة: '+fmtDate(todayStr())+'</div><div class="actions noprint"><button class="btn primary" onclick="repPrint()">🖨️ طباعة كشف الحساب</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>';
+  h+='<div class="muted" style="margin-top:8px">تاريخ الطباعة: '+fmtDate(todayStr())+'</div><div class="actions noprint"><button class="btn primary" onclick="repPrint()">🖨️ طباعة تفاصيل الأمر</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>';
   openModal(h,true);
 }
 
