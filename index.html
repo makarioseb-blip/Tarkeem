@@ -206,6 +206,19 @@ tr.tot td{background:#eef2ff;font-weight:800}
 body.pr header.top,body.pr .tabs-wrap,body.pr main,body.pr footer,body.pr .noprint,body.pr #toast{display:none!important}
 body.pr .overlay{position:static;background:#fff;padding:0;display:block;backdrop-filter:none;animation:none}
 body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;padding:0;animation:none}
+
+.heat{display:grid;gap:3px;direction:ltr}
+.heat .hr{display:grid;grid-template-columns:repeat(56,1fr);gap:2px}
+.heat .hc{aspect-ratio:1;border-radius:3px;background:#eef2f7;min-width:0}
+.heat .hn{font-size:12.5px;font-weight:800;direction:rtl;margin-top:6px}
+.trend{font-size:12px;font-weight:700;margin-top:4px}
+.trend.up{color:#059669}.trend.dn{color:#e11d48}.trend.eq{color:#64748b}
+.sr{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--line);margin-bottom:6px;background:#fff;width:100%;text-align:start}
+.sr:hover{background:#f5f7ff}
+.sr b{direction:ltr}
+.pbar{height:8px;border-radius:99px;background:#e2e8f0;overflow:hidden;min-width:70px}
+.pbar i{display:block;height:100%;background:var(--brand);border-radius:99px}
+@media print{.noprint{display:none!important}}
 </style>
 </head>
 <body>
@@ -807,7 +820,7 @@ function logout(){if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSessio
 /* ============== الرسم ============== */
 function renderHeader(){
   const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
-  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
+  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
 }
@@ -930,12 +943,14 @@ function dashHTML(){
       '<div class="mc-big">'+fmt(r.t.stock)+'<small>في المخزن</small></div>'+
       '<div class="mc-row"><span class="g">سليم '+fmt(r.t.sg)+'</span><span class="b">معيب '+fmt(r.t.sb)+'</span></div>'+
       '<div class="bar" title="نسبة المعيب من إجمالي الإنتاج"><i style="width:'+Math.min(100,defect)+'%"></i></div>'+
-      '<div class="mc-foot"><span>نسبة المعيب: '+defect+'%</span><span>اليوم: إنتاج '+fmt(r.prod)+' · تسليم '+fmt(r.del)+'</span></div>'+
+      trendHTML(r.m,r.prod)+'<div class="mc-foot"><span>نسبة المعيب: '+defect+'%</span><span>اليوم: إنتاج '+fmt(r.prod)+' · تسليم '+fmt(r.del)+'</span></div>'+
     '</button>';
   }
   h+='</div></div>';
 
   h+=perfHTML();
+  h+=planHTML();
+  h+=heatHTML();
 
   /* رسم مقارنة الماكينات */
   const labels=MACHINES.map(MNAME);
@@ -1027,7 +1042,8 @@ function machineHTML(m){
       '<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div>'+
       '<div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>'+
       fcHTML(o)+
-      '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>'+fmtTime(o.modified)+'</span></div>'+
+      '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>معيب '+(x.prod?(x.pb/x.prod*100).toFixed(1):'0')+'%</span><span>'+fmtTime(o.modified)+'</span></div>'+
+      '<div class="oc-b"><button class="btn light sm" onclick="orderDetail(\''+o.id+'\')">📈 تفاصيل وكشف حساب</button></div>'+
       (ce?'<div class="oc-b"><button class="btn primary sm" onclick="pickOrder('+m+',\''+o.id+'\')">＋ إدخال</button><button class="btn light sm" onclick="orderModal('+m+',\''+o.id+'\')">تعديل</button>'+(isAdmin()?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">حذف</button>':'')+'</div>':'')+
     '</div>';
   }
@@ -1244,7 +1260,7 @@ function download(name,text,type){
 }
 function exportJSON(){
   const out={v:1,orders:DB.orders,entries:DB.entries};
-  download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
+  markBackup();download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
 }
 function exportCSV(){
   /* حماية من حقن المعادلات: النص اللي يبدأ بـ = + - @ يتحول لنص عادي في Excel */
@@ -1591,6 +1607,7 @@ function buildAlerts(){
     if(t.stock>0&&idle>=IDLE_DAYS)
       out.push({lvl:'lo',m:o.machine,ic:'🕸️',txt:MNAME(o.machine)+' · الأمر '+o.number+': رصيد راكد '+fmt(t.stock)+' فرخ — بدون حركة منذ '+idle+' يوم'});
   }
+  if(isAdmin()&&DB.entries.length){const d=backupAge();if(d==null||d>=7)out.push({lvl:'md',m:null,ic:'💾',txt:d==null?'لم يتم تنزيل نسخة احتياطية من هذا الجهاز من قبل — صدّر نسخة (JSON أو Excel) من صفحة الإدارة':'آخر نسخة احتياطية منذ '+d+' يوم — يُفضّل تصدير نسخة جديدة من صفحة الإدارة'})}
   const rank={hi:0,md:1,lo:2};
   return out.sort((a,b)=>rank[a.lvl]-rank[b.lvl]);
 }
@@ -1767,7 +1784,7 @@ let REP=null;
 function reportModal(){
   const t=todayStr();
   openModal('<h3>📋 تقرير الإنتاج والمخزون</h3>'+
-   '<div class="seg noprint" style="margin-bottom:10px;flex-wrap:wrap"><button onclick="repPreset(0)">اليوم</button><button onclick="repPreset(1)">أمس</button><button onclick="repPreset(7)">آخر 7 أيام</button><button onclick="repPreset(30)">آخر 30 يوم</button></div>'+
+   '<div class="seg noprint" style="margin-bottom:10px;flex-wrap:wrap"><button onclick="repPreset(0)">اليوم</button><button onclick="repPreset(1)">أمس</button><button onclick="repPreset(7)">آخر 7 أيام</button><button onclick="repPreset(30)">آخر 30 يوم</button><button onclick="repPreset(-1)">هذا الشهر</button></div>'+
    '<div class="fgrid noprint" style="margin-bottom:12px"><label class="f">من<input type="date" id="rp-f" onchange="repChange()"></label><label class="f">إلى<input type="date" id="rp-t" onchange="repChange()"></label></div>'+
    '<div id="rep-body"></div>'+
    '<div class="actions noprint"><button class="btn primary" onclick="repCopy()">📋 نسخ النص</button><button class="btn green" onclick="repWA()">💬 إرسال واتساب</button><button class="btn light" onclick="repPrint()">🖨️ طباعة</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>',true);
@@ -1776,6 +1793,7 @@ function reportModal(){
 }
 function repPreset(n){
   const t=todayStr();
+  if(n===-1){$('#rp-f').value=t.slice(0,8)+'01';$('#rp-t').value=t;repChange();return}
   $('#rp-f').value=n===0?t:n===1?addDays(t,-1):addDays(t,-(n-1));
   $('#rp-t').value=n===1?addDays(t,-1):t;
   repChange();
@@ -1828,9 +1846,121 @@ function exportXLSX(){
       const ws=X.utils.aoa_to_sheet(s[1]);ws['!cols']=s[2].map(w=>({wch:w}));X.utils.book_append_sheet(wb,ws,s[0]);
     });
     wb.Workbook={Views:[{RTL:true}]};
-    X.writeFile(wb,'tarqeem-'+todayStr()+'.xlsx');
+    X.writeFile(wb,'tarqeem-'+todayStr()+'.xlsx');markBackup();
     toast('تم تنزيل ملف Excel ✓','ok');
   }).catch(e=>{if(e)console.error(e);toast('تعذر إنشاء ملف Excel (يحتاج إنترنت أول مرة) — تم تنزيل CSV بدلاً منه','err');exportCSV()});
+}
+
+/* ============== مزايا إضافية ============== */
+const BK_KEY='tarqeem_lastbackup_v1';
+function markBackup(){try{localStorage.setItem(BK_KEY,todayStr())}catch(e){}}
+function backupAge(){try{const v=localStorage.getItem(BK_KEY);return v?daysBetween(v,todayStr()):null}catch(e){return null}}
+
+/* مقارنة إنتاج اليوم بمتوسط آخر 14 يوم (الأيام التي بها إنتاج فقط) */
+function trendHTML(m,todayProd){
+  const today=todayStr(),st=statsBy(addDays(today,-14),addDays(today,-1));
+  const OM=orderMachineMap(),by={};
+  for(const e of DB.entries){
+    if(OM[e.order]!==m||e.date<addDays(today,-14)||e.date>=today)continue;
+    by[e.date]=(by[e.date]||0)+(e.g||0)+(e.b||0);
+  }
+  const days=Object.values(by).filter(v=>v>0);
+  if(!days.length)return '';
+  const avg=sum(days,v=>v)/days.length;
+  if(!todayProd)return '<div class="trend eq">متوسط يومي معتاد: '+fmt(Math.round(avg))+' فرخ</div>';
+  const pc=Math.round((todayProd/avg-1)*100);
+  return '<div class="trend '+(pc>=5?'up':pc<=-5?'dn':'eq')+'">'+(pc>=5?'▲ ':pc<=-5?'▼ ':'● ')+Math.abs(pc)+'% '+(pc>=0?'فوق':'تحت')+' المتوسط المعتاد ('+fmt(Math.round(avg))+')</div>';
+}
+
+/* لوحة الاكتمال المتوقع لكل الأوامر الجارية */
+function planHTML(){
+  const rows=[];
+  for(const o of DB.orders){
+    const t=totals(o,DB.entries),q=qtyOf(o);
+    if(t.prod<=0||t.prod>=q)continue;
+    const f=forecast(o);
+    rows.push({o,t,q,f,pc:t.prod/q*100});
+  }
+  if(!rows.length)return '';
+  rows.sort((a,b)=>(a.f?a.f.days:1e9)-(b.f?b.f.days:1e9));
+  return '<div class="card sec"><div class="sec-title"><h3>🗓️ جدول الاكتمال المتوقع للأوامر الجارية</h3><span class="muted">حسب معدل آخر 14 يوم</span></div><div class="tw"><table style="min-width:620px"><thead><tr><th>الماكينة</th><th>الأمر</th><th>التقدم</th><th>المتبقي</th><th>المتوقع</th></tr></thead><tbody>'+
+   rows.slice(0,14).map(r=>'<tr style="cursor:pointer" onclick="orderDetail(\''+r.o.id+'\')"><td><b style="color:'+MCOL[r.o.machine]+'">'+MNAME(r.o.machine)+'</b></td><td class="l"><b class="ltr">'+esc(r.o.number)+'</b><small>'+esc(r.o.denom)+'</small></td>'+
+     '<td><div class="pbar"><i style="width:'+Math.min(100,r.pc).toFixed(1)+'%"></i></div><small>'+r.pc.toFixed(0)+'%</small></td><td>'+fmt(r.q-r.t.prod)+'</td>'+
+     '<td>'+(r.f?(r.f.days>365?'أكثر من سنة':'≈ '+fmt(r.f.days)+' يوم<small>'+fmtDate(r.f.date)+'</small>'):'<span class="muted">متوقف (لا إنتاج حديث)</span>')+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+}
+
+/* خريطة حرارية لآخر 8 أسابيع */
+function heatHTML(){
+  const today=todayStr(),from=addDays(today,-55),OM=orderMachineMap(),by={};
+  MACHINES.forEach(m=>by[m]={});
+  for(const e of DB.entries){
+    if(e.date<from||e.date>today)continue;
+    const m=OM[e.order];if(!m)continue;
+    by[m][e.date]=(by[m][e.date]||0)+(e.g||0)+(e.b||0);
+  }
+  if(!MACHINES.some(m=>Object.keys(by[m]).length))return '';
+  let h='<div class="card sec"><div class="sec-title"><h3>🔥 خريطة النشاط — آخر 8 أسابيع</h3><span class="muted">كل مربع = يوم · الأغمق = إنتاج أعلى · الأحدث يميناً</span></div><div class="heat">';
+  for(const m of MACHINES){
+    const mx=Math.max(1,...Object.values(by[m]));
+    h+='<div class="hn" style="color:'+MCOL[m]+'">'+MNAME(m)+'</div><div class="hr">';
+    for(let i=0;i<56;i++){
+      const d=addDays(from,i),v=by[m][d]||0;
+      const a=v?(0.25+0.75*v/mx).toFixed(2):0;
+      h+='<div class="hc" title="'+fmtDate(d)+' ('+dayName(d)+'): '+fmt(v)+'" style="'+(v?'background:'+MCOL[m]+';opacity:'+a:'')+'"></div>';
+    }
+    h+='</div>';
+  }
+  return h+'</div></div>';
+}
+
+/* تفاصيل أمر + كشف حساب قابل للطباعة */
+function orderDetail(id){
+  const o=DB.orders.find(x=>x.id===id);if(!o)return;
+  const t=totals(o,DB.entries),q=qtyOf(o),ents=[...entsOf(id)].sort(cmpDT),bal=runningBalances(o);
+  const dates=[...new Set(ents.map(e=>e.date))];
+  let cp=(o.og||0)+(o.ob||0),cd=0;
+  const byD={};ents.forEach(e=>{const x=byD[e.date]||(byD[e.date]={p:0,d:0});x.p+=(e.g||0)+(e.b||0);x.d+=(e.dg||0)+(e.db||0)});
+  const sp={name:'إجمالي الإنتاج التراكمي',color:'#4f46e5',values:[]},sd={name:'إجمالي التسليمات التراكمي',color:'#f59e0b',values:[]};
+  dates.forEach(d=>{cp+=byD[d].p;cd+=byD[d].d;sp.values.push(cp);sd.values.push(cd)});
+  const labels=dates.map(d=>d.slice(8)+'/'+d.slice(5,7));
+  const f=forecast(o),defect=t.prod?(t.pb/t.prod*100):0;
+  const active=dates.filter(d=>byD[d].p>0).length;
+  const dels=ents.filter(e=>(e.dg||0)+(e.db||0)>0);
+  const k=(l,v,c)=>'<div class="pv"><div class="l">'+l+'</div><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+v+'</div></div>';
+  let h='<h3>📈 الأمر <span class="ltr">'+esc(o.number)+'</span> — '+MNAME(o.machine)+(o.denom?' — '+esc(o.denom):'')+'</h3>'+
+   (o.notes?'<div class="oc-n" style="margin-bottom:10px">📝 '+esc(o.notes)+'</div>':'')+
+   '<div class="preview">'+k('كمية الأمر',fmt(q)+' فرخ')+k('المنتج ('+(t.prod/q*100).toFixed(1)+'%)',fmt(t.prod))+k('المتبقي',fmt(Math.max(0,q-t.prod)))+k('سليم بالمخزن',fmt(t.sg),'#059669')+k('معيب بالمخزن',fmt(t.sb),'#e11d48')+k('نسبة المعيب',defect.toFixed(1)+'%',defect>=DEFECT_WARN?'#e11d48':'')+k('إجمالي التسليمات',fmt(t.del))+k('أيام الإنتاج',fmt(active)+' يوم')+
+   k('متوسط يومي',active?fmt(Math.round(sum(ents,e=>(e.g||0)+(e.b||0))/active)):'—')+k('الاكتمال المتوقع',f?(f.done?'مكتمل':f.days>365?'> سنة':fmtDate(f.date)):'—')+'</div>';
+  if(dates.length>=2)h+='<div class="noprint">'+legendHTML([sp,sd])+lineChartSVG(labels,[sp,sd])+'</div>';
+  h+='<h4 style="margin:12px 0 6px">كشف الحركات'+(dels.length?' (التسليمات '+dels.length+')':'')+'</h4>';
+  if(!ents.length)h+='<div class="empty">لا توجد حركات على هذا الأمر</div>';
+  else h+='<div class="tw"><table style="min-width:640px"><thead><tr><th>التاريخ</th><th>سليم</th><th>معيب</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد</th></tr></thead><tbody>'+
+    '<tr class="tot"><td>رصيد افتتاحي</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>—</td><td>—</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>'+fmt((o.og||0)+(o.ob||0))+'</td></tr>'+
+    ents.map(e=>{const b=bal[e.id]||{sg:0,sb:0};return '<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.note||'')+'</small></td><td class="g">'+fmt(e.g)+'</td><td class="b">'+fmt(e.b)+'</td><td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td><td>'+fmt(b.sg)+'</td><td>'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td></tr>'}).join('')+
+    '<tr class="tot"><td>الإجمالي الحالي</td><td>'+fmt(t.pg)+'</td><td>'+fmt(t.pb)+'</td><td>'+fmt(t.dg)+'</td><td>'+fmt(t.db)+'</td><td>'+fmt(t.sg)+'</td><td>'+fmt(t.sb)+'</td><td>'+fmt(t.stock)+'</td></tr></tbody></table></div>';
+  h+='<div class="muted" style="margin-top:8px">تاريخ الطباعة: '+fmtDate(todayStr())+'</div><div class="actions noprint"><button class="btn primary" onclick="repPrint()">🖨️ طباعة كشف الحساب</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>';
+  openModal(h,true);
+}
+
+/* بحث شامل في الأوامر والملاحظات */
+function searchModal(){
+  openModal('<h3>🔍 بحث في كل الماكينات</h3><label class="f">رقم الأمر أو الفئة أو ملاحظة<input type="text" id="gs-q" autocomplete="off" placeholder="مثال: 6029 أو 50 جنيه أو كسر" oninput="gsearch()"></label><div id="gs-res" style="margin-top:12px"></div><div class="actions"><button class="btn light" onclick="closeModal()">إغلاق</button></div>');
+  gsearch();
+}
+function gsearch(){
+  const q=normDigits($('#gs-q').value).trim().toLowerCase(),box=$('#gs-res');
+  if(!q){box.innerHTML='<div class="muted">اكتب للبحث — النتائج تشمل أرقام الأوامر والفئات وملاحظات الأوامر والحركات.</div>';return}
+  const hits=[];
+  for(const o of DB.orders){
+    let why='';
+    if((o.number+' '+(o.denom||'')).toLowerCase().includes(q))why='';
+    else if((o.notes||'').toLowerCase().includes(q))why='في ملاحظات الأمر';
+    else{const e=entsOf(o.id).find(x=>(x.note||'').toLowerCase().includes(q));if(e)why='في ملاحظة حركة '+fmtDate(e.date);else continue}
+    hits.push({o,why});
+  }
+  box.innerHTML=hits.length?hits.slice(0,30).map(h=>{const t=totals(h.o,DB.entries);
+    return '<button class="sr" onclick="closeModal();go('+h.o.machine+');orderDetail(\''+h.o.id+'\')"><b>'+esc(h.o.number)+'</b><span>'+esc(h.o.denom||'')+'</span><span class="chip" style="margin-inline-start:0">'+MNAME(h.o.machine)+'</span><span style="margin-inline-start:auto;font-weight:800">'+fmt(t.stock)+'</span>'+(h.why?'<small class="muted">'+esc(h.why)+'</small>':'')+'</button>'}).join(''):'<div class="empty">لا توجد نتائج</div>';
 }
 
 /* ============== بدء التشغيل ============== */
