@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#4f46e5">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
 <title>مخزن الترقيمات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -244,6 +247,8 @@ body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;p
 
 <script>
 "use strict";
+/* منع تضمين الصفحة داخل موقع آخر (clickjacking) */
+if(window.top!==window.self){try{window.top.location=window.self.location}catch(e){document.documentElement.innerHTML=''}}
 /* ============== ثوابت ============== */
 const LS_KEY='tarqeem_stock_v1', SS_KEY='tarqeem_session_v1';
 const MACHINES=[1,2,3,4];
@@ -269,6 +274,9 @@ const FIREBASE_CONFIG = {
 };
 const ACCOUNT_DOMAIN = 'tarqeem.app';     /* اسم المستخدم machine1 ⇐ البريد machine1@tarqeem.app */
 const FB_VERSION = '10.12.5';
+const REQUIRE_LOGIN_TO_VIEW = true;   /* true = لا تظهر أي بيانات قبل تسجيل الدخول (ويلزم نشر firebase-rules-strict.json) */
+const IDLE_MIN = 30;                  /* تسجيل خروج تلقائي بعد هذه المدة من عدم النشاط (دقائق) */
+let AUTH_READY=false;
 const CLOUD = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL);
 let FB=null, CLOUD_READY=false, CLOUD_ERR='', ONLINE=false, NAV_AFTER=false, RAF=0;
 
@@ -311,11 +319,11 @@ function seed(){
   return {
     v:1,
     users:{
-      admin:{user:'admin',pass:'admin123'},
-      1:{user:'machine1',pass:'11111'},
-      2:{user:'machine2',pass:'22222'},
-      3:{user:'machine3',pass:'33333'},
-      4:{user:'machine4',pass:'44444'}
+      admin:{user:'admin',pass:''},
+      1:{user:'machine1',pass:''},
+      2:{user:'machine2',pass:''},
+      3:{user:'machine3',pass:''},
+      4:{user:'machine4',pass:''}
     },
     orders:[
       O('o1',1,'9013/1','2000 كوانزا',281112,0,'','2026-10-24T12:33:18'),
@@ -355,18 +363,28 @@ const cloudOrderTouch=o=>{if(CLOUD&&FB)cw(()=>FB.update(FB.ref(FB.db,'orders/'+o
 const cloudEntry=e=>{if(CLOUD&&FB)cw(()=>FB.set(FB.ref(FB.db,'entries/'+e.id),plain(e)))};
 const cloudDelEntry=id=>{if(CLOUD&&FB)cw(()=>FB.remove(FB.ref(FB.db,'entries/'+id)))};
 function withM(e){if(e.m==null){const o=DB.orders.find(x=>x.id===e.order);if(o)return {...e,m:o.machine}}return e}
-const toArr=s=>{const v=s.val();return v?Object.keys(v).map(k=>({...v[k],id:v[k].id||k})):[]};
+const SAFE_ID=/^[A-Za-z0-9_-]{1,64}$/, DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
+const numF=(v,max)=>{v=Number(v);return Number.isFinite(v)&&v>=0?Math.min(v,max||1e9):0};
+const strF=(v,n)=>String(v==null?'':v).slice(0,n);
+/* المفتاح في قاعدة البيانات هو المرجع للمعرّف، وأي مفتاح غير آمن يُتجاهل */
+const toArr=s=>{const v=s.val();if(!v||typeof v!=='object')return [];return Object.keys(v).filter(k=>SAFE_ID.test(k)&&v[k]&&typeof v[k]==='object').map(k=>({...v[k],id:k}))};
+const normOrder=o=>{const m=Number(o.machine);if(!MACHINES.includes(m))return null;
+  return {...o,id:String(o.id),machine:m,number:strF(o.number,60),denom:strF(o.denom,60),notes:strF(o.notes,2000),og:numF(o.og),ob:numF(o.ob),qty:o.qty==null?undefined:numF(o.qty,MAXQ),modified:strF(o.modified,40)}};
+const normEntry=e=>{if(!DATE_RE.test(String(e.date))||!SAFE_ID.test(String(e.order)))return null;
+  const x={...e,id:String(e.id),order:String(e.order),date:String(e.date),g:numF(e.g),b:numF(e.b),dg:numF(e.dg),db:numF(e.db),note:strF(e.note,1000),by:strF(e.by,80),ts:strF(e.ts,40)};
+  if(e.m!=null){const m=Number(e.m);if(MACHINES.includes(m))x.m=m;else delete x.m}return x};
 function sched(){if(RAF)return;RAF=requestAnimationFrame(()=>{RAF=0;render(true)})}
 let AUTH_TK=0;
 async function onAuth(user){
   const tk=++AUTH_TK;
   auditStop();profStop();
-  if(!user){setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
+  if(!user){AUTH_READY=true;setSession(null);idleStop();if(REQUIRE_LOGIN_TO_VIEW&&FB&&FB.detachData)FB.detachData();EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
   const R=await resolveRole(user);
   if(tk!==AUTH_TK)return;
-  if(R.role==null){cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
+  if(R.role==null){AUTH_READY=true;cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
   const role=R.role;
   setSession({role,displayName:R.displayName||''});
+  AUTH_READY=true;idleStart();if(FB.attachData)FB.attachData();
   auditLog('تسجيل دخول','دخول المستخدم '+whoName());
   if(role==='admin'){auditListen();profListen()}
   if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;}
@@ -388,8 +406,18 @@ async function initCloud(){
     let gotO=false,gotE=false;
     const ready=()=>{if(gotO&&gotE)CLOUD_READY=true};
     const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
-    D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s);gotO=true;ready();sched()},lerr);
-    D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s);gotE=true;ready();sched()},lerr);
+    FB.attachData=()=>{
+      if(FB.dataOn)return;FB.dataOn=true;gotO=gotE=false;CLOUD_READY=false;CLOUD_ERR='';
+      FB.dataOff=[
+        D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s).map(normOrder).filter(Boolean);gotO=true;ready();sched()},lerr),
+        D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s).map(normEntry).filter(Boolean);gotE=true;ready();sched()},lerr)
+      ];
+    };
+    FB.detachData=()=>{
+      (FB.dataOff||[]).forEach(f=>{try{f()}catch(e){}});FB.dataOff=null;FB.dataOn=false;
+      DB.orders=[];DB.entries=[];CLOUD_READY=false;CLOUD_ERR='';
+    };
+    if(!REQUIRE_LOGIN_TO_VIEW)FB.attachData();
     D.onValue(D.ref(FB.db,'.info/connected'),s=>{ONLINE=!!s.val();renderHeader()});
     U.onAuthStateChanged(FB.auth,onAuth);
   }catch(e){CLOUD_ERR=String((e&&e.message)||e);render(true)}
@@ -403,14 +431,14 @@ function seedCloud(){
   toast('تم رفع بيانات البداية ✓','ok');
 }
 function loadSession(){try{const s=JSON.parse(sessionStorage.getItem(SS_KEY));if(s&&s.role!=null)return s}catch(e){}return null}
-function setSession(s){SESSION=s;try{s?sessionStorage.setItem(SS_KEY,JSON.stringify(s)):sessionStorage.removeItem(SS_KEY)}catch(e){}}
+function setSession(s){SESSION=s;if(CLOUD)return;try{s?sessionStorage.setItem(SS_KEY,JSON.stringify(s)):sessionStorage.removeItem(SS_KEY)}catch(e){}}
 
 /* ============== إدارة المستخدمين (محمية بكلمة سر الموافقة) ============== */
 /* السحابة: الصلاحية تُقرأ من profiles/{uid}، وكتابتها مسموحة فقط لحساب الموافقة (gate) — فحتى لو حد سجّل حساب جديد بمفتاح المشروع ما يقدرش يدخل.
    المحلي: كلمة سر الموافقة تُحفظ مشفّرة (PBKDF2) داخل بيانات الجهاز. */
 const GATE_EMAIL='gate@'+ACCOUNT_DOMAIN;
 const BASE_USERS=[{k:'admin',user:'admin',role:'admin'},{k:1,user:'machine1',role:1},{k:2,user:'machine2',role:2},{k:3,user:'machine3',role:3},{k:4,user:'machine4',role:4}];
-const DEFAULT_PASS={admin:'admin123',1:'11111',2:'22222',3:'33333',4:'44444'};
+const DEFAULT_PASS={};
 const USER_RE=/^[a-z0-9][a-z0-9._-]{2,29}$/;
 const roleLabel=r=>r==='admin'?'مدير عام':MNAME(r);
 let PROFILES=[], UM_TARGET='', UM_KIND='';
@@ -805,6 +833,17 @@ function confirmBox(msg,cb,okLabel,word){
 }
 function go(v){VIEW=v;EDITING=null;SHOWALL=false;LOGF={o:'',from:'',to:'',q:''};render();window.scrollTo({top:0,behavior:'smooth'})}
 
+/* ============== تسجيل خروج تلقائي ============== */
+let IDLE_T=0,_idleLast=0;
+function idleBump(force){
+  if(!SESSION)return;
+  const n=Date.now();if(!force&&n-_idleLast<5000)return;_idleLast=n;
+  clearTimeout(IDLE_T);
+  IDLE_T=setTimeout(()=>{if(SESSION){toast('تم تسجيل الخروج تلقائياً لعدم النشاط','err');logout()}},IDLE_MIN*60000);
+}
+const idleStart=()=>idleBump(true), idleStop=()=>clearTimeout(IDLE_T);
+['click','keydown','touchstart','mousemove'].forEach(ev=>document.addEventListener(ev,()=>idleBump(),{passive:true}));
+
 /* ============== الدخول ============== */
 function loginModal(msg){
   openModal('<h3>🔐 تسجيل الدخول</h3>'+
@@ -814,8 +853,12 @@ function loginModal(msg){
    '</div><div class="err-txt" id="l-err">'+esc(msg||'')+'</div>'+
    '<div class="actions"><button class="btn primary" type="submit">دخول</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
 }
+const LG={n:0,until:0};
+const lgBlocked=()=>{const w=LG.until-Date.now();return w>0?Math.ceil(w/1000):0};
+const lgFail=()=>{LG.n++;if(LG.n>=5)LG.until=Date.now()+Math.min(900000,30000*Math.pow(2,LG.n-5))};
 async function doLogin(){
   const u=$('#l-u').value.trim().toLowerCase(),p=$('#l-p').value;
+  const wait=lgBlocked();if(wait){$('#l-err').textContent='محاولات خاطئة كثيرة — انتظر '+wait+' ثانية ثم أعد المحاولة';return}
   if(CLOUD){
     if(!FB){$('#l-err').textContent='لم يتم الاتصال بالسحابة بعد — انتظر لحظة وحاول مرة أخرى';return}
     if(!u||!p){$('#l-err').textContent='اكتب اسم المستخدم وكلمة المرور';return}
@@ -823,11 +866,12 @@ async function doLogin(){
     try{
       NAV_AFTER=true;
       const tmo=new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),15000));
-      await Promise.race([FB.signInWithEmailAndPassword(FB.auth,u.includes('@')?u:u+'@'+ACCOUNT_DOMAIN,p),tmo]);
-      closeModal();
+      await Promise.race([FB.signInWithEmailAndPassword(FB.auth,(u.includes('@')?u.split('@')[0]:u)+'@'+ACCOUNT_DOMAIN,p),tmo]);
+      LG.n=0;closeModal();
     }catch(e){
       NAV_AFTER=false;
       const c=String(e&&e.code||'');
+      if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))lgFail();
       const el=$('#l-err');if(!el)return;
       el.textContent=
         /invalid-credential|wrong-password|user-not-found|invalid-email|invalid-login/.test(c)?'اسم المستخدم أو كلمة المرور غير صحيحة (كلمة المرور في Firebase 6 خانات على الأقل)':
@@ -841,7 +885,7 @@ async function doLogin(){
   }
   for(const k of Object.keys(DB.users)){
     const a=DB.users[k];
-    if(a.active!==false&&a.user.toLowerCase()===u&&a.pass===p){
+    if(a.active!==false&&a.pass&&a.user.toLowerCase()===u&&a.pass===p){
       const rl=k==='admin'?'admin':(a.role!=null?a.role:Number(k));
       setSession({role:rl,displayName:a.displayName||''});
       auditLog('تسجيل دخول','دخول المستخدم '+whoName());
@@ -850,14 +894,14 @@ async function doLogin(){
       render();toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');return;
     }
   }
-  $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
+  lgFail();$('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
 function logout(){if(SESSION)auditLog('تسجيل خروج','خروج المستخدم '+whoName());if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
 
 /* ============== الرسم ============== */
 function renderHeader(){
   const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
-  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
+  $('#who').innerHTML=net+((SESSION||!(CLOUD&&REQUIRE_LOGIN_TO_VIEW))?'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>':'')+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
 }
@@ -888,6 +932,10 @@ function render(keep){
   const qf=!!(keep&&document.activeElement&&document.activeElement.id==='lg-q');
   renderHeader();renderTabs();
   const v=$('#view');
+  if(CLOUD&&REQUIRE_LOGIN_TO_VIEW&&!SESSION&&!CLOUD_ERR){
+    v.innerHTML=AUTH_READY?lockedHTML('البيانات متاحة للمستخدمين المسجلين فقط'):'<div class="empty">⏳ جاري التحقق من الجلسة…</div>';
+    return;
+  }
   if(CLOUD&&!CLOUD_READY){
     v.innerHTML=CLOUD_ERR
      ?'<div class="card lock"><div class="ic">⚠️</div><div style="flex:1"><b>تعذر الاتصال بقاعدة البيانات</b><div class="muted">'+esc(CLOUD_ERR)+' — تأكد من الإنترنت ومن إعدادات Firebase وقواعد القراءة.</div></div><button class="btn primary" onclick="location.reload()">إعادة المحاولة</button></div>'
@@ -1302,7 +1350,7 @@ function exportJSON(){
 }
 function exportCSV(){
   /* حماية من حقن المعادلات: النص اللي يبدأ بـ = + - @ يتحول لنص عادي في Excel */
-  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
+  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
   const OM={};DB.orders.forEach(o=>OM[o.id]=o);
   const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
   [...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{
@@ -1325,7 +1373,7 @@ function applyDataset(d){
     d.entries.forEach(e=>{const x=plain(e);if(x.m==null){const oo=d.orders.find(z=>z.id===x.order);if(oo)x.m=oo.machine}E[x.id]=x});
     (d.audit||[]).forEach(a=>{if(a&&a.id)A[a.id]=plain(a)});
     const patch={orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null};
-    if(Array.isArray(d.audit))patch.audit=Object.keys(A).length?A:null;
+    /* سجل التدقيق لا يُستبدل أبداً (يُضاف إليه فقط) */
     cw(()=>FB.update(FB.ref(FB.db),patch));
     return;
   }
@@ -1336,10 +1384,17 @@ function applyDataset(d){
 $('#file-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
   if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
+  if(f.size>10*1024*1024){toast('الملف كبير جداً (الحد 10 ميجا)','err');return}
   const r=new FileReader();
   r.onload=()=>{
     let d;try{d=JSON.parse(r.result)}catch(e){toast('الملف غير صالح','err');return}
     if(!d||!Array.isArray(d.orders)||!Array.isArray(d.entries)){toast('هذا ليس ملف نسخة احتياطية صالح','err');return}
+    /* تنقية كل ما في الملف قبل استخدامه: معرّفات آمنة وأرقام وطول نصوص محدود */
+    const nO=d.orders.length,nE=d.entries.length;
+    d.orders=d.orders.filter(o=>o&&typeof o==='object'&&SAFE_ID.test(String(o.id))).map(normOrder).filter(Boolean);
+    d.entries=d.entries.filter(e=>e&&typeof e==='object'&&SAFE_ID.test(String(e.id))).map(normEntry).filter(Boolean);
+    d.audit=Array.isArray(d.audit)?d.audit.filter(a=>a&&typeof a==='object'&&SAFE_ID.test(String(a.id))).map(a=>({id:String(a.id),ts:strF(a.ts,40),by:strF(a.by,80),act:strF(a.act,100),txt:strF(a.txt,1500)})):undefined;
+    if(d.orders.length<nO||d.entries.length<nE)toast('تم تجاهل '+((nO-d.orders.length)+(nE-d.entries.length))+' سجل غير صالح في الملف','err');
     if(IMPORT_MODE==='replace'){
       confirmBox('سيتم استبدال كل البيانات الحالية ('+DB.orders.length+' أمر / '+DB.entries.length+' حركة) بمحتوى الملف ('+d.orders.length+' أمر / '+d.entries.length+' حركة). تُحفظ نسخة تلقائية قبل الاستبدال للرجوع إليها من «نقطة الاسترجاع».',()=>{
         saveRestorePoint('قبل استبدال البيانات');
@@ -1571,6 +1626,8 @@ function pickExcel(){
 }
 $('#xl-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
+  if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
+  if(f.size>15*1024*1024){toast('الملف كبير جداً (الحد 15 ميجا)','err');return}
   toast('جاري قراءة الملف…');
   const r=new FileReader();
   r.onerror=()=>toast('تعذر قراءة الملف','err');
@@ -1744,7 +1801,7 @@ function auditLocalFallback(rec,reason){
   toast('تنبيه: تعذر حفظ عملية في سجل التدقيق السحابي. تم الاحتفاظ بها محلياً على هذا الجهاز فقط.','err');
 }
 function auditLog(act,txt){
-  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act:String(act||'عملية'),txt:String(txt||'')};
+  const rec={id:uid('a'),ts:new Date().toISOString(),by:strF(whoName()||'—',80),act:strF(act||'عملية',100),txt:strF(txt,1500),uid:(CLOUD&&FB&&FB.auth&&FB.auth.currentUser)?FB.auth.currentUser.uid:''};
   if(CLOUD){
     if(!FB){auditLocalFallback(rec,'لم تكتمل تهيئة Firebase');return rec}
     AUDIT_STATUS='جاري تسجيل آخر عملية…';
@@ -1778,7 +1835,7 @@ function auditStop(){
 }
 function auditExport(){
   const list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice());
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const q=v=>{let t=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
   const rows=[['الوقت','المستخدم','العملية','التفاصيل','حالة الحفظ']];
   list.sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).forEach(a=>rows.push([fmtTime(a.ts),a.by,a.act,a.txt,a.localOnly?'محلي فقط':'مسجل']));
   download('tarqeem-audit-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
