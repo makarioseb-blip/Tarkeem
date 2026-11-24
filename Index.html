@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#0f766e">
 <title>مخزن الترقيمات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -190,6 +190,97 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 14px 26px
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .tw input[type=checkbox]{width:18px;height:18px}
 @media print{header .who,.tabs-wrap,.actions,.oc-b,footer{display:none!important}}
+.alerts{display:grid;gap:8px}
+.al{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:13px;font-weight:600;font-size:14px;line-height:1.7;border:1px solid}
+.al .ic{font-size:18px;line-height:1.5}
+.al.hi{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+.al.md{background:#fffbeb;border-color:#fde68a;color:#92400e}
+.al.lo{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+.fc{font-size:12.5px;color:#475569;background:#f8fafc;border-radius:9px;padding:5px 10px;margin:0 0 6px}
+.fc b{color:var(--ink)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:0 0 12px}
+.filters label.f{font-size:12.5px}
+#toast.act{pointer-events:auto}
+#toast .ub{margin-inline-start:10px;background:#fff;color:#0f172a;border:0;border-radius:9px;padding:3px 12px;font-weight:800}
+tr.tot td{background:#eef2ff;font-weight:800}
+body.pr header.top,body.pr .tabs-wrap,body.pr main,body.pr footer,body.pr .noprint,body.pr #toast{display:none!important}
+body.pr .overlay{position:static;background:#fff;padding:0;display:block;backdrop-filter:none;animation:none}
+body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;padding:0;animation:none}
+
+.heat{display:grid;gap:3px;direction:ltr}
+.heat .hr{display:grid;grid-template-columns:repeat(56,1fr);gap:2px}
+.heat .hc{aspect-ratio:1;border-radius:3px;background:#eef2f7;min-width:0}
+.heat .hn{font-size:12.5px;font-weight:800;direction:rtl;margin-top:6px}
+.trend{font-size:12px;font-weight:700;margin-top:4px}
+.trend.up{color:#059669}.trend.dn{color:#e11d48}.trend.eq{color:#64748b}
+.sr{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--line);margin-bottom:6px;background:#fff;width:100%;text-align:start}
+.sr:hover{background:#f5f7ff}
+.sr b{direction:ltr}
+.pbar{height:8px;border-radius:99px;background:#e2e8f0;overflow:hidden;min-width:70px}
+.pbar i{display:block;height:100%;background:var(--brand);border-radius:99px}\n.audit-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:10px 0}.audit-status{padding:9px 12px;border-radius:11px;font-size:12.5px;font-weight:700;margin:8px 0}.audit-status.ok{background:#ecfdf5;color:#047857}.audit-status.warn{background:#fffbeb;color:#92400e}.audit-status.bad{background:#fff1f2;color:#9f1239}
+@media print{.noprint{display:none!important}}
+</style>
+<style id="v2-theme">
+:root{--bg:#f3f6f4;--brand:#0f766e;--ink:#10201e;--muted:#5d6f6b;--line:#e1e9e6;--shadow:0 1px 2px rgba(16,32,30,.05),0 12px 30px -12px rgba(16,32,30,.16)}
+body{background:radial-gradient(1100px 480px at 100% -8%,#cdeee6 0,transparent 60%),radial-gradient(900px 420px at 0% 0%,#fdecc8 0,transparent 55%),var(--bg)}
+header.top{background:linear-gradient(120deg,#0b3b36 0%,#0f766e 52%,#d97706 130%)}
+.btn.primary{background:var(--brand);box-shadow:0 6px 16px -6px rgba(15,118,110,.7)}
+.btn.light{background:#e2f4ef;color:#0b4f48}.btn.light:hover{background:#cfeee6}
+.kpi.big{background:linear-gradient(135deg,#0f766e,#115e59 60%,#b45309 140%)}
+.tab.on{background:var(--c,var(--brand))}
+.pbar i{background:var(--brand)}
+tr.tot td{background:#e2f4ef}
+.oc-s .d{background:#e2f4ef;color:#0b4f48}
+.card,.kpi,.mcard,.oc{transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 18px 36px -16px rgba(16,32,30,.28)}
+.kpi .v{letter-spacing:-.5px}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:14px 18px;border-radius:var(--r);background:linear-gradient(120deg,#ffffffcc,#ffffff88);backdrop-filter:blur(6px);box-shadow:var(--shadow)}
+.hero b{font-size:18px;font-weight:800}.hero .muted{display:block}
+.hero .clk{font-variant-numeric:tabular-nums;font-weight:800;font-size:22px;color:var(--brand);direction:ltr}
+.ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.ins .it{border-radius:14px;padding:12px 14px;background:#f6faf9;border:1px solid var(--line)}
+.ins .it .l{font-size:12.5px;color:var(--muted);font-weight:700}
+.ins .it .v{font-size:19px;font-weight:800;margin-top:2px}
+.ins .it .s{font-size:12px;color:var(--muted)}
+.rk{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:8px 4px;border-top:1px solid var(--line)}
+.rk:first-of-type{border-top:0}
+.rk .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;background:var(--mc,#0f766e)}
+.rk b{direction:ltr;unicode-bidi:embed}
+.rk .pr{height:6px;border-radius:99px;background:#e2e8f0;overflow:hidden;margin-top:4px}
+.rk .pr i{display:block;height:100%;border-radius:99px;background:var(--mc,#0f766e)}
+#totop{position:fixed;bottom:20px;inset-inline-start:16px;width:44px;height:44px;border-radius:50%;border:0;background:var(--brand);color:#fff;font-size:20px;box-shadow:0 10px 22px -8px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+#totop.on{opacity:1;pointer-events:auto}
+.btn.icon{padding:6px 10px}
+/* dark mode */
+body.dark{--bg:#0b1513;--card:#13211f;--ink:#e6f1ee;--muted:#93aaa5;--line:#223532;--brand:#2dd4bf;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px -12px rgba(0,0,0,.6);background:radial-gradient(1000px 420px at 100% -8%,#0f3a35 0,transparent 60%),#0b1513;color:var(--ink)}
+body.dark header.top{background:linear-gradient(120deg,#05201d,#0b4a44 55%,#7a4a0a 140%)}
+body.dark .tabs,body.dark .kpi,body.dark .mcard,body.dark .oc,body.dark .modal,body.dark table,body.dark .sr,body.dark .hero{background:var(--card);color:var(--ink)}
+body.dark .tab{color:#b6cac5}body.dark .tab:hover{background:#1a2d2a}
+body.dark th{background:#1a2d2a;color:#d4e6e1}
+body.dark tr:hover td{background:#182a27}
+body.dark input[type=text],body.dark input[type=date],body.dark input[type=password],body.dark select,body.dark textarea{background:#0f1c1a;color:var(--ink);border-color:var(--line)}
+body.dark input:focus,body.dark select:focus,body.dark textarea:focus{background:#0f1c1a}
+body.dark .pv,body.dark .formula,body.dark .fc,body.dark .oc-n,body.dark .ins .it{background:#0f1c1a;border-color:var(--line);color:var(--ink)}
+body.dark .seg{background:#0f1c1a}body.dark .seg button{color:#b6cac5}body.dark .seg button.on{background:#1f3a36;color:var(--brand)}
+body.dark .chip{background:#1f3a36;color:#cfe3de}
+body.dark .btn.light{background:#1f3a36;color:#bdf3e8}
+body.dark .btn.danger{background:#3a1820;color:#fda4af}
+body.dark .empty{background:#0f1c1a;color:var(--muted)}
+body.dark .tw{border-color:var(--line)}
+body.dark td.l,body.dark .card h3,body.dark label.f{color:var(--ink)}
+body.dark .oc-s .a{background:#0f3a2c;color:#6ee7b7}body.dark .oc-s .c{background:#3a1820;color:#fda4af}body.dark .oc-s .d{background:#17332f;color:#99f6e4}
+body.dark .al.hi{background:#3a1820;border-color:#7f1d33;color:#fecdd3}
+body.dark .al.md{background:#3a2c0f;border-color:#7a5a12;color:#fde68a}
+body.dark .al.lo{background:#112a3d;border-color:#1e4e75;color:#bfdbfe}
+body.dark .lock{background:#3a2c0f;border-color:#7a5a12}
+body.dark tr.tot td{background:#17332f}
+body.dark .heat .hc{background:#1b2d2a}
+body.dark .hero{background:var(--card)}
+body.dark .rk .pr,body.dark .pbar,body.dark .qbar{background:#223532}
+body.dark .tab.on{color:#04211e}
+body.dark .kpi.big{background:linear-gradient(135deg,#0f766e,#115e59 60%,#b45309 140%);color:#fff}
+body.dark svg text{fill:#b6cac5}
+body.dark .cat .tr{background:#223532}
 </style>
 </head>
 <body>
@@ -223,6 +314,8 @@ const MNAME=m=>'ترقيم '+AR_NUM[m];
 const MCOL={1:'#0d9488',2:'#4f46e5',3:'#d97706',4:'#db2777'};
 const MAXQ=1200000;                       /* أقصى كمية للأمر الواحد (فرخ) */
 const qtyOf=o=>Math.min(MAXQ,Number(o.qty)||MAXQ);
+/* حدود التنبيهات الذكية */
+const DEFECT_WARN=20, NEAR_DONE=0.9, IDLE_DAYS=14;
 
 /* ============== إعدادات Firebase ==============
    الصق هنا إعدادات مشروعك من: Firebase Console ← Project settings ← Your apps ← Web app ← firebaseConfig
@@ -273,6 +366,7 @@ function niceMax(v){
 
 /* ============== البيانات ============== */
 let DB, SESSION=null, VIEW='dash', RANGE=14, EDITING=null, SHOWALL=false, SEL={}, LASTDATE=null, MEMORY_ONLY=false, CONFIRM_CB=null;
+let METRIC='prod', LOGF={o:'',from:'',to:'',q:''}, ALL_AL=false, CF_WORD='';
 
 function seed(){
   const O=(id,m,number,denom,og,ob,notes,mod)=>({id,machine:m,number,denom,og,ob,notes:notes||'',modified:mod});
@@ -325,14 +419,20 @@ const cloudDelEntry=id=>{if(CLOUD&&FB)cw(()=>FB.remove(FB.ref(FB.db,'entries/'+i
 function withM(e){if(e.m==null){const o=DB.orders.find(x=>x.id===e.order);if(o)return {...e,m:o.machine}}return e}
 const toArr=s=>{const v=s.val();return v?Object.keys(v).map(k=>({...v[k],id:v[k].id||k})):[]};
 function sched(){if(RAF)return;RAF=requestAnimationFrame(()=>{RAF=0;render(true)})}
-function onAuth(user){
+let AUTH_TK=0;
+async function onAuth(user){
+  const tk=++AUTH_TK;
+  auditStop();profStop();
   if(!user){setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
-  const name=String(user.email||'').split('@')[0].toLowerCase();
-  let role=null;
-  if(name==='admin')role='admin';else{const mm=/^machine([1-4])$/.exec(name);if(mm)role=Number(mm[1])}
-  if(role==null){cw(()=>FB.signOut(FB.auth));toast('هذا الحساب غير مصرّح له بالبرنامج','err');return}
-  setSession({role});
-  if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;toast('أهلاً '+whoName(),'ok')}
+  const R=await resolveRole(user);
+  if(tk!==AUTH_TK)return;
+  if(R.role==null){cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
+  const role=R.role;
+  setSession({role,displayName:R.displayName||''});
+  auditLog('تسجيل دخول','دخول المستخدم '+whoName());
+  if(role==='admin'){auditListen();profListen()}
+  if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;}
+  toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');
   render(true);
 }
 async function initCloud(){
@@ -345,7 +445,8 @@ async function initCloud(){
     try{authInst=U.initializeAuth(app,{persistence:[U.indexedDBLocalPersistence,U.browserLocalPersistence,U.inMemoryPersistence]})}
     catch(e){authInst=U.getAuth(app)}
     FB={db:D.getDatabase(app),auth:authInst,ref:D.ref,set:D.set,update:D.update,remove:D.remove,
-        signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut};
+        signInWithEmailAndPassword:U.signInWithEmailAndPassword,signOut:U.signOut,
+        onValue:D.onValue,query:D.query,limitToLast:D.limitToLast,get:D.get,mods:{A,D,U}};
     let gotO=false,gotE=false;
     const ready=()=>{if(gotO&&gotE)CLOUD_READY=true};
     const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
@@ -360,16 +461,348 @@ function seedCloud(){
   const s=seed(),u={};
   s.orders.forEach(o=>u['orders/'+o.id]=plain(o));
   cw(()=>FB.update(FB.ref(FB.db),u));
+  auditLog('رفع بيانات البداية','تم رفع '+s.orders.length+' أمر إلى السحابة');
   toast('تم رفع بيانات البداية ✓','ok');
 }
 function loadSession(){try{const s=JSON.parse(sessionStorage.getItem(SS_KEY));if(s&&s.role!=null)return s}catch(e){}return null}
 function setSession(s){SESSION=s;try{s?sessionStorage.setItem(SS_KEY,JSON.stringify(s)):sessionStorage.removeItem(SS_KEY)}catch(e){}}
 
+/* ============== إدارة المستخدمين (محمية بكلمة سر الموافقة) ============== */
+/* السحابة: الصلاحية تُقرأ من profiles/{uid}، وكتابتها مسموحة فقط لحساب الموافقة (gate) — فحتى لو حد سجّل حساب جديد بمفتاح المشروع ما يقدرش يدخل.
+   المحلي: كلمة سر الموافقة تُحفظ مشفّرة (PBKDF2) داخل بيانات الجهاز. */
+const GATE_EMAIL='gate@'+ACCOUNT_DOMAIN;
+const BASE_USERS=[{k:'admin',user:'admin',role:'admin'},{k:1,user:'machine1',role:1},{k:2,user:'machine2',role:2},{k:3,user:'machine3',role:3},{k:4,user:'machine4',role:4}];
+const DEFAULT_PASS={admin:'admin123',1:'11111',2:'22222',3:'33333',4:'44444'};
+const USER_RE=/^[a-z0-9][a-z0-9._-]{2,29}$/;
+const roleLabel=r=>r==='admin'?'مدير عام':MNAME(r);
+let PROFILES=[], UM_TARGET='', UM_KIND='';
+
+/* ---------- تشفير كلمة سر الموافقة محلياً ---------- */
+const b64=u=>btoa(String.fromCharCode(...u));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function pbk(pw,salt,it){
+  if(!(window.crypto&&crypto.subtle))throw {code:'no-crypto'};
+  const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:it},k,256));
+}
+async function hashPw(pw){const s=crypto.getRandomValues(new Uint8Array(16)),it=150000;return {s:b64(s),it,h:b64(await pbk(pw,s,it))}}
+async function verifyPw(pw,g){return b64(await pbk(pw,unb64(g.s),g.it))===g.h}
+/* المحلي: أول مرة بتتعيّن كلمة السر (مع تأكيد)، وبعد كده بتتحقق */
+async function gateCheckLocal(pw){
+  if(!DB.gate){
+    if(pw.length<4)throw {code:'gate-short'};
+    const p2=$('#g-pw2');if(!p2||pw!==p2.value)throw {code:'gate-mismatch'};
+    DB.gate=await hashPw(pw);persist();return;
+  }
+  if(!(await verifyPw(pw,DB.gate)))throw {code:'gate-wrong'};
+}
+
+/* ---------- السحابة: تطبيقات ثانوية (جلسة منفصلة) ---------- */
+async function secApp(){
+  const M=FB.mods,name='sec'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const app=M.A.initializeApp(FIREBASE_CONFIG,name);
+  const auth=M.U.initializeAuth(app,{persistence:[M.U.inMemoryPersistence]});
+  return {app,auth,db:M.D.getDatabase(app),done:()=>{try{M.A.deleteApp(app)}catch(e){}}};
+}
+async function gateSignIn(sec,pw){
+  try{await FB.mods.U.signInWithEmailAndPassword(sec.auth,GATE_EMAIL,pw)}
+  catch(e){const c=String(e&&e.code||'');throw {code:/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c)?'gate-wrong':(c||'error')}}
+}
+function profListen(){
+  if(!CLOUD||!FB||!isAdmin()||FB.profOn)return;
+  FB.profOn=true;
+  try{
+    FB.profOff=FB.onValue(FB.ref(FB.db,'profiles'),
+      s=>{PROFILES=toArr(s);if(VIEW==='settings')sched()},
+      ()=>{PROFILES=null;if(VIEW==='settings')sched()});
+  }catch(e){FB.profOn=false}
+}
+function profStop(){
+  if(FB){if(FB.profOff){try{FB.profOff()}catch(e){}}FB.profOn=false;FB.profOff=null}
+  PROFILES=[];
+}
+/* الدور من بريد الحسابات الأساسية، أو من ملف التعريف للحسابات المضافة */
+async function resolveRole(user){
+  const name=String(user.email||'').split('@')[0].toLowerCase();
+  const baseRole=name==='admin'?'admin':(/^machine([1-4])$/.test(name)?Number(name.match(/^machine([1-4])$/)[1]):null);
+  try{
+    const p=(await FB.get(FB.ref(FB.db,'profiles/'+user.uid))).val();
+    if(p){
+      if(p.active===false)return {off:true};
+      const r=baseRole!==null?baseRole:(p.role==='admin'?'admin':Number(p.role));
+      if(r==='admin'||MACHINES.includes(r))return {role:r,user:p.user||name,displayName:p.displayName||''};
+    }
+  }catch(e){}
+  if(baseRole!==null)return {role:baseRole};
+  return {};
+}
+
+/* ---------- التحقق ---------- */
+function valUser(u){
+  if(!USER_RE.test(u))return 'اسم المستخدم: من 3 إلى 30 حرف إنجليزي صغير أو أرقام أو ( . _ - ) ويبدأ بحرف أو رقم';
+  if(u==='admin'||u==='gate'||/^machine\d*$/.test(u))return 'هذا الاسم محجوز';
+  return '';
+}
+function valPass(p,p2,u){
+  if(p.length<6)return 'كلمة المرور 6 أحرف على الأقل';
+  if(p!==p2)return 'تأكيد كلمة المرور غير مطابق';
+  if(u&&p.toLowerCase()===u)return 'كلمة المرور لا يجب أن تطابق اسم المستخدم';
+  return '';
+}
+function userErrMsg(e){
+  const c=String((e&&(e.code||e.message))||'');
+  const m={
+    'gate-wrong':'كلمة سر الموافقة غير صحيحة'+(CLOUD?' — أو أن حساب الموافقة ('+GATE_EMAIL+') لم يُنشأ بعد في Firebase':''),
+    'gate-short':'كلمة سر الموافقة 4 أحرف على الأقل','gate-mismatch':'تأكيد كلمة سر الموافقة غير مطابق',
+    'no-crypto':'هذا المتصفح لا يدعم التشفير — افتح البرنامج عبر رابط https',
+    'dup':'اسم المستخدم موجود بالفعل','bad-current':'كلمة المرور الحالية غير صحيحة','orphan-pw':'اسم المستخدم مستخدم من قبل بكلمة مرور أخرى',
+    'auth/weak-password':'كلمة المرور ضعيفة (6 أحرف على الأقل)','auth/operation-not-allowed':'تسجيل الدخول بالبريد غير مفعّل في Firebase',
+    'auth/too-many-requests':'محاولات خاطئة كثيرة — انتظر قليلاً ثم أعد المحاولة','auth/network-request-failed':'تعذر الاتصال بالإنترنت'
+  };
+  if(m[c])return m[c];
+  if(/permission/i.test(c))return 'رفض Firebase الحفظ — تأكد من نشر قواعد Firebase الجديدة (firebase-rules-strict.json). لو كنت تضيف مستخدماً فأعد المحاولة بنفس الاسم وكلمة المرور.';
+  return 'تعذرت العملية ('+(c||'خطأ')+')';
+}
+const umErr=t=>{const el=$('#um-err');if(el)el.textContent=t};
+const umBusy=on=>{const b=$('#um-go');if(b){b.disabled=on;if(on)b.dataset.t=b.textContent;b.textContent=on?'جاري التنفيذ…':(b.dataset.t||b.textContent)}};
+function gateFieldHTML(){
+  if(!CLOUD&&!DB.gate)return '<label class="f">🛡️ عيّن كلمة سر الموافقة (أول مرة)<input type="password" id="g-pw" autocomplete="new-password"></label><label class="f">تأكيد كلمة سر الموافقة<input type="password" id="g-pw2" autocomplete="new-password"></label>';
+  return '<label class="f">🛡️ كلمة سر الموافقة<input type="password" id="g-pw" autocomplete="off"></label>';
+}
+const mActions=(go,label)=>'<div class="err-txt" id="um-err"></div><div class="actions"><button class="btn primary" id="um-go" onclick="'+go+'">'+label+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>';
+
+/* ---------- القائمة ---------- */
+function userRows(){
+  const rows=[];
+  if(CLOUD){
+    BASE_USERS.forEach(b=>rows.push({id:'b:'+b.k,user:b.user,displayName:((PROFILES||[]).find(p=>p.user===b.user)||{}).displayName||'',uid:((PROFILES||[]).find(p=>p.user===b.user)||{}).id,role:b.role,base:true,active:true}));
+    (PROFILES||[]).forEach(p=>rows.push({id:'p:'+p.id,uid:p.id,user:p.user||'؟',displayName:p.displayName||'',role:p.role==='admin'?'admin':Number(p.role),active:p.active!==false}));
+  }else{
+    BASE_USERS.forEach(b=>{const a=DB.users[b.k];if(a)rows.push({id:'b:'+b.k,user:a.user,displayName:a.displayName||'',role:b.role,base:true,active:a.active!==false,weak:a.pass===DEFAULT_PASS[b.k]})});
+    Object.keys(DB.users).filter(k=>k.charAt(0)==='x').forEach(k=>{const a=DB.users[k];rows.push({id:'x:'+k,user:a.user,displayName:a.displayName||'',role:a.role,active:a.active!==false})});
+  }
+  return rows;
+}
+function usersHTML(){
+  const rows=userRows();
+  let h='<div class="card sec"><div class="sec-title"><h3>👥 المستخدمون وكلمات السر</h3><div class="actions" style="margin:0"><button class="btn primary sm" onclick="userAddModal()">➕ مستخدم جديد</button><button class="btn light sm" onclick="gateChangeModal()">🛡️ كلمة سر الموافقة</button></div></div>'+
+   '<div class="muted" style="margin-bottom:10px;line-height:1.9">أي إضافة أو تغيير كلمة سر أو تعطيل لمستخدم يحتاج <b>كلمة سر الموافقة</b>.'+(CLOUD?' الحسابات الأساسية (admin وmachine1–4) تتغير كلمة سرها فقط، أما الحسابات المضافة من هنا فيمكن تعطيلها أو حذف صلاحيتها.':'')+'</div>';
+  if(CLOUD&&PROFILES===null)h+='<div class="al md" style="margin-bottom:10px"><span class="ic">⚠️</span><span>تعذّرت قراءة الحسابات المضافة — انشر قواعد Firebase الجديدة (ملف firebase-rules-strict.json).</span></div>';
+  if(!CLOUD&&!DB.gate)h+='<div class="al lo" style="margin-bottom:10px"><span class="ic">🛡️</span><span>لم تُعيَّن كلمة سر الموافقة بعد — ستُطلب منك عند أول عملية.</span></div>';
+  h+='<div class="tw"><table style="min-width:560px"><thead><tr><th>المستخدم</th><th>الصلاحية</th><th>الحالة</th><th></th></tr></thead><tbody>'+
+   rows.map(r=>'<tr><td class="l"><b>'+esc(r.displayName||r.user)+'</b><div class="muted ltr" style="font-size:11px">'+esc(r.user)+'</div>'+(r.base?' <span class="chip" style="margin:0">أساسي</span>':'')+(r.weak?'<div class="wn">⚠ كلمة السر افتراضية — غيّرها</div>':'')+'</td>'+
+     '<td>'+esc(roleLabel(r.role))+'</td>'+
+     '<td>'+(r.active?'<span class="badge st-new">نشط</span>':'<span class="badge st-err">معطّل</span>')+'</td>'+
+     '<td>'+(r.uid||!CLOUD?'<button class="btn light sm" onclick="userNameModal(\''+esc(r.id)+'\')">✏️ الاسم الظاهر</button> ':'')+'<button class="btn light sm" onclick="userPassModal(\''+esc(r.id)+'\')">🔑 كلمة السر</button>'+
+     (r.base?'':' <button class="btn light sm" onclick="userStatusModal(\''+esc(r.id)+'\',\'toggle\')">'+(r.active?'⏸ تعطيل':'▶ تفعيل')+'</button> <button class="btn danger sm" onclick="userStatusModal(\''+esc(r.id)+'\',\'del\')">🗑 حذف</button>')+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+  return h;
+}
+
+/* ---------- إضافة مستخدم ---------- */
+function userAddModal(){
+  if(!isAdmin())return;
+  openModal('<h3>➕ مستخدم جديد</h3><div class="fgrid" style="grid-template-columns:1fr">'+
+   '<label class="f">الاسم الظاهر بالعربية<input type="text" id="nu-name" autocomplete="name" placeholder="مثال: أحمد محمد"></label>'+
+   '<label class="f">اسم المستخدم (إنجليزي)<input type="text" id="nu-u" autocomplete="off" autocapitalize="off" placeholder="مثال: ahmed" style="direction:ltr;text-align:right"></label>'+
+   '<label class="f">الصلاحية<select id="nu-r">'+MACHINES.map(m=>'<option value="'+m+'">'+MNAME(m)+' (يعدّل ماكينته فقط)</option>').join('')+'<option value="admin">مدير عام (يعدّل كل شيء)</option></select></label>'+
+   '<label class="f">كلمة المرور (6 أحرف على الأقل)<input type="password" id="nu-p" autocomplete="new-password"></label>'+
+   '<label class="f">تأكيد كلمة المرور<input type="password" id="nu-p2" autocomplete="new-password"></label>'+
+   gateFieldHTML()+'</div>'+mActions('userAddGo()','إضافة'));
+}
+async function userAddGo(){
+  if(!isAdmin())return;
+  const u=$('#nu-u').value.trim().toLowerCase(),displayName=$('#nu-name').value.trim(),r=$('#nu-r').value,p=$('#nu-p').value,p2=$('#nu-p2').value,gp=$('#g-pw').value;
+  const role=r==='admin'?'admin':Number(r);
+  const bad=(!displayName?'اكتب الاسم الظاهر بالعربية':(displayName.length>60?'الاسم الظاهر يجب ألا يزيد عن 60 حرفاً':''))||valUser(u)||valPass(p,p2,u)||(gp?'':'اكتب كلمة سر الموافقة');
+  if(bad)return umErr(bad);
+  umErr('');umBusy(true);
+  let g=null,g2=null;
+  try{
+    if(CLOUD){
+      if(!FB)throw {code:'auth/network-request-failed'};
+      const M=FB.mods,email=u+'@'+ACCOUNT_DOMAIN;
+      g=await secApp();
+      await gateSignIn(g,gp);                         // تحقق السيرفر من كلمة سر الموافقة
+      if((PROFILES||[]).some(x=>String(x.user).toLowerCase()===u))throw {code:'dup'};
+      g2=await secApp();
+      let uidNew;
+      try{uidNew=(await M.U.createUserWithEmailAndPassword(g2.auth,email,p)).user.uid}
+      catch(e){
+        /* حساب موجود بدون صلاحيات (مثلاً محاولة سابقة فشلت): لو كلمة المرور مطابقة نربطه بدل ما نضيّعه */
+        if(String(e&&e.code)!=='auth/email-already-in-use')throw e;
+        try{uidNew=(await M.U.signInWithEmailAndPassword(g2.auth,email,p)).user.uid}catch(e2){throw {code:'orphan-pw'}}
+      }
+      await M.D.set(M.D.ref(g.db,'profiles/'+uidNew),{user:u,displayName,role,active:true,created:new Date().toISOString(),by:whoName()});
+    }else{
+      await gateCheckLocal(gp);
+      if(Object.values(DB.users).some(a=>String(a.user).toLowerCase()===u))throw {code:'dup'};
+      DB.users[uid('x')]={user:u,displayName,pass:p,role,active:true};
+    }
+    auditLog('مستخدم جديد',displayName+' ('+u+') · '+roleLabel(role));
+    closeModal();render();toast('تمت إضافة المستخدم «'+displayName+'» ✓','ok');
+  }catch(e){umErr(userErrMsg(e))}
+  finally{if(g)g.done();if(g2)g2.done();umBusy(false)}
+}
+
+/* ---------- تعديل الاسم الظاهر للمستخدم ---------- */
+function userNameModal(id){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===id);if(!r)return;
+  UM_TARGET=id;
+  openModal('<h3>✏️ تعديل الاسم الظاهر</h3><div class="muted" style="margin-bottom:10px">اسم الدخول: <b class="ltr">'+esc(r.user)+'</b></div><div class="fgrid" style="grid-template-columns:1fr">'+
+   '<label class="f">الاسم الذي سيظهر في البرنامج وسجل التدقيق<input type="text" id="un-name" maxlength="60" value="'+esc(r.displayName||'')+'" placeholder="مثال: أحمد محمد"></label>'+gateFieldHTML()+'</div>'+mActions('userNameGo()','حفظ الاسم'));
+}
+async function userNameGo(){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===UM_TARGET);if(!r)return;
+  const displayName=$('#un-name').value.trim(),gp=$('#g-pw').value;
+  if(!displayName||displayName.length>60)return umErr('اكتب اسماً صحيحاً لا يزيد عن 60 حرفاً');
+  if(!gp)return umErr('اكتب كلمة سر الموافقة');
+  umErr('');umBusy(true);let g=null;
+  try{
+    if(CLOUD){
+      if(!r.uid)throw {code:'no-profile'};
+      g=await secApp();await gateSignIn(g,gp);
+      await FB.mods.D.set(FB.mods.D.ref(g.db,'profiles/'+r.uid+'/displayName'),displayName);
+      const p=(PROFILES||[]).find(x=>x.id===r.uid);if(p)p.displayName=displayName;
+    }else{
+      await gateCheckLocal(gp);
+      const k=UM_TARGET.slice(2);if(!DB.users[k])throw {code:'error'};
+      DB.users[k].displayName=displayName;persist();
+    }
+    auditLog('تعديل الاسم الظاهر',r.user+' ← '+displayName);
+    closeModal();render();toast('تم حفظ الاسم الظاهر ✓','ok');
+  }catch(e){umErr(String(e&&e.code)==='no-profile'?'هذا المستخدم الأساسي لا يملك ملف تعريف قابلًا للتعديل من هذه الشاشة.':'تعذر حفظ الاسم: '+userErrMsg(e))}
+  finally{if(g)g.done();umBusy(false)}
+}
+
+/* ---------- تغيير كلمة سر مستخدم ---------- */
+function userPassModal(id){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===id);if(!r)return;
+  UM_TARGET=id;
+  openModal('<h3>🔑 تغيير كلمة السر</h3><div class="muted" style="margin-bottom:10px">المستخدم: <b class="ltr">'+esc(r.user)+'</b> — '+esc(roleLabel(r.role))+'</div><div class="fgrid" style="grid-template-columns:1fr">'+
+   (CLOUD?'<label class="f">كلمة المرور الحالية<input type="password" id="np-c" autocomplete="off"></label>':'')+
+   '<label class="f">كلمة المرور الجديدة (6 أحرف على الأقل)<input type="password" id="np-p" autocomplete="new-password"></label>'+
+   '<label class="f">تأكيد كلمة المرور الجديدة<input type="password" id="np-p2" autocomplete="new-password"></label>'+
+   gateFieldHTML()+'</div>'+
+   (CLOUD?'<div class="muted" style="margin-top:8px;font-size:12.5px;line-height:1.8">Firebase يتطلب معرفة كلمة المرور الحالية لتغييرها. لو نسيتها: أضف مستخدماً جديداً بدلها وعطّل القديم، أو أعد ضبطها من لوحة Firebase.</div>':'')+
+   mActions('userPassGo()','تغيير'));
+}
+async function userPassGo(){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===UM_TARGET);if(!r)return;
+  const cur=CLOUD?$('#np-c').value:'',np=$('#np-p').value,np2=$('#np-p2').value,gp=$('#g-pw').value;
+  const bad=(CLOUD&&!cur?'اكتب كلمة المرور الحالية':'')||valPass(np,np2,r.user)||(CLOUD&&np===cur?'كلمة المرور الجديدة مطابقة للحالية':'')||(gp?'':'اكتب كلمة سر الموافقة');
+  if(bad)return umErr(bad);
+  umErr('');umBusy(true);
+  let g=null,g2=null,self=false;
+  try{
+    if(CLOUD){
+      if(!FB)throw {code:'auth/network-request-failed'};
+      const M=FB.mods,email=r.user+'@'+ACCOUNT_DOMAIN;
+      g=await secApp();await gateSignIn(g,gp);
+      g2=await secApp();
+      let cred;
+      try{cred=await M.U.signInWithEmailAndPassword(g2.auth,email,cur)}
+      catch(e){throw /invalid-credential|wrong-password|invalid-login|user-not-found/.test(String(e&&e.code))?{code:'bad-current'}:e}
+      await M.U.updatePassword(cred.user,np);
+      const me=FB.auth.currentUser;self=!!(me&&String(me.email).toLowerCase()===email);
+    }else{
+      await gateCheckLocal(gp);
+      const a=DB.users[UM_TARGET.slice(2)];if(!a)throw {code:'error'};
+      a.pass=np;
+    }
+    auditLog('تغيير كلمة سر','«'+r.user+'»');
+    closeModal();render();
+    if(self){toast('تم تغيير كلمة السر — سجّل الدخول من جديد','ok');logout()}else toast('تم تغيير كلمة السر ✓','ok');
+  }catch(e){umErr(userErrMsg(e))}
+  finally{if(g)g.done();if(g2)g2.done();umBusy(false)}
+}
+
+/* ---------- تعطيل / تفعيل / حذف مستخدم مضاف ---------- */
+function userStatusModal(id,kind){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===id);if(!r||r.base)return;
+  UM_TARGET=id;UM_KIND=kind;
+  const msg=kind==='del'?'حذف المستخدم «'+r.user+'» نهائياً؟'+(CLOUD?' (تُسحب صلاحيته فوراً؛ والاسم يبقى محجوزاً في Firebase)':''):(r.active?'تعطيل المستخدم «'+r.user+'»؟ لن يستطيع الدخول حتى يُفعَّل.':'تفعيل المستخدم «'+r.user+'»؟');
+  openModal('<h3>'+(kind==='del'?'🗑 حذف مستخدم':r.active?'⏸ تعطيل مستخدم':'▶ تفعيل مستخدم')+'</h3><p style="margin:0 0 12px;line-height:1.9">'+esc(msg)+'</p><div class="fgrid" style="grid-template-columns:1fr">'+gateFieldHTML()+'</div>'+
+   mActions('userStatusGo()',kind==='del'?'حذف':r.active?'تعطيل':'تفعيل'));
+}
+async function userStatusGo(){
+  if(!isAdmin())return;
+  const r=userRows().find(x=>x.id===UM_TARGET);if(!r||r.base)return;
+  const gp=$('#g-pw').value;if(!gp)return umErr('اكتب كلمة سر الموافقة');
+  umErr('');umBusy(true);
+  let g=null;
+  try{
+    if(CLOUD){
+      if(!FB)throw {code:'auth/network-request-failed'};
+      const M=FB.mods;g=await secApp();await gateSignIn(g,gp);
+      const rf=M.D.ref(g.db,'profiles/'+r.uid);
+      if(UM_KIND==='del')await M.D.remove(rf);else await M.D.update(rf,{active:!r.active});
+    }else{
+      await gateCheckLocal(gp);
+      const k=UM_TARGET.slice(2);
+      if(UM_KIND==='del')delete DB.users[k];else DB.users[k].active=!r.active;
+    }
+    auditLog(UM_KIND==='del'?'حذف مستخدم':r.active?'تعطيل مستخدم':'تفعيل مستخدم','«'+r.user+'»');
+    closeModal();render();toast('تم ✓','ok');
+  }catch(e){umErr(userErrMsg(e))}
+  finally{if(g)g.done();umBusy(false)}
+}
+
+/* ---------- تغيير كلمة سر الموافقة نفسها ---------- */
+function gateChangeModal(){
+  if(!isAdmin())return;
+  const first=!CLOUD&&!DB.gate;
+  openModal('<h3>🛡️ '+(first?'تعيين':'تغيير')+' كلمة سر الموافقة</h3><div class="fgrid" style="grid-template-columns:1fr">'+
+   (first?'':'<label class="f">كلمة سر الموافقة الحالية<input type="password" id="gc-o" autocomplete="off"></label>')+
+   '<label class="f">كلمة سر الموافقة الجديدة (6 أحرف على الأقل)<input type="password" id="gc-n" autocomplete="new-password"></label>'+
+   '<label class="f">تأكيد كلمة سر الموافقة الجديدة<input type="password" id="gc-n2" autocomplete="new-password"></label></div>'+
+   mActions('gateChangeGo()',first?'تعيين':'تغيير'));
+}
+async function gateChangeGo(){
+  if(!isAdmin())return;
+  const first=!CLOUD&&!DB.gate,o=first?'':$('#gc-o').value,n=$('#gc-n').value,n2=$('#gc-n2').value;
+  const bad=(first||o?'':'اكتب كلمة سر الموافقة الحالية')||(n.length<6?'كلمة سر الموافقة الجديدة 6 أحرف على الأقل':'')||(n!==n2?'تأكيد كلمة السر غير مطابق':'')||(!first&&n===o?'الجديدة مطابقة للحالية':'');
+  if(bad)return umErr(bad);
+  umErr('');umBusy(true);
+  let g=null;
+  try{
+    if(CLOUD){
+      if(!FB)throw {code:'auth/network-request-failed'};
+      g=await secApp();await gateSignIn(g,o);
+      await FB.mods.U.updatePassword(g.auth.currentUser,n);
+    }else{
+      if(!first&&!(await verifyPw(o,DB.gate)))throw {code:'gate-wrong'};
+      DB.gate=await hashPw(n);persist();
+    }
+    auditLog('تغيير كلمة سر الموافقة','');
+    closeModal();render();toast('تم '+(first?'تعيين':'تغيير')+' كلمة سر الموافقة ✓','ok');
+  }catch(e){umErr(userErrMsg(e))}
+  finally{if(g)g.done();umBusy(false)}
+}
+
+
 /* ============== الحسابات ============== */
 const ordersOf=m=>DB.orders.filter(o=>o.machine===m);
+/* فهرس الحركات حسب الأمر: يُعاد بناؤه فقط لما تتغير مصفوفة الحركات أو عددها، فالحساب يبقى سريع مهما كبرت البيانات */
+let _ix={e:null,n:-1,map:null};
+function entsOf(id){
+  const E=DB.entries;
+  if(_ix.e!==E||_ix.n!==E.length){
+    const m=new Map();
+    for(const x of E){let a=m.get(x.order);if(!a)m.set(x.order,a=[]);a.push(x)}
+    _ix={e:E,n:E.length,map:m};
+  }
+  return _ix.map.get(id)||[];
+}
 function totals(o,list){
-  let pg=o.og,pb=o.ob,dg=0,db=0;
-  for(const e of list){ if(e.order!==o.id)continue; pg+=e.g;pb+=e.b;dg+=e.dg;db+=e.db }
+  let pg=o.og||0,pb=o.ob||0,dg=0,db=0;
+  const src=list===DB.entries?entsOf(o.id):list;
+  for(const e of src){ if(e.order!==o.id)continue; pg+=e.g||0;pb+=e.b||0;dg+=e.dg||0;db+=e.db||0 }
   return {pg,pb,dg,db,sg:pg-dg,sb:pb-db,prod:pg+pb,del:dg+db,stock:(pg-dg)+(pb-db)};
 }
 function mTotals(m,list){
@@ -379,20 +812,23 @@ function mTotals(m,list){
   return t;
 }
 function orderMachineMap(){const m={};DB.orders.forEach(o=>m[o.id]=o.machine);return m}
+/* ترتيب زمني (تاريخ ثم وقت الإدخال) بمقارنة مباشرة — أسرع بكثير من localeCompare على آلاف الحركات */
+const cmpDT=(a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.ts<b.ts?-1:a.ts>b.ts?1:0);
 function runningBalances(o){
-  const list=DB.entries.filter(e=>e.order===o.id).sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts)));
-  let sg=o.og,sb=o.ob;const map={};
-  for(const e of list){sg+=e.g-e.dg;sb+=e.b-e.db;map[e.id]={sg,sb}}
+  const list=[...entsOf(o.id)].sort(cmpDT);
+  let sg=o.og||0,sb=o.ob||0;const map={};
+  for(const e of list){sg+=(e.g||0)-(e.dg||0);sb+=(e.b||0)-(e.db||0);map[e.id]={sg,sb}}
   return map;
 }
-function dailySeries(days){
+/* metric: prod = إنتاج (سليم+معيب) · def = معيب · del = تسليمات */
+function dailySeries(days,metric){
   const OM=orderMachineMap(),labels=[],keys=[],now=new Date();
   for(let i=days-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);keys.push(ymd(d));labels.push(pad(d.getDate())+'/'+pad(d.getMonth()+1))}
   const idx={};keys.forEach((k,i)=>idx[k]=i);
   const series=MACHINES.map(m=>({name:MNAME(m),color:MCOL[m],values:keys.map(()=>0)}));
   for(const e of DB.entries){
     const i=idx[e.date],m=OM[e.order];
-    if(i!=null&&m)series[m-1].values[i]+=e.g+e.b;
+    if(i!=null&&m)series[m-1].values[i]+=metric==='def'?(e.b||0):metric==='del'?(e.dg||0)+(e.db||0):(e.g||0)+(e.b||0);
   }
   return {labels,series};
 }
@@ -400,7 +836,7 @@ function dailySeries(days){
 /* ============== الصلاحيات ============== */
 const isAdmin=()=>!!SESSION&&SESSION.role==='admin';
 const canEdit=m=>!!SESSION&&(SESSION.role==='admin'||SESSION.role===m);
-const whoName=()=>!SESSION?'':SESSION.role==='admin'?'المدير العام':MNAME(SESSION.role);
+const whoName=()=>!SESSION?'':(SESSION.displayName|| (SESSION.role==='admin'?'المدير العام':MNAME(SESSION.role)));
 
 /* ============== واجهة عامة ============== */
 let toastT;
@@ -408,17 +844,28 @@ function toast(msg,type){
   const t=$('#toast');t.textContent=msg;t.className='on '+(type||'');
   clearTimeout(toastT);toastT=setTimeout(()=>t.className='',type==='err'?4200:2200);
 }
+function toastUndo(msg,fn){
+  const t=$('#toast');t.textContent=msg+' ';
+  const b=document.createElement('button');b.className='ub';b.textContent='↩ تراجع';
+  b.onclick=()=>{clearTimeout(toastT);t.className='';fn()};
+  t.appendChild(b);t.className='on act';
+  clearTimeout(toastT);toastT=setTimeout(()=>t.className='',8000);
+}
 function openModal(inner,wide){
   $('#modal-root').innerHTML='<div class="overlay" onmousedown="if(event.target===this)closeModal()"><div class="modal'+(wide?' wide':'')+'" role="dialog" aria-modal="true">'+inner+'</div></div>';
-  const f=$('#modal-root input,#modal-root select,#modal-root textarea');if(f)setTimeout(()=>f.focus(),30);
+  const f=$('#modal-root input,#modal-root select,#modal-root textarea');if(f)setTimeout(()=>{if(!$('#modal-root').contains(document.activeElement))f.focus()},30);
 }
 function closeModal(){$('#modal-root').innerHTML='';CONFIRM_CB=null}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-function confirmBox(msg,cb,okLabel){
-  CONFIRM_CB=cb;
-  openModal('<h3>تأكيد</h3><p style="margin:0 0 16px;line-height:1.9">'+esc(msg)+'</p><div class="actions"><button class="btn danger" onclick="const f=CONFIRM_CB;closeModal();f&&f()">'+esc(okLabel||'تأكيد')+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>');
+/* تأكيد: msg نص أو قائمة تحذيرات · word = كلمة لازم المستخدم يكتبها قبل ما يتفعّل الزرار (للعمليات الخطرة) */
+function confirmBox(msg,cb,okLabel,word){
+  CONFIRM_CB=cb;CF_WORD=word||'';
+  const body=Array.isArray(msg)?msg.map(x=>'• '+esc(x)).join('<br>'):esc(msg);
+  openModal('<h3>تأكيد</h3><p style="margin:0 0 16px;line-height:1.9">'+body+'</p>'+
+    (word?'<label class="f" style="margin-bottom:14px">اكتب «'+esc(word)+'» للتأكيد<input type="text" id="cf-w" autocomplete="off" oninput="$(\'#cf-ok\').disabled=this.value.trim()!==CF_WORD"></label>':'')+
+    '<div class="actions"><button class="btn danger" id="cf-ok"'+(word?' disabled':'')+' onclick="const f=CONFIRM_CB;closeModal();f&&f()">'+esc(okLabel||'تأكيد')+'</button><button class="btn light" onclick="closeModal()">إلغاء</button></div>');
 }
-function go(v){VIEW=v;EDITING=null;SHOWALL=false;render();window.scrollTo({top:0,behavior:'smooth'})}
+function go(v){VIEW=v;EDITING=null;SHOWALL=false;LOGF={o:'',from:'',to:'',q:''};render();window.scrollTo({top:0,behavior:'smooth'})}
 
 /* ============== الدخول ============== */
 function loginModal(msg){
@@ -456,21 +903,23 @@ async function doLogin(){
   }
   for(const k of Object.keys(DB.users)){
     const a=DB.users[k];
-    if(a.user.toLowerCase()===u&&a.pass===p){
-      setSession({role:k==='admin'?'admin':Number(k)});
+    if(a.active!==false&&a.user.toLowerCase()===u&&a.pass===p){
+      const rl=k==='admin'?'admin':(a.role!=null?a.role:Number(k));
+      setSession({role:rl,displayName:a.displayName||''});
+      auditLog('تسجيل دخول','دخول المستخدم '+whoName());
       closeModal();
-      if(k!=='admin')VIEW=Number(k);
-      render();toast('أهلاً '+whoName(),'ok');return;
+      if(rl!=='admin')VIEW=rl;
+      render();toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');return;
     }
   }
   $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
-function logout(){if(CLOUD&&FB)cw(()=>FB.signOut(FB.auth));setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
+function logout(){if(SESSION)auditLog('تسجيل خروج','خروج المستخدم '+whoName());if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
 
 /* ============== الرسم ============== */
 function renderHeader(){
   const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
-  $('#who').innerHTML=net+(SESSION
+  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
 }
@@ -498,6 +947,7 @@ function renderTabs(){
 }
 function render(keep){
   const snap=keep?snapForm():null;
+  const qf=!!(keep&&document.activeElement&&document.activeElement.id==='lg-q');
   renderHeader();renderTabs();
   const v=$('#view');
   if(CLOUD&&!CLOUD_READY){
@@ -509,6 +959,7 @@ function render(keep){
   if(VIEW==='dash')v.innerHTML=dashHTML();
   else if(VIEW==='settings')v.innerHTML=isAdmin()?settingsHTML():lockedHTML('صفحة الإدارة للمدير العام فقط');
   else{v.innerHTML=machineHTML(VIEW);if(canEdit(VIEW)){afterMachineRender(VIEW);restoreForm(snap)}}
+  if(qf){const x=$('#lg-q');if(x){x.focus();try{const l=x.value.length;x.setSelectionRange(l,l)}catch(e){}}}
 }
 function lockedHTML(txt){
   return '<div class="card lock"><div class="ic">🔒</div><div style="flex:1"><b>'+esc(txt)+'</b><div class="muted">سجّل الدخول للمتابعة</div></div><button class="btn primary" onclick="loginModal()">تسجيل الدخول</button></div>';
@@ -581,6 +1032,8 @@ function dashHTML(){
    '<div class="kpi" style="--k:#d97706"><div class="l">🚚 تسليمات اليوم</div><div class="v">'+fmt(todayDel)+'</div></div>'+
   '</div>';
 
+  const al=buildAlerts();
+  h+='<div class="card sec"><div class="sec-title"><h3>🔔 التنبيهات الذكية</h3>'+(al.length?'<span class="chip" style="margin:0">'+al.length+'</span>':'')+'</div><div class="alerts">'+alertsHTML(al,ALL_AL?0:5)+'</div></div>';
   h+='<div class="sec"><div class="sec-title"><h3>الماكينات</h3><span class="muted">اضغط على أي ماكينة لعرض تفاصيلها</span></div><div class="grid mcards">';
   for(const r of rows){
     const defect=r.t.prod?Math.round(r.t.pb/r.t.prod*1000)/10:0;
@@ -589,10 +1042,14 @@ function dashHTML(){
       '<div class="mc-big">'+fmt(r.t.stock)+'<small>في المخزن</small></div>'+
       '<div class="mc-row"><span class="g">سليم '+fmt(r.t.sg)+'</span><span class="b">معيب '+fmt(r.t.sb)+'</span></div>'+
       '<div class="bar" title="نسبة المعيب من إجمالي الإنتاج"><i style="width:'+Math.min(100,defect)+'%"></i></div>'+
-      '<div class="mc-foot"><span>نسبة المعيب: '+defect+'%</span><span>اليوم: إنتاج '+fmt(r.prod)+' · تسليم '+fmt(r.del)+'</span></div>'+
+      trendHTML(r.m,r.prod)+'<div class="mc-foot"><span>نسبة المعيب: '+defect+'%</span><span>اليوم: إنتاج '+fmt(r.prod)+' · تسليم '+fmt(r.del)+'</span></div>'+
     '</button>';
   }
   h+='</div></div>';
+
+  h+=perfHTML();
+  h+=planHTML();
+  h+=heatHTML();
 
   /* رسم مقارنة الماكينات */
   const labels=MACHINES.map(MNAME);
@@ -601,14 +1058,15 @@ function dashHTML(){
     {name:'التسليمات',color:'#f59e0b',values:rows.map(r=>r.t.del)},
     {name:'الرصيد بالمخزن',color:'#10b981',values:rows.map(r=>r.t.stock)}
   ];
-  const ds=dailySeries(RANGE),hasDaily=ds.series.some(s=>s.values.some(v=>v>0));
+  const ds=dailySeries(RANGE,METRIC),hasDaily=ds.series.some(s=>s.values.some(v=>v>0));
 
   h+='<div class="grid two sec">'+
    '<div class="card"><div class="sec-title"><h3>📊 مقارنة إنتاجية الماكينات</h3></div>'+legendHTML(cmp)+barChartSVG(labels,cmp)+'</div>'+
-   '<div class="card"><div class="sec-title"><h3>📈 الإنتاج اليومي</h3><div class="seg">'+
+   '<div class="card"><div class="sec-title"><h3>📈 '+({prod:'الإنتاج اليومي',def:'المعيب اليومي',del:'التسليمات اليومية'})[METRIC]+'</h3><div class="seg">'+
      [7,14,30].map(n=>'<button class="'+(RANGE===n?'on':'')+'" onclick="RANGE='+n+';render()">'+n+' يوم</button>').join('')+'</div></div>'+
+     '<div class="seg" style="margin-bottom:8px">'+[['prod','🏭 الإنتاج'],['def','⚠️ المعيب'],['del','🚚 التسليمات']].map(x=>'<button class="'+(METRIC===x[0]?'on':'')+'" onclick="METRIC=\''+x[0]+'\';render()">'+x[1]+'</button>').join('')+'</div>'+
      legendHTML(ds.series)+
-     (hasDaily?lineChartSVG(ds.labels,ds.series):'<div class="empty">لا يوجد إنتاج يومي مُدخل خلال هذه الفترة.<br>سيظهر الرسم هنا بمجرد إدخال أول إنتاج للماكينات.</div>')+
+     (hasDaily?lineChartSVG(ds.labels,ds.series):'<div class="empty">لا توجد بيانات مُدخلة خلال هذه الفترة.<br>سيظهر الرسم هنا بمجرد إدخال أول حركة.</div>')+
    '</div></div>';
 
   /* المخزون حسب الفئة */
@@ -645,6 +1103,9 @@ function machineHTML(m){
    '<div class="tile" style="--t:#0ea5e9"><div class="l">إنتاج اليوم</div><div class="v">'+fmt(sum(te,e=>e.g+e.b))+'</div></div>'+
   '</div>';
 
+  const mal=buildAlerts().filter(a=>a.m===m);
+  if(mal.length)h+='<div class="sec alerts">'+alertsHTML(mal,0,true)+'</div>';
+
   /* نموذج الإدخال */
   if(!ce){
     h+='<div class="sec">'+lockedHTML('الإدخال والتعديل متاح لمشغّل '+MNAME(m)+' أو للمدير العام فقط')+'</div>';
@@ -679,35 +1140,17 @@ function machineHTML(m){
       '<div class="oc-s"><div class="a"><div class="l">سليم</div><div class="v">'+fmt(x.sg)+'</div></div><div class="c"><div class="l">معيب</div><div class="v">'+fmt(x.sb)+'</div></div><div class="d"><div class="l">الإجمالي</div><div class="v">'+fmt(x.stock)+'</div></div></div>'+
       '<div class="qbar" title="المنتج من كمية الأمر"><i style="width:'+Math.min(100,x.prod/qtyOf(o)*100).toFixed(1)+'%"></i></div>'+
       '<div class="oc-f" style="margin-bottom:4px"><span>المنتج '+fmt(x.prod)+' من '+fmt(qtyOf(o))+' فرخ</span><span>المتبقي '+fmt(Math.max(0,qtyOf(o)-x.prod))+'</span></div>'+
-      '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>'+fmtTime(o.modified)+'</span></div>'+
+      fcHTML(o)+
+      '<div class="oc-f"><span>تسليم '+fmt(x.del)+'</span><span>معيب '+(x.prod?(x.pb/x.prod*100).toFixed(1):'0')+'%</span><span>'+fmtTime(o.modified)+'</span></div>'+
+      '<div class="oc-b"><button class="btn light sm" onclick="orderDetail(\''+o.id+'\')">📈 تفاصيل الأمر</button></div>'+
       (ce?'<div class="oc-b"><button class="btn primary sm" onclick="pickOrder('+m+',\''+o.id+'\')">＋ إدخال</button><button class="btn light sm" onclick="orderModal('+m+',\''+o.id+'\')">تعديل</button>'+(isAdmin()?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">حذف</button>':'')+'</div>':'')+
     '</div>';
   }
   if(!os.length)h+='<div class="empty" style="grid-column:1/-1">لا توجد أوامر</div>';
   h+='</div></div>';
 
-  /* سجل الحركات */
-  const bal={};os.forEach(o=>Object.assign(bal,runningBalances(o)));
-  const oMap={};os.forEach(o=>oMap[o.id]=o);
-  const ents=DB.entries.filter(e=>oMap[e.order]).sort((a,b)=>b.date.localeCompare(a.date)||String(b.ts).localeCompare(String(a.ts)));
-  const shown=SHOWALL?ents:ents.slice(0,40);
-  h+='<div class="card sec"><div class="sec-title"><h3>📒 سجل الإنتاج والتسليمات</h3><span class="muted">'+ents.length+' حركة</span></div>';
-  if(!ents.length)h+='<div class="empty">لا توجد حركات مُدخلة بعد</div>';
-  else{
-    h+='<div class="tw"><table><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
-    for(const e of shown){
-      const o=oMap[e.order],b=bal[e.id]||{sg:0,sb:0};
-      h+='<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.by||'')+'</small></td>'+
-        '<td class="l"><b class="ltr">'+esc(o.number)+'</b><small>'+esc(o.denom)+(e.note?' · '+esc(e.note):'')+'</small></td>'+
-        '<td class="g"><b>'+fmt(e.g)+'</b></td><td class="b"><b>'+fmt(e.b)+'</b></td><td><b>'+fmt(e.g+e.b)+'</b></td>'+
-        '<td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td>'+
-        '<td class="g">'+fmt(b.sg)+'</td><td class="b">'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td>'+
-        (ce?'<td><button class="btn light sm" onclick="editEntry(\''+e.id+'\')">تعديل</button> <button class="btn danger sm" onclick="delEntry(\''+e.id+'\')">حذف</button></td>':'')+'</tr>';
-    }
-    h+='</tbody></table></div>';
-    if(ents.length>40)h+='<div class="actions"><button class="btn light sm" onclick="SHOWALL='+(!SHOWALL)+';render()">'+(SHOWALL?'عرض آخر 40 فقط':'عرض كل الحركات ('+ents.length+')')+'</button></div>';
-  }
-  h+='</div></div>';
+  h+=logCardHTML(m);
+  h+='</div>';
   return h;
 }
 function afterMachineRender(m){
@@ -747,8 +1190,9 @@ function pickOrder(m,id){
 }
 
 /* ============== العمليات: الحركات ============== */
-function saveEntry(m){
-  const err=t=>{$('#f-err').textContent=t;return false};
+const entSum=e=>'سليم '+fmt(e.g)+' / معيب '+fmt(e.b)+' / تسليم '+fmt((e.dg||0)+(e.db||0));
+function saveEntry(m,force){
+  const err=t=>{const el=$('#f-err');if(el)el.textContent=t;return false};
   const o=DB.orders.find(x=>x.id===$('#f-order').value);
   if(!o||o.machine!==m)return err('اختر أمر الشغل');
   if(!canEdit(m))return err('ليس لديك صلاحية');
@@ -756,13 +1200,31 @@ function saveEntry(m){
   const g=parseNum($('#f-g').value),b=parseNum($('#f-b').value),dg=parseNum($('#f-dg').value),db=parseNum($('#f-db').value);
   if([g,b,dg,db].some(isNaN))return err('الأرقام يجب أن تكون صحيحة وغير سالبة (بدون كسور أو حروف)');
   if(g+b+dg+db===0)return err('أدخل قيمة واحدة على الأقل');
+  const old=EDITING?DB.entries.find(e=>e.id===EDITING):null;
   const rec={id:EDITING||uid('e'),order:o.id,m:o.machine,date,g,b,dg,db,note:$('#f-note').value.trim(),by:whoName(),ts:new Date().toISOString()};
   const test=EDITING?DB.entries.map(e=>e.id===EDITING?rec:e):DB.entries.concat(rec);
   const t=totals(o,test);
   if(t.prod>qtyOf(o))return err('إجمالي إنتاج الأمر سيصبح '+fmt(t.prod)+' وهو أكبر من كمية الأمر ('+fmt(qtyOf(o))+' فرخ) — المتبقي المتاح للإنتاج: '+fmt(Math.max(0,qtyOf(o)-(t.prod-g-b)))+' فرخ');
   if(t.sg<0)return err('تسليم السليم ('+fmt(dg)+') أكبر من المتاح بالمخزن ('+fmt(t.sg+dg)+')');
   if(t.sb<0)return err('تسليم المعيب ('+fmt(db)+') أكبر من المتاح بالمخزن ('+fmt(t.sb+db)+')');
+  err('');
+  /* حماية من أخطاء الإدخال: تحذير يقدر المستخدم يتجاوزه لو متأكد */
+  if(!force){
+    const warns=[],today=todayStr();
+    if(date>today)warns.push('التاريخ ('+fmtDate(date)+') بعد تاريخ اليوم');
+    else if(daysBetween(date,today)>45)warns.push('التاريخ ('+fmtDate(date)+') قديم — قبل '+daysBetween(date,today)+' يوم');
+    if(DB.entries.some(e=>e.id!==rec.id&&e.order===o.id&&e.date===date&&e.g===g&&e.b===b&&e.dg===dg&&e.db===db))
+      warns.push('توجد حركة مطابقة تماماً لهذا الأمر في نفس التاريخ — تأكد أنك لا تسجّلها مرتين');
+    const pv=entsOf(o.id).filter(e=>e.id!==rec.id&&(e.g||0)+(e.b||0)>0);
+    if(pv.length>=3&&g+b>=20000){
+      const avg=sum(pv,e=>(e.g||0)+(e.b||0))/pv.length;
+      if(g+b>avg*4)warns.push('إنتاج اليوم ('+fmt(g+b)+') أكبر بكثير من المتوسط المعتاد لهذا الأمر (≈ '+fmt(Math.round(avg))+') — تأكد من عدم وجود صفر زائد');
+    }
+    if(warns.length){confirmBox(warns,()=>saveEntry(m,true),'متأكد، احفظ');return false}
+  }
   DB.entries=test;o.modified=rec.ts;cloudEntry(rec);cloudOrderTouch(o);
+  if(old)auditLog('تعديل حركة',MNAME(m)+' · أمر '+o.number+' · '+fmtDate(old.date)+': ['+entSum(old)+'] ← ['+entSum(rec)+']');
+  else auditLog('إضافة حركة',MNAME(m)+' · أمر '+o.number+' · '+fmtDate(rec.date)+': ['+entSum(rec)+']'+(rec.note?' · ملاحظة: '+rec.note:''));
   const was=!!EDITING;EDITING=null;LASTDATE=date;SEL[m]=o.id;
   persist();render();toast(was?'تم حفظ التعديل ✓':'تم الحفظ ✓ — رصيد الأمر: '+fmt(t.stock),'ok');
 }
@@ -779,8 +1241,20 @@ function delEntry(id){
   const rest=DB.entries.filter(x=>x.id!==id),t=totals(o,rest);
   if(t.sg<0||t.sb<0){toast('لا يمكن الحذف: سيصبح رصيد الأمر بالسالب بسبب تسليمات مسجلة','err');return}
   confirmBox('حذف حركة '+fmtDate(e.date)+' (سليم '+fmt(e.g)+' / معيب '+fmt(e.b)+')؟',()=>{
-    DB.entries=rest;o.modified=new Date().toISOString();cloudDelEntry(id);cloudOrderTouch(o);persist();render();toast('تم الحذف');
+    DB.entries=rest;o.modified=new Date().toISOString();cloudDelEntry(id);cloudOrderTouch(o);
+    auditLog('حذف حركة',MNAME(o.machine)+' · أمر '+o.number+' · '+fmtDate(e.date)+': ['+entSum(e)+']'+(e.by?' · أدخلها '+e.by:''));
+    persist();render();
+    toastUndo('تم حذف الحركة',()=>undoDelEntry(e));
   },'حذف');
+}
+function undoDelEntry(e){
+  const o=DB.orders.find(x=>x.id===e.order);if(!o||!canEdit(o.machine))return;
+  if(DB.entries.some(x=>x.id===e.id))return;
+  const test=DB.entries.concat(e),t=totals(o,test);
+  if(t.prod>qtyOf(o)||t.sg<0||t.sb<0){toast('تعذر الاسترجاع: الأرصدة تغيّرت بعد الحذف','err');return}
+  DB.entries=test;o.modified=new Date().toISOString();cloudEntry(e);cloudOrderTouch(o);
+  auditLog('استرجاع حركة محذوفة',MNAME(o.machine)+' · أمر '+o.number+' · '+fmtDate(e.date)+': ['+entSum(e)+']');
+  persist();render();toast('تم استرجاع الحركة ✓','ok');
 }
 
 /* ============== العمليات: أوامر الشغل ============== */
@@ -816,10 +1290,20 @@ function saveOrder(m,id){
     const t=totals({...o,og,ob},DB.entries);
     if(t.sg<0||t.sb<0)return err('هذا الرصيد الافتتاحي يجعل رصيد الأمر بالسالب');
     if(t.prod>qty)return err('المنتج فعلياً ('+fmt(t.prod)+') أكبر من الكمية المكتوبة — اكتب كمية لا تقل عن المنتج');
+    const chg=[];
+    if(o.number!==number)chg.push('الرقم '+o.number+' ← '+number);
+    if((o.denom||'')!==denom)chg.push('الفئة «'+(o.denom||'—')+'» ← «'+(denom||'—')+'»');
+    if(qtyOf(o)!==qty)chg.push('الكمية '+fmt(qtyOf(o))+' ← '+fmt(qty));
+    if((o.og||0)!==og)chg.push('افتتاحي سليم '+fmt(o.og)+' ← '+fmt(og));
+    if((o.ob||0)!==ob)chg.push('افتتاحي معيب '+fmt(o.ob)+' ← '+fmt(ob));
+    if((o.notes||'')!==notes)chg.push('الملاحظات');
+    const oldNo=o.number;
     Object.assign(o,{number,denom,notes,og,ob,qty,modified:now});cloudOrder(o);
+    if(chg.length)auditLog('تعديل أمر',MNAME(m)+' · '+oldNo+': '+chg.join(' · '));
   }else{
     const n={id:uid('o'),machine:m,number,denom,notes,og,ob,qty,modified:now};
     DB.orders.push(n);SEL[m]=n.id;cloudOrder(n);
+    auditLog('أمر جديد',MNAME(m)+' · '+number+(denom?' · '+denom:'')+' · كمية '+fmt(qty));
   }
   persist();closeModal();render();toast('تم حفظ الأمر ✓','ok');
 }
@@ -829,6 +1313,8 @@ function delOrder(id){
   const n=DB.entries.filter(e=>e.order===id).length;
   confirmBox('حذف الأمر '+o.number+(n?' مع '+n+' حركة مسجلة عليه':'')+' نهائياً؟',()=>{
     const eids=DB.entries.filter(e=>e.order===id).map(e=>e.id);
+    saveRestorePoint('قبل حذف الأمر '+o.number);
+    auditLog('حذف أمر',MNAME(o.machine)+' · '+o.number+(eids.length?' مع '+eids.length+' حركة':''));
     DB.orders=DB.orders.filter(x=>x.id!==id);DB.entries=DB.entries.filter(e=>e.order!==id);
     if(CLOUD&&FB){const u={};u['orders/'+id]=null;eids.forEach(x=>u['entries/'+x]=null);cw(()=>FB.update(FB.ref(FB.db),u))}
     persist();render();toast('تم حذف الأمر');
@@ -841,20 +1327,12 @@ function settingsHTML(){
   let h='<div class="mhead"><div><h2 style="color:var(--brand)">⚙️ الإدارة</h2><p>الحسابات والنسخ الاحتياطي</p></div></div>';
   if(CLOUD){
     h+='<div class="card"><h3>☁️ المزامنة والحسابات</h3>'+
-      '<div class="muted" style="line-height:1.9">البيانات متزامنة لحظياً على Firebase بين كل الأجهزة. حسابات الدخول تُدار من لوحة Firebase: <b>Authentication ← Users</b> (غيّر كلمات المرور أو أضف حسابات من هناك).<br>أسماء المستخدمين المعتمدة: <b class="ltr">admin</b> و <b class="ltr">machine1</b> إلى <b class="ltr">machine4</b>.</div>'+
+      '<div class="muted" style="line-height:1.9">البيانات متزامنة لحظياً على Firebase بين كل الأجهزة. إضافة المستخدمين وتغيير كلمات السر من قسم «المستخدمون» أدناه، وتحتاج كلمة سر الموافقة.</div>'+
       '<div class="actions"><span class="chip-user" style="background:#eef2ff;color:#3730a3">'+(ONLINE?'🟢 متصل بالسحابة':'🔴 غير متصل')+'</span>'+
       '<span class="chip-user" style="background:#f1f5f9;color:#334155">'+DB.orders.length+' أمر · '+DB.entries.length+' حركة</span>'+
       (DB.orders.length?'':'<button class="btn primary" onclick="seedCloud()">رفع بيانات البداية (من ملف Excel)</button>')+'</div></div>';
-  }else{
-  h+='<div class="card"><h3>🔑 الحسابات</h3><div class="muted" style="margin-bottom:10px">اسم المستخدم وكلمة المرور لكل ماكينة (تعدّل بيانات ماكينتها فقط) وحساب المدير العام (يعدّل كل شيء).</div>';
-  for(const k of keys){
-    const a=DB.users[k];
-    h+='<div class="acc"><div class="nm">'+(k==='admin'?'👑 المدير العام':MNAME(k))+'</div>'+
-      '<input type="text" id="u-'+k+'" value="'+esc(a.user)+'" placeholder="اسم المستخدم" autocomplete="off" style="direction:ltr;text-align:right">'+
-      '<input type="text" id="p-'+k+'" value="'+esc(a.pass)+'" placeholder="كلمة المرور" autocomplete="off" style="direction:ltr;text-align:right"></div>';
   }
-  h+='<div class="err-txt" id="s-err"></div><div class="actions"><button class="btn primary" onclick="saveUsers()">💾 حفظ الحسابات</button></div></div>';
-  }
+  if(isAdmin())h+=usersHTML();
 
   h+='<div class="card sec"><h3>📥 استيراد من ملف Excel</h3>'+
    '<div class="muted" style="margin-bottom:12px;line-height:1.9">اختر ملف Excel بنفس شكل جدول «مخزن الترقيمات» (عناوين: رقم الأمر · الفئة · سليم · معيب · ملاحظات · تاريخ آخر تعديل، وأسماء الماكينات «ترقيم ١..٤»). هتظهر معاينة قبل الحفظ، وأرقام السليم/المعيب في الملف تُعتبر الرصيد الحالي لكل أمر.</div>'+
@@ -863,25 +1341,17 @@ function settingsHTML(){
    '<div class="muted" style="margin-bottom:12px">'+(CLOUD?'حمّل نسخة احتياطية بشكل دوري كإجراء احتياط. «استبدال» و«دمج» يكتبان مباشرة على السحابة لكل الأجهزة.':'البيانات تُحفظ على هذا الجهاز فقط. لجمع بيانات عدة أجهزة: صدّر نسخة من كل جهاز ثم استخدم «دمج نسخة» على الجهاز الرئيسي.')+'</div>'+
    '<div class="actions" style="margin-top:0">'+
    '<button class="btn primary" onclick="exportJSON()">⬇️ تصدير نسخة (JSON)</button>'+
-   '<button class="btn green" onclick="exportCSV()">📄 تصدير السجل (Excel/CSV)</button>'+
+   '<button class="btn green" onclick="exportXLSX()">📊 تصدير Excel (.xlsx)</button>'+
+   '<button class="btn light" onclick="exportCSV()">📄 تصدير CSV</button>'+
    '<button class="btn light" onclick="pickFile(\'merge\')">🔀 دمج نسخة من جهاز آخر</button>'+
    '<button class="btn light" onclick="pickFile(\'replace\')">♻️ استبدال البيانات بنسخة</button>'+
    '</div></div>';
 
+  h+=restoreHTML()+auditHTML();
   h+='<div class="card sec" style="border:1px solid #fecdd3"><h3 style="color:#be123c">منطقة الخطر</h3>'+
    '<div class="muted" style="margin-bottom:10px">يمسح كل الحركات المسجلة ويعيد الأرصدة الافتتاحية من ملف Excel الأصلي.</div>'+
    '<button class="btn danger" onclick="resetAll()">إعادة ضبط البيانات للوضع الأصلي</button></div>';
   return h;
-}
-function saveUsers(){
-  const keys=['admin',1,2,3,4],next={},seen=new Set();
-  for(const k of keys){
-    const u=$('#u-'+k).value.trim(),p=$('#p-'+k).value;
-    if(!u||!p){$('#s-err').textContent='لا يمكن ترك اسم مستخدم أو كلمة مرور فارغة';return}
-    if(seen.has(u.toLowerCase())){$('#s-err').textContent='اسم المستخدم «'+u+'» مكرر — اختر أسماء مختلفة';return}
-    seen.add(u.toLowerCase());next[k]={user:u,pass:p};
-  }
-  DB.users=next;persist();$('#s-err').textContent='';toast('تم حفظ الحسابات ✓','ok');
 }
 function download(name,text,type){
   const b=new Blob([text],{type});const a=document.createElement('a');
@@ -889,11 +1359,12 @@ function download(name,text,type){
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},600);
 }
 function exportJSON(){
-  const out=CLOUD?{v:1,orders:DB.orders,entries:DB.entries}:DB;
-  download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
+  const out={v:2,orders:DB.orders,entries:DB.entries,audit:CLOUD?[...(AUDIT||[]),...AUDIT_LOCAL]:((DB.audit||[]).slice())};
+  markBackup();download('tarqeem-backup-'+todayStr()+'.json',JSON.stringify(out,null,1),'application/json');toast('تم تنزيل النسخة','ok');
 }
 function exportCSV(){
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  /* حماية من حقن المعادلات: النص اللي يبدأ بـ = + - @ يتحول لنص عادي في Excel */
+  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
   const OM={};DB.orders.forEach(o=>OM[o.id]=o);
   const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
   [...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{
@@ -908,24 +1379,38 @@ function exportCSV(){
 }
 let IMPORT_MODE='merge';
 function pickFile(mode){IMPORT_MODE=mode;const f=$('#file-in');f.value='';f.click()}
+/* يطبّق مجموعة بيانات كاملة (استبدال / استرجاع) محلياً أو على السحابة */
+function applyDataset(d){
+  if(CLOUD&&FB){
+    const O={},E={},A={};
+    d.orders.forEach(o=>O[o.id]=plain(o));
+    d.entries.forEach(e=>{const x=plain(e);if(x.m==null){const oo=d.orders.find(z=>z.id===x.order);if(oo)x.m=oo.machine}E[x.id]=x});
+    (d.audit||[]).forEach(a=>{if(a&&a.id)A[a.id]=plain(a)});
+    const patch={orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null};
+    if(Array.isArray(d.audit))patch.audit=Object.keys(A).length?A:null;
+    cw(()=>FB.update(FB.ref(FB.db),patch));
+    return;
+  }
+  const keepUsers=DB.users,keepAudit=DB.audit,keepGate=DB.gate;
+  DB={v:1,users:keepUsers||seed().users,gate:keepGate,orders:d.orders,entries:d.entries,audit:d.audit||keepAudit||[]};
+  persist();render();
+}
 $('#file-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
+  if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
   const r=new FileReader();
   r.onload=()=>{
     let d;try{d=JSON.parse(r.result)}catch(e){toast('الملف غير صالح','err');return}
     if(!d||!Array.isArray(d.orders)||!Array.isArray(d.entries)){toast('هذا ليس ملف نسخة احتياطية صالح','err');return}
     if(IMPORT_MODE==='replace'){
-      confirmBox('سيتم استبدال كل البيانات الحالية بمحتوى الملف. متأكد؟',()=>{
-        if(CLOUD&&FB){
-          const O={},E={};
-          d.orders.forEach(o=>O[o.id]=plain(o));
-          d.entries.forEach(e=>{const x=withM.call(null,{...e}); if(x.m==null){const oo=d.orders.find(z=>z.id===e.order);if(oo)x.m=oo.machine} E[x.id]=plain(x)});
-          cw(()=>FB.update(FB.ref(FB.db),{orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null}));
-          toast('تم الاستبدال ✓','ok');return;
-        }
-        DB=d;if(!DB.users)DB.users=seed().users;persist();render();toast('تم الاستبدال ✓','ok');
-      },'استبدال');
+      confirmBox('سيتم استبدال كل البيانات الحالية ('+DB.orders.length+' أمر / '+DB.entries.length+' حركة) بمحتوى الملف ('+d.orders.length+' أمر / '+d.entries.length+' حركة). تُحفظ نسخة تلقائية قبل الاستبدال للرجوع إليها من «نقطة الاسترجاع».',()=>{
+        saveRestorePoint('قبل استبدال البيانات');
+        applyDataset(d);
+        auditLog('استبدال البيانات','من ملف: '+d.orders.length+' أمر / '+d.entries.length+' حركة');
+        toast('تم الاستبدال ✓','ok');
+      },'استبدال','استبدال');
     }else{
+      saveRestorePoint('قبل دمج نسخة');
       const oi=new Set(DB.orders.map(o=>o.id)),ei=new Set(DB.entries.map(e=>e.id));
       let no=0,ne=0;
       d.orders.forEach(o=>{
@@ -933,20 +1418,26 @@ $('#file-in').addEventListener('change',ev=>{
         else{const cur=DB.orders.find(x=>x.id===o.id);if(cur&&String(o.modified)>String(cur.modified)){cur.modified=o.modified;cloudOrderTouch(cur)}}
       });
       d.entries.forEach(e=>{if(!ei.has(e.id)&&oi.has(e.order)){const x=withM(e);DB.entries.push(x);cloudEntry(x);ei.add(e.id);ne++}});
+      if(!CLOUD&&Array.isArray(d.audit)){const ai=new Set((DB.audit||[]).map(a=>a.id));DB.audit=DB.audit||[];d.audit.forEach(a=>{if(a&&a.id&&!ai.has(a.id)){DB.audit.push(a);ai.add(a.id)}});if(DB.audit.length>500)DB.audit=DB.audit.slice(-500)}
+      auditLog('دمج نسخة',ne+' حركة جديدة و '+no+' أمر جديد');
       persist();render();toast('تم الدمج: '+ne+' حركة جديدة و '+no+' أمر جديد','ok');
     }
   };
   r.readAsText(f);
 });
 function resetAll(){
-  confirmBox('سيتم مسح كل الحركات المسجلة والرجوع للأرصدة الافتتاحية الأصلية (الحسابات تبقى كما هي). متأكد؟',()=>{
+  if(!isAdmin())return;
+  confirmBox('سيتم مسح كل الحركات المسجلة والرجوع للأرصدة الافتتاحية الأصلية على كل الأجهزة (الحسابات تبقى كما هي). تُحفظ نسخة تلقائية قبل ذلك للرجوع إليها.',()=>{
+    saveRestorePoint('قبل إعادة الضبط');
     if(CLOUD&&FB){
       const O={};seed().orders.forEach(o=>O[o.id]=plain(o));
       cw(()=>FB.update(FB.ref(FB.db),{orders:O,entries:null}));
-      toast('تمت إعادة الضبط');return;
+    }else{
+      const u=DB.users,au=DB.audit,gt=DB.gate;DB=seed();DB.users=u;DB.gate=gt;DB.audit=au||[];persist();render();
     }
-    const u=DB.users;DB=seed();DB.users=u;persist();render();toast('تمت إعادة الضبط');
-  },'إعادة ضبط');
+    auditLog('إعادة ضبط البيانات','الرجوع للأرصدة الافتتاحية الأصلية');
+    toast('تمت إعادة الضبط');
+  },'إعادة ضبط','مسح');
 }
 
 /* ============== استيراد من Excel ============== */
@@ -1071,6 +1562,7 @@ function buildImportPlan(rows){
 function applyImport(){
   if(!isAdmin())return;
   const plan=buildImportPlan(IMPORT_ROWS),now=new Date().toISOString(),up={};
+  if(IMPORT_SEL.size)saveRestorePoint('قبل استيراد Excel');
   let nn=0,nu=0;
   for(const p of plan){
     if(!IMPORT_SEL.has(p.key)||(p.status!=='new'&&p.status!=='upd'))continue;
@@ -1086,6 +1578,7 @@ function applyImport(){
   }
   if(!nn&&!nu){toast('لا يوجد ما يُستورد','err');return}
   if(CLOUD&&FB)cw(()=>FB.update(FB.ref(FB.db),up));
+  auditLog('استيراد Excel',nn+' أمر جديد · '+nu+' أمر محدّث');
   persist();closeModal();render();
   toast('تم الاستيراد ✓ — '+nn+' أمر جديد · '+nu+' أمر محدّث','ok');
 }
@@ -1155,6 +1648,530 @@ $('#xl-in').addEventListener('change',ev=>{
   };
   r.readAsArrayBuffer(f);
 });
+
+/* ============== أدوات التاريخ والإحصاء ============== */
+function addDays(s,n){const p=String(s).split('-');return ymd(new Date(+p[0],+p[1]-1,+p[2]+n))}
+function daysBetween(a,b){const p=s=>{const x=String(s).split('-');return Date.UTC(+x[0],+x[1]-1,+x[2])};return Math.round((p(b)-p(a))/864e5)}
+const WD=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function dayName(s){const p=String(s).split('-');return WD[new Date(+p[0],+p[1]-1,+p[2]).getDay()]}
+/* مجموع الإنتاج والتسليمات لكل ماكينة في فترة (تواريخ نصية YYYY-MM-DD) — مرور واحد على الحركات */
+function statsBy(from,to){
+  const OM=orderMachineMap(),r={};
+  MACHINES.forEach(m=>r[m]={g:0,b:0,dg:0,db:0,n:0});
+  for(const e of DB.entries){
+    if(e.date<from||e.date>to)continue;
+    const m=OM[e.order];if(!m)continue;
+    const x=r[m];x.g+=e.g||0;x.b+=e.b||0;x.dg+=e.dg||0;x.db+=e.db||0;x.n++;
+  }
+  return r;
+}
+function lastActivity(o){
+  let d=String(o.modified||'').slice(0,10);
+  for(const e of entsOf(o.id))if(e.date>d)d=e.date;
+  return d;
+}
+
+/* ============== توقع اكتمال الأمر ============== */
+function forecast(o){
+  const t=totals(o,DB.entries),rem=qtyOf(o)-t.prod;
+  if(rem<=0)return {done:true};
+  const today=todayStr(),from=addDays(today,-13);
+  let p=0;for(const e of entsOf(o.id))if(e.date>=from&&e.date<=today)p+=(e.g||0)+(e.b||0);
+  if(!p)return null;
+  const rate=p/14,days=Math.ceil(rem/rate);
+  return {rate,days,date:addDays(today,Math.min(days,3650))};
+}
+function fcHTML(o){
+  const f=forecast(o);
+  if(!f)return '';
+  if(f.done)return '<div class="fc">🏁 <b>اكتملت كمية الأمر</b></div>';
+  return '<div class="fc">⏳ متوقع الاكتمال '+(f.days>365?'<b>بعد أكثر من سنة</b>':'بعد <b>≈ '+fmt(f.days)+' يوم</b> ('+fmtDate(f.date)+')')+' · المعدل '+fmt(Math.round(f.rate))+' فرخ/يوم</div>';
+}
+
+/* ============== التنبيهات الذكية ============== */
+function buildAlerts(){
+  const out=[],today=todayStr(),st=statsBy(addDays(today,-6),today),st1=statsBy(today,today);
+  const now=new Date(),hr=now.getHours(),notFri=now.getDay()!==5;
+  for(const m of MACHINES){
+    const s=st[m],prod=s.g+s.b;
+    if(prod>=5000){
+      const d=s.b/prod*100;
+      if(d>=DEFECT_WARN)out.push({lvl:d>=DEFECT_WARN*1.5?'hi':'md',m,ic:'⚠️',txt:MNAME(m)+': نسبة المعيب آخر 7 أيام '+d.toFixed(1)+'% (الحد المقبول '+DEFECT_WARN+'%)'});
+    }
+    if(hr>=15&&notFri&&ordersOf(m).length&&!st1[m].n)
+      out.push({lvl:'lo',m,ic:'📝',txt:MNAME(m)+': لم تُسجَّل أي حركة اليوم حتى الآن'});
+  }
+  for(const o of DB.orders){
+    const t=totals(o,DB.entries),q=qtyOf(o),la=lastActivity(o),idle=la?daysBetween(la,today):0;
+    if(t.prod>=q){
+      if(idle<=7)out.push({lvl:'lo',m:o.machine,ic:'🏁',txt:MNAME(o.machine)+' · الأمر '+o.number+': اكتملت كمية الأمر ('+fmt(q)+' فرخ)'});
+    }else if(t.prod/q>=NEAR_DONE){
+      out.push({lvl:'md',m:o.machine,ic:'📈',txt:MNAME(o.machine)+' · الأمر '+o.number+': قارب على الاكتمال ('+Math.round(t.prod/q*100)+'%) — متبقي '+fmt(q-t.prod)+' فرخ، جهّز الأمر التالي'});
+    }
+    if(t.stock>0&&idle>=IDLE_DAYS)
+      out.push({lvl:'lo',m:o.machine,ic:'🕸️',txt:MNAME(o.machine)+' · الأمر '+o.number+': رصيد راكد '+fmt(t.stock)+' فرخ — بدون حركة منذ '+idle+' يوم'});
+  }
+  if(isAdmin()&&DB.entries.length){const d=backupAge();if(d==null||d>=7)out.push({lvl:'md',m:null,ic:'💾',txt:d==null?'لم يتم تنزيل نسخة احتياطية من هذا الجهاز من قبل — صدّر نسخة (JSON أو Excel) من صفحة الإدارة':'آخر نسخة احتياطية منذ '+d+' يوم — يُفضّل تصدير نسخة جديدة من صفحة الإدارة'})}
+  const rank={hi:0,md:1,lo:2};
+  return out.sort((a,b)=>rank[a.lvl]-rank[b.lvl]);
+}
+function alertsHTML(list,limit,noOpen){
+  if(!list.length)return '<div class="al lo"><span class="ic">✅</span><span>لا توجد تنبيهات — كل المؤشرات ضمن الحدود المعتادة.</span></div>';
+  const shown=limit?list.slice(0,limit):list;
+  let h=shown.map(a=>'<div class="al '+a.lvl+'"><span class="ic">'+a.ic+'</span><span style="flex:1">'+esc(a.txt)+'</span>'+(a.m&&!noOpen?'<button class="btn light sm" onclick="go('+a.m+')">فتح</button>':'')+'</div>').join('');
+  if(limit&&list.length>limit)h+='<button class="btn light sm" onclick="ALL_AL=true;render()">عرض كل التنبيهات ('+list.length+')</button>';
+  else if(ALL_AL&&list.length>5&&!noOpen)h+='<button class="btn light sm" onclick="ALL_AL=false;render()">عرض أقل</button>';
+  return h;
+}
+function perfHTML(){
+  const today=todayStr(),st=statsBy(addDays(today,-6),today);
+  const rows=MACHINES.map(m=>{const s=st[m],prod=s.g+s.b;return {m,prod,def:prod?s.b/prod*100:null,del:s.dg+s.db,avg:prod/7}});
+  const maxP=Math.max(...rows.map(r=>r.prod));
+  /* شارة «الأقل معيباً» تظهر فقط لو فيه فائز واضح (مش لو الماكينات متعادلة) */
+  const elig=rows.filter(r=>r.def!=null&&r.prod>=1000),rd=r=>Math.round(r.def*10);
+  const minD=elig.length?Math.min(...elig.map(rd)):null,showBest=minD!=null&&elig.filter(r=>rd(r)===minD).length<elig.length;
+  return '<div class="card sec"><div class="sec-title"><h3>🏆 أداء آخر 7 أيام</h3><span class="muted">مقارنة بين الماكينات</span></div><div class="tw"><table style="min-width:560px"><thead><tr><th>الماكينة</th><th>الإنتاج</th><th>متوسط يومي</th><th>نسبة المعيب</th><th>التسليمات</th><th>التميّز</th></tr></thead><tbody>'+
+   rows.map(r=>'<tr><td class="l"><b style="color:'+MCOL[r.m]+'">'+MNAME(r.m)+'</b></td><td><b>'+fmt(r.prod)+'</b></td><td>'+fmt(Math.round(r.avg))+'</td><td>'+(r.def==null?'—':r.def.toFixed(1)+'%')+'</td><td>'+fmt(r.del)+'</td><td>'+
+     (r.prod>0&&r.prod===maxP?'<span class="badge" style="--mc:#d97706">🥇 الأعلى إنتاجاً</span> ':'')+
+     (showBest&&r.def!=null&&r.prod>=1000&&rd(r)===minD?'<span class="badge" style="--mc:#059669">🎯 الأقل معيباً</span>':'')+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+}
+
+/* ============== سجل الحركات: بحث وفلاتر ============== */
+function logFiltersHTML(os){
+  return '<div class="filters">'+
+   '<label class="f">الأمر<select id="lg-o" onchange="logFilter()"><option value="">كل الأوامر</option>'+os.map(o=>'<option value="'+o.id+'"'+(LOGF.o===o.id?' selected':'')+'>'+esc(o.number)+(o.denom?' — '+esc(o.denom):'')+'</option>').join('')+'</select></label>'+
+   '<label class="f">من تاريخ<input type="date" id="lg-f" value="'+esc(LOGF.from)+'" onchange="logFilter()"></label>'+
+   '<label class="f">إلى تاريخ<input type="date" id="lg-t" value="'+esc(LOGF.to)+'" onchange="logFilter()"></label>'+
+   '<label class="f">بحث (ملاحظة / مستخدم / فئة)<input type="text" id="lg-q" value="'+esc(LOGF.q)+'" placeholder="اكتب للبحث…" autocomplete="off" oninput="logFilter()"></label></div>';
+}
+function logFilter(){
+  LOGF={o:$('#lg-o').value,from:$('#lg-f').value,to:$('#lg-t').value,q:$('#lg-q').value};
+  SHOWALL=false;logRefresh();
+}
+function logRefresh(){const b=$('#log-box');if(b&&typeof VIEW==='number')b.innerHTML=logHTML(VIEW)}
+function logClear(){LOGF={o:'',from:'',to:'',q:''};SHOWALL=false;render()}
+function logCardHTML(m){
+  const os=ordersOf(m),oSet=new Set(os.map(o=>o.id)),has=DB.entries.some(e=>oSet.has(e.order));
+  return '<div class="card sec"><div class="sec-title"><h3>📒 سجل الإنتاج والتسليمات</h3></div>'+(has?logFiltersHTML(os):'')+'<div id="log-box">'+logHTML(m)+'</div></div>';
+}
+function logHTML(m){
+  const os=ordersOf(m),ce=canEdit(m),oMap={};os.forEach(o=>oMap[o.id]=o);
+  const all=DB.entries.filter(e=>oMap[e.order]);
+  if(!all.length)return '<div class="empty">لا توجد حركات مُدخلة بعد</div>';
+  const q=normDigits(LOGF.q).trim().toLowerCase(),active=!!(LOGF.o||LOGF.from||LOGF.to||q);
+  const ents=all.filter(e=>{
+    const o=oMap[e.order];
+    if(LOGF.o&&e.order!==LOGF.o)return false;
+    if(LOGF.from&&e.date<LOGF.from)return false;
+    if(LOGF.to&&e.date>LOGF.to)return false;
+    if(q&&!(o.number+' '+o.denom+' '+(e.note||'')+' '+(e.by||'')).toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>cmpDT(b,a));
+  if(!ents.length)return '<div class="empty">لا توجد حركات تطابق البحث</div><div class="actions"><button class="btn light sm" onclick="logClear()">مسح الفلاتر</button></div>';
+  const shown=SHOWALL?ents:ents.slice(0,40);
+  const bal={},need=new Set(shown.map(e=>e.order));os.forEach(o=>{if(need.has(o.id))Object.assign(bal,runningBalances(o))});
+  let h='<div class="muted" style="margin:0 0 8px">'+ents.length+' حركة'+(active?' من '+all.length+' · سليم '+fmt(sum(ents,e=>e.g||0))+' · معيب '+fmt(sum(ents,e=>e.b||0))+' · تسليمات '+fmt(sum(ents,e=>(e.dg||0)+(e.db||0)))+' <button class="btn light sm" onclick="logClear()">مسح الفلاتر</button>':'')+'</div>';
+  h+='<div class="tw"><table><thead><tr><th>التاريخ</th><th>الأمر</th><th>سليم</th><th>معيب</th><th>إنتاج اليوم</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد الكلي</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>';
+  for(const e of shown){
+    const o=oMap[e.order],b=bal[e.id]||{sg:0,sb:0};
+    h+='<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.by||'')+'</small></td>'+
+      '<td class="l"><b class="ltr">'+esc(o.number)+'</b><small>'+esc(o.denom)+(e.note?' · '+esc(e.note):'')+'</small></td>'+
+      '<td class="g"><b>'+fmt(e.g)+'</b></td><td class="b"><b>'+fmt(e.b)+'</b></td><td><b>'+fmt(e.g+e.b)+'</b></td>'+
+      '<td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td>'+
+      '<td class="g">'+fmt(b.sg)+'</td><td class="b">'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td>'+
+      (ce?'<td><button class="btn light sm" onclick="editEntry(\''+e.id+'\')">تعديل</button> <button class="btn danger sm" onclick="delEntry(\''+e.id+'\')">حذف</button></td>':'')+'</tr>';
+  }
+  h+='</tbody></table></div>';
+  if(ents.length>40)h+='<div class="actions"><button class="btn light sm" onclick="SHOWALL='+(!SHOWALL)+';logRefresh()">'+(SHOWALL?'عرض آخر 40 فقط':'عرض كل الحركات ('+ents.length+')')+'</button></div>';
+  return h;
+}
+
+/* ============== سجل التدقيق المحسّن ============== */
+const AUDIT_LOCAL_KEY='tarqeem_audit_fallback_v1';
+let AUDIT=[],AUDIT_LOCAL=[],AUDIT_STATUS='لم يتم فحص سجل التدقيق بعد',AUDIT_Q='';
+function loadAuditFallback(){
+  try{const a=JSON.parse(localStorage.getItem(AUDIT_LOCAL_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}
+}
+AUDIT_LOCAL=loadAuditFallback();
+function saveAuditFallback(){
+  try{if(AUDIT_LOCAL.length>500)AUDIT_LOCAL=AUDIT_LOCAL.slice(-500);localStorage.setItem(AUDIT_LOCAL_KEY,JSON.stringify(AUDIT_LOCAL))}catch(e){}
+}
+function auditLocalFallback(rec,reason){
+  AUDIT_LOCAL=AUDIT_LOCAL.filter(x=>x.id!==rec.id);
+  AUDIT_LOCAL.push({...rec,localOnly:true,error:String(reason||'تعذر الاتصال')});
+  saveAuditFallback();
+  AUDIT_STATUS='⚠️ توجد عمليات محفوظة محلياً فقط ولم تصل إلى السحابة';
+  if(VIEW==='settings')sched();
+  toast('تنبيه: تعذر حفظ عملية في سجل التدقيق السحابي. تم الاحتفاظ بها محلياً على هذا الجهاز فقط.','err');
+}
+function auditLog(act,txt){
+  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act:String(act||'عملية'),txt:String(txt||'')};
+  if(CLOUD){
+    if(!FB){auditLocalFallback(rec,'لم تكتمل تهيئة Firebase');return rec}
+    AUDIT_STATUS='جاري تسجيل آخر عملية…';
+    try{
+      FB.set(FB.ref(FB.db,'audit/'+rec.id),plain(rec)).then(()=>{
+        AUDIT_LOCAL=AUDIT_LOCAL.filter(x=>x.id!==rec.id);saveAuditFallback();
+        AUDIT_STATUS='تم تسجيل آخر عملية على السحابة';
+        if(VIEW==='settings')sched();
+      }).catch(e=>auditLocalFallback(rec,(e&&e.code)||e));
+    }catch(e){auditLocalFallback(rec,e)}
+  }else{
+    (DB.audit=DB.audit||[]).push(rec);
+    if(DB.audit.length>500)DB.audit.splice(0,DB.audit.length-500);
+    persist();
+  }
+  return rec;
+}
+function auditListen(){
+  if(!CLOUD||!FB||!isAdmin()||FB.auditOn)return;
+  FB.auditOn=true;
+  AUDIT_STATUS='جاري تحميل سجل التدقيق…';
+  try{
+    FB.auditOff=FB.onValue(FB.query(FB.ref(FB.db,'audit'),FB.limitToLast(500)),
+      s=>{AUDIT=toArr(s).sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));AUDIT_STATUS='تم الاتصال بسجل التدقيق — آخر '+AUDIT.length+' عملية سحابية';if(VIEW==='settings')sched()},
+      e=>{AUDIT=null;AUDIT_STATUS='تعذر قراءة سجل التدقيق: '+String((e&&e.code)||'تحقق من قواعد Firebase');if(VIEW==='settings')sched()});
+  }catch(e){FB.auditOn=false;AUDIT=null;AUDIT_STATUS='تعذر تشغيل سجل التدقيق: '+String(e&&e.message||e)}
+}
+function auditStop(){
+  if(FB){if(FB.auditOff){try{FB.auditOff()}catch(e){}}FB.auditOn=false;FB.auditOff=null}
+  AUDIT=[];
+}
+function auditExport(){
+  const list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice());
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['الوقت','المستخدم','العملية','التفاصيل','حالة الحفظ']];
+  list.sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).forEach(a=>rows.push([fmtTime(a.ts),a.by,a.act,a.txt,a.localOnly?'محلي فقط':'مسجل']));
+  download('tarqeem-audit-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
+  toast('تم تصدير سجل التدقيق','ok');
+}
+function auditHTML(){
+  let list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice().reverse());
+  const unique=new Map();list.forEach(a=>unique.set(a.id,a));list=[...unique.values()].sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));
+  const q=String(AUDIT_Q||'').trim().toLowerCase();
+  const shown=q?list.filter(a=>(String(a.by)+' '+String(a.act)+' '+String(a.txt)).toLowerCase().includes(q)):list;
+  let h='<div class="card sec" id="audit-card"><div class="sec-title"><h3>📜 سجل التدقيق</h3><button class="btn light sm" onclick="auditExport()">⬇️ تصدير السجل CSV</button></div>'+
+   '<div class="muted" style="margin-bottom:10px">يسجل الإضافات والتعديلات والحذف والاسترجاع والإجراءات الإدارية، مع اسم المستخدم والتوقيت. في وضع السحابة يتم توضيح أي عملية لم يصل تأكيد حفظها.</div>';
+  if(CLOUD)h+='<div class="audit-status '+(AUDIT===null?'bad':AUDIT_LOCAL.length?'warn':'ok')+'">'+esc(AUDIT_STATUS)+' · محلي غير متزامن: '+AUDIT_LOCAL.length+'</div>';
+  h+='<div class="audit-tools"><input type="text" id="audit-q" placeholder="بحث بالمستخدم أو العملية أو التفاصيل" value="'+esc(AUDIT_Q)+'" oninput="AUDIT_Q=this.value;auditRefresh()"></div>';
+  if(CLOUD&&AUDIT===null&&!AUDIT_LOCAL.length)h+='<div class="empty">تعذرت قراءة السجل السحابي. راجع قواعد Firebase وصلاحية قراءة العقدة <b class="ltr">audit</b>.</div>';
+  else if(!shown.length)h+='<div class="empty">'+(q?'لا توجد عمليات تطابق البحث':'لا توجد عمليات مسجلة بعد')+'</div>';
+  else h+='<div class="muted">عرض '+shown.length+' من '+list.length+' عملية</div><div class="tw" style="max-height:420px"><table style="min-width:700px"><thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th><th>الحالة</th></tr></thead><tbody>'+
+    shown.slice(0,300).map(a=>'<tr><td>'+esc(fmtTime(a.ts))+'</td><td>'+esc(a.by)+'</td><td><b>'+esc(a.act)+'</b></td><td class="l">'+esc(a.txt)+'</td><td>'+(a.localOnly?'<span class="badge st-err">محلي فقط</span>':'<span class="badge st-new">مسجل</span>')+'</td></tr>').join('')+'</tbody></table></div>';
+  return h+'</div>';
+}
+function auditRefresh(){
+  const card=$('#audit-card');if(!card)return;
+  const old=$('#audit-q'),pos=old?old.selectionStart:0,end=old?old.selectionEnd:pos;
+  const tmp=document.createElement('div');tmp.innerHTML=auditHTML();
+  if(tmp.firstElementChild)card.replaceWith(tmp.firstElementChild);
+  const n=$('#audit-q');if(n){n.focus();try{n.setSelectionRange(pos,end)}catch(e){}}
+}
+/* ============== نقطة الاسترجاع ============== */
+const RP_KEY='tarqeem_restore_v1';
+function saveRestorePoint(label){
+  try{
+    const s={ts:new Date().toISOString(),label,orders:DB.orders,entries:DB.entries};
+    if(!CLOUD){s.audit=DB.audit||[]}
+    localStorage.setItem(RP_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+function getRestorePoint(){
+  try{const s=JSON.parse(localStorage.getItem(RP_KEY));if(s&&Array.isArray(s.orders)&&Array.isArray(s.entries))return s}catch(e){}
+  return null;
+}
+function restoreLast(){
+  const r=getRestorePoint();if(!r||!isAdmin())return;
+  confirmBox('استرجاع نسخة «'+r.label+'» ('+fmtTime(r.ts)+')؟ سيتم استبدال البيانات الحالية (وتُحفظ نسخة منها قبل ذلك).',()=>{
+    saveRestorePoint('قبل الاسترجاع');
+    applyDataset({orders:r.orders,entries:r.entries,audit:r.audit});
+    auditLog('استرجاع نسخة','«'+r.label+'» بتاريخ '+fmtTime(r.ts));
+    toast('تم الاسترجاع ✓','ok');
+  },'استرجاع');
+}
+function restoreHTML(){
+  const r=getRestorePoint();
+  return '<div class="card sec"><h3>↩️ نقطة الاسترجاع</h3><div class="muted" style="margin-bottom:10px;line-height:1.9">قبل أي عملية كبيرة (استبدال، دمج، استيراد Excel، إعادة ضبط، حذف أمر) يحفظ البرنامج نسخة تلقائية على هذا الجهاز، وتقدر ترجع لها.</div>'+
+   (r?'<div class="actions" style="margin-top:0"><span class="chip-user" style="background:#eef2ff;color:#3730a3">'+esc(r.label)+' · '+esc(fmtTime(r.ts))+' · '+r.orders.length+' أمر / '+r.entries.length+' حركة</span><button class="btn light" onclick="restoreLast()">↩️ استرجاع هذه النسخة</button></div>':'<div class="muted">لا توجد نقطة استرجاع محفوظة بعد.</div>')+'</div>';
+}
+
+/* ============== التقارير (واتساب / طباعة) ============== */
+function reportData(from,to){
+  const st=statsBy(from,to);
+  const rows=MACHINES.map(m=>{
+    const s=st[m];let sg=0,sb=0;
+    for(const o of ordersOf(m)){
+      sg+=o.og||0;sb+=o.ob||0;
+      for(const e of entsOf(o.id))if(e.date<=to){sg+=(e.g||0)-(e.dg||0);sb+=(e.b||0)-(e.db||0)}
+    }
+    const prod=s.g+s.b;
+    return {m,g:s.g,b:s.b,prod,del:s.dg+s.db,sg,sb,stock:sg+sb,def:prod?s.b/prod*100:0};
+  });
+  const tot={g:0,b:0,prod:0,del:0,sg:0,sb:0,stock:0};
+  rows.forEach(r=>{for(const k in tot)tot[k]+=r[k]});
+  tot.def=tot.prod?tot.b/tot.prod*100:0;
+  return {rows,tot};
+}
+function reportText(from,to,d){
+  const label=from===to?dayName(from)+' '+fmtDate(from):'من '+fmtDate(from)+' إلى '+fmtDate(to);
+  const L=['📦 *تقرير مخزن الترقيمات*','📅 '+label,'━━━━━━━━━━━━'];
+  d.rows.forEach(r=>{
+    L.push('🏭 *'+MNAME(r.m)+'*');
+    L.push('• الإنتاج: '+fmt(r.prod)+' (سليم '+fmt(r.g)+' · معيب '+fmt(r.b)+(r.prod?' — '+r.def.toFixed(1)+'%':'')+')');
+    L.push('• التسليمات: '+fmt(r.del));
+    L.push('• رصيد المخزن: '+fmt(r.stock)+' (سليم '+fmt(r.sg)+' · معيب '+fmt(r.sb)+')');
+    L.push('');
+  });
+  L.push('━━━━━━━━━━━━','📊 *الإجمالي*');
+  L.push('• الإنتاج: '+fmt(d.tot.prod)+' (معيب '+d.tot.def.toFixed(1)+'%)');
+  L.push('• التسليمات: '+fmt(d.tot.del));
+  L.push('• رصيد المخزن: '+fmt(d.tot.stock)+' (سليم '+fmt(d.tot.sg)+' · معيب '+fmt(d.tot.sb)+')');
+  return L.join('\n');
+}
+let REP=null;
+function reportModal(){
+  const t=todayStr();
+  openModal('<h3>📋 تقرير الإنتاج والمخزون</h3>'+
+   '<div class="seg noprint" style="margin-bottom:10px;flex-wrap:wrap"><button onclick="repPreset(0)">اليوم</button><button onclick="repPreset(1)">أمس</button><button onclick="repPreset(7)">آخر 7 أيام</button><button onclick="repPreset(30)">آخر 30 يوم</button><button onclick="repPreset(-1)">هذا الشهر</button></div>'+
+   '<div class="fgrid noprint" style="margin-bottom:12px"><label class="f">من<input type="date" id="rp-f" onchange="repChange()"></label><label class="f">إلى<input type="date" id="rp-t" onchange="repChange()"></label></div>'+
+   '<div id="rep-body"></div>'+
+   '<div class="actions noprint"><button class="btn primary" onclick="repCopy()">📋 نسخ النص</button><button class="btn green" onclick="repWA()">💬 إرسال واتساب</button><button class="btn light" onclick="repPrint()">🖨️ طباعة</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>',true);
+  $('#rp-f').value=t;$('#rp-t').value=t;repChange();
+  const md=$('#modal-root .modal');if(md){md.setAttribute('tabindex','-1');md.focus({preventScroll:true})}
+}
+function repPreset(n){
+  const t=todayStr();
+  if(n===-1){$('#rp-f').value=t.slice(0,8)+'01';$('#rp-t').value=t;repChange();return}
+  $('#rp-f').value=n===0?t:n===1?addDays(t,-1):addDays(t,-(n-1));
+  $('#rp-t').value=n===1?addDays(t,-1):t;
+  repChange();
+}
+function repChange(){
+  let f=$('#rp-f').value,t=$('#rp-t').value;
+  if(!f||!t)return;
+  if(f>t){const x=f;f=t;t=x}
+  const d=reportData(f,t);
+  REP={from:f,to:t,text:reportText(f,t,d)};
+  const row=(r,cls)=>'<tr'+(cls?' class="'+cls+'"':'')+'><td class="l"><b>'+(r.m?MNAME(r.m):'الإجمالي')+'</b></td><td class="g">'+fmt(r.g)+'</td><td class="b">'+fmt(r.b)+'</td><td><b>'+fmt(r.prod)+'</b></td><td>'+r.def.toFixed(1)+'%</td><td>'+fmt(r.del)+'</td><td><b>'+fmt(r.stock)+'</b><small>سليم '+fmt(r.sg)+' · معيب '+fmt(r.sb)+'</small></td></tr>';
+  $('#rep-body').innerHTML='<div class="muted" style="margin-bottom:8px">'+(f===t?'📅 '+dayName(f)+' '+fmtDate(f):'📅 من '+fmtDate(f)+' إلى '+fmtDate(t))+' — الأرصدة كما هي في نهاية الفترة</div>'+
+   '<div class="tw"><table style="min-width:620px"><thead><tr><th>الماكينة</th><th>سليم</th><th>معيب</th><th>الإنتاج</th><th>% معيب</th><th>التسليمات</th><th>رصيد المخزن</th></tr></thead><tbody>'+d.rows.map(r=>row(r)).join('')+row(d.tot,'tot')+'</tbody></table></div>';
+}
+function fallbackCopy(t,done){
+  const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy');done()}catch(e){toast('تعذر النسخ','err')}
+  a.remove();
+}
+function repCopy(){
+  const t=REP&&REP.text;if(!t)return;
+  const done=()=>toast('تم نسخ التقرير ✓','ok');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,()=>fallbackCopy(t,done));
+  else fallbackCopy(t,done);
+}
+function repWA(){if(REP&&REP.text)window.open('https://wa.me/?text='+encodeURIComponent(REP.text),'_blank','noopener')}
+function repPrint(){document.body.classList.add('pr');try{window.print()}finally{setTimeout(()=>document.body.classList.remove('pr'),400)}}
+
+/* ============== تصدير Excel حقيقي (.xlsx) بعدة أوراق ============== */
+function exportXLSX(){
+  toast('جاري تجهيز ملف Excel…');
+  loadXLSX().then(X=>{
+    const OM={};DB.orders.forEach(o=>OM[o.id]=o);
+    const ords=[...DB.orders].sort((a,b)=>a.machine-b.machine||String(a.number).localeCompare(String(b.number)));
+    const bal=[['الماكينة','رقم الأمر','الفئة','كمية الأمر','إجمالي الإنتاج','إجمالي التسليمات','رصيد السليم','رصيد المعيب','إجمالي المخزن','% المنتج من الكمية','آخر تعديل','ملاحظات']];
+    ords.forEach(o=>{const t=totals(o,DB.entries),q=qtyOf(o);bal.push([MNAME(o.machine),o.number,o.denom,q,t.prod,t.del,t.sg,t.sb,t.stock,Math.round(t.prod/q*1000)/10,fmtTime(o.modified),o.notes||''])});
+    const sorted=[...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts)));
+    const log=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
+    const day={};
+    sorted.forEach(e=>{
+      const o=OM[e.order];if(!o)return;
+      log.push([e.date,MNAME(o.machine),o.number,o.denom,e.g||0,e.b||0,(e.g||0)+(e.b||0),e.dg||0,e.db||0,e.note||'',e.by||'',fmtTime(e.ts)]);
+      const k=e.date+'|'+o.machine,x=day[k]||(day[k]={d:e.date,m:o.machine,g:0,b:0,del:0});
+      x.g+=e.g||0;x.b+=e.b||0;x.del+=(e.dg||0)+(e.db||0);
+    });
+    const sum1=[['التاريخ','الماكينة','إنتاج سليم','إنتاج معيب','إجمالي الإنتاج','% معيب','تسليمات']];
+    Object.values(day).sort((a,b)=>a.d.localeCompare(b.d)||a.m-b.m).forEach(x=>sum1.push([x.d,MNAME(x.m),x.g,x.b,x.g+x.b,(x.g+x.b)?Math.round(x.b/(x.g+x.b)*1000)/10:0,x.del]));
+    const wb=X.utils.book_new();
+    [['الأرصدة',bal,[11,13,14,12,14,15,12,12,13,16,18,40]],['السجل',log,[12,11,13,14,10,10,12,12,12,30,14,18]],['ملخص يومي',sum1,[12,11,12,12,14,10,12]]].forEach(s=>{
+      const ws=X.utils.aoa_to_sheet(s[1]);ws['!cols']=s[2].map(w=>({wch:w}));X.utils.book_append_sheet(wb,ws,s[0]);
+    });
+    wb.Workbook={Views:[{RTL:true}]};
+    X.writeFile(wb,'tarqeem-'+todayStr()+'.xlsx');markBackup();
+    toast('تم تنزيل ملف Excel ✓','ok');
+  }).catch(e=>{if(e)console.error(e);toast('تعذر إنشاء ملف Excel (يحتاج إنترنت أول مرة) — تم تنزيل CSV بدلاً منه','err');exportCSV()});
+}
+
+/* ============== مزايا إضافية ============== */
+const BK_KEY='tarqeem_lastbackup_v1';
+function markBackup(){try{localStorage.setItem(BK_KEY,todayStr())}catch(e){}}
+function backupAge(){try{const v=localStorage.getItem(BK_KEY);return v?daysBetween(v,todayStr()):null}catch(e){return null}}
+
+/* مقارنة إنتاج اليوم بمتوسط آخر 14 يوم (الأيام التي بها إنتاج فقط) */
+function trendHTML(m,todayProd){
+  const today=todayStr(),st=statsBy(addDays(today,-14),addDays(today,-1));
+  const OM=orderMachineMap(),by={};
+  for(const e of DB.entries){
+    if(OM[e.order]!==m||e.date<addDays(today,-14)||e.date>=today)continue;
+    by[e.date]=(by[e.date]||0)+(e.g||0)+(e.b||0);
+  }
+  const days=Object.values(by).filter(v=>v>0);
+  if(!days.length)return '';
+  const avg=sum(days,v=>v)/days.length;
+  if(!todayProd)return '<div class="trend eq">متوسط يومي معتاد: '+fmt(Math.round(avg))+' فرخ</div>';
+  const pc=Math.round((todayProd/avg-1)*100);
+  return '<div class="trend '+(pc>=5?'up':pc<=-5?'dn':'eq')+'">'+(pc>=5?'▲ ':pc<=-5?'▼ ':'● ')+Math.abs(pc)+'% '+(pc>=0?'فوق':'تحت')+' المتوسط المعتاد ('+fmt(Math.round(avg))+')</div>';
+}
+
+/* لوحة الاكتمال المتوقع لكل الأوامر الجارية */
+function planHTML(){
+  const rows=[];
+  for(const o of DB.orders){
+    const t=totals(o,DB.entries),q=qtyOf(o);
+    if(t.prod<=0||t.prod>=q)continue;
+    const f=forecast(o);
+    rows.push({o,t,q,f,pc:t.prod/q*100});
+  }
+  if(!rows.length)return '';
+  rows.sort((a,b)=>(a.f?a.f.days:1e9)-(b.f?b.f.days:1e9));
+  return '<div class="card sec"><div class="sec-title"><h3>🗓️ جدول الاكتمال المتوقع للأوامر الجارية</h3><span class="muted">حسب معدل آخر 14 يوم</span></div><div class="tw"><table style="min-width:620px"><thead><tr><th>الماكينة</th><th>الأمر</th><th>التقدم</th><th>المتبقي</th><th>المتوقع</th></tr></thead><tbody>'+
+   rows.slice(0,14).map(r=>'<tr style="cursor:pointer" onclick="orderDetail(\''+r.o.id+'\')"><td><b style="color:'+MCOL[r.o.machine]+'">'+MNAME(r.o.machine)+'</b></td><td class="l"><b class="ltr">'+esc(r.o.number)+'</b><small>'+esc(r.o.denom)+'</small></td>'+
+     '<td><div class="pbar"><i style="width:'+Math.min(100,r.pc).toFixed(1)+'%"></i></div><small>'+r.pc.toFixed(0)+'%</small></td><td>'+fmt(r.q-r.t.prod)+'</td>'+
+     '<td>'+(r.f?(r.f.days>365?'أكثر من سنة':'≈ '+fmt(r.f.days)+' يوم<small>'+fmtDate(r.f.date)+'</small>'):'<span class="muted">متوقف (لا إنتاج حديث)</span>')+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+}
+
+/* خريطة حرارية لآخر 8 أسابيع */
+function heatHTML(){
+  const today=todayStr(),from=addDays(today,-55),OM=orderMachineMap(),by={};
+  MACHINES.forEach(m=>by[m]={});
+  for(const e of DB.entries){
+    if(e.date<from||e.date>today)continue;
+    const m=OM[e.order];if(!m)continue;
+    by[m][e.date]=(by[m][e.date]||0)+(e.g||0)+(e.b||0);
+  }
+  if(!MACHINES.some(m=>Object.keys(by[m]).length))return '';
+  let h='<div class="card sec"><div class="sec-title"><h3>🔥 خريطة النشاط — آخر 8 أسابيع</h3><span class="muted">كل مربع = يوم · الأغمق = إنتاج أعلى · الأحدث يميناً</span></div><div class="heat">';
+  for(const m of MACHINES){
+    const mx=Math.max(1,...Object.values(by[m]));
+    h+='<div class="hn" style="color:'+MCOL[m]+'">'+MNAME(m)+'</div><div class="hr">';
+    for(let i=0;i<56;i++){
+      const d=addDays(from,i),v=by[m][d]||0;
+      const a=v?(0.25+0.75*v/mx).toFixed(2):0;
+      h+='<div class="hc" title="'+fmtDate(d)+' ('+dayName(d)+'): '+fmt(v)+'" style="'+(v?'background:'+MCOL[m]+';opacity:'+a:'')+'"></div>';
+    }
+    h+='</div>';
+  }
+  return h+'</div></div>';
+}
+
+/* بطاقة تفاصيل الأمر القابلة للطباعة */
+function orderDetail(id){
+  const o=DB.orders.find(x=>x.id===id);if(!o)return;
+  const t=totals(o,DB.entries),q=qtyOf(o),ents=[...entsOf(id)].sort(cmpDT),bal=runningBalances(o);
+  const dates=[...new Set(ents.map(e=>e.date))];
+  let cp=(o.og||0)+(o.ob||0),cd=0;
+  const byD={};ents.forEach(e=>{const x=byD[e.date]||(byD[e.date]={p:0,d:0});x.p+=(e.g||0)+(e.b||0);x.d+=(e.dg||0)+(e.db||0)});
+  const sp={name:'إجمالي الإنتاج التراكمي',color:'#4f46e5',values:[]},sd={name:'إجمالي التسليمات التراكمي',color:'#f59e0b',values:[]};
+  dates.forEach(d=>{cp+=byD[d].p;cd+=byD[d].d;sp.values.push(cp);sd.values.push(cd)});
+  const labels=dates.map(d=>d.slice(8)+'/'+d.slice(5,7));
+  const f=forecast(o),defect=t.prod?(t.pb/t.prod*100):0;
+  const active=dates.filter(d=>byD[d].p>0).length;
+  const dels=ents.filter(e=>(e.dg||0)+(e.db||0)>0);
+  const prodDates=dates.filter(d=>byD[d].p>0);
+  const lastProd=prodDates.length?prodDates[prodDates.length-1]:'';
+  const lastAct=dates.length?dates[dates.length-1]:'';
+  const peak=prodDates.reduce((best,d)=>!best||byD[d].p>byD[best].p?d:best,'');
+  const state=t.prod>=q?'مكتمل':t.prod>0?'جارٍ التنفيذ':'لم يبدأ';
+  const deliveryPct=t.prod?t.del/t.prod*100:0;
+  const k=(l,v,c)=>'<div class="pv"><div class="l">'+l+'</div><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+v+'</div></div>';
+  let h='<h3>📈 الأمر <span class="ltr">'+esc(o.number)+'</span> — '+MNAME(o.machine)+(o.denom?' — '+esc(o.denom):'')+'</h3>'+
+   (o.notes?'<div class="oc-n" style="margin-bottom:10px">📝 '+esc(o.notes)+'</div>':'')+
+   '<div class="preview">'+k('كمية الأمر',fmt(q)+' فرخ')+k('المنتج ('+(t.prod/q*100).toFixed(1)+'%)',fmt(t.prod))+k('المتبقي',fmt(Math.max(0,q-t.prod)))+k('سليم بالمخزن',fmt(t.sg),'#059669')+k('معيب بالمخزن',fmt(t.sb),'#e11d48')+k('نسبة المعيب',defect.toFixed(1)+'%',defect>=DEFECT_WARN?'#e11d48':'')+k('إجمالي التسليمات',fmt(t.del))+k('أيام الإنتاج',fmt(active)+' يوم')+
+   k('متوسط يومي',active?fmt(Math.round(sum(ents,e=>(e.g||0)+(e.b||0))/active)):'—')+k('الاكتمال المتوقع',f?(f.done?'مكتمل':f.days>365?'> سنة':fmtDate(f.date)):'—')+
+   k('حالة الأمر',state,t.prod>=q?'#059669':'')+k('نسبة التسليم من الإنتاج',deliveryPct.toFixed(1)+'%')+
+   k('تسليم سليم',fmt(t.dg),'#059669')+k('تسليم معيب',fmt(t.db),'#e11d48')+
+   k('آخر يوم إنتاج',lastProd?fmtDate(lastProd):'—')+k('مدة التوقف',lastProd?fmt(daysBetween(lastProd,todayStr()))+' يوم':'لا يوجد إنتاج مسجل')+
+   k('آخر حركة',lastAct?fmtDate(lastAct):'—')+k('أعلى إنتاج يومي',peak?fmt(byD[peak].p)+' ('+fmtDate(peak)+')':'—')+'</div>';
+  if(dates.length>=2)h+='<div class="noprint">'+legendHTML([sp,sd])+lineChartSVG(labels,[sp,sd])+'</div>';
+  h+='<h4 style="margin:12px 0 6px">سجل حركات الأمر'+(dels.length?' (التسليمات '+dels.length+')':'')+'</h4>';
+  if(!ents.length)h+='<div class="empty">لا توجد حركات على هذا الأمر</div>';
+  else h+='<div class="tw"><table style="min-width:640px"><thead><tr><th>التاريخ</th><th>سليم</th><th>معيب</th><th>تسليم سليم</th><th>تسليم معيب</th><th>رصيد السليم</th><th>رصيد المعيب</th><th>الرصيد</th></tr></thead><tbody>'+
+    '<tr class="tot"><td>رصيد افتتاحي</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>—</td><td>—</td><td>'+fmt(o.og)+'</td><td>'+fmt(o.ob)+'</td><td>'+fmt((o.og||0)+(o.ob||0))+'</td></tr>'+
+    ents.map(e=>{const b=bal[e.id]||{sg:0,sb:0};return '<tr><td>'+fmtDate(e.date)+'<small>'+esc(e.note||'')+'</small></td><td class="g">'+fmt(e.g)+'</td><td class="b">'+fmt(e.b)+'</td><td>'+fmt(e.dg)+'</td><td>'+fmt(e.db)+'</td><td>'+fmt(b.sg)+'</td><td>'+fmt(b.sb)+'</td><td><b>'+fmt(b.sg+b.sb)+'</b></td></tr>'}).join('')+
+    '<tr class="tot"><td>الإجمالي الحالي</td><td>'+fmt(t.pg)+'</td><td>'+fmt(t.pb)+'</td><td>'+fmt(t.dg)+'</td><td>'+fmt(t.db)+'</td><td>'+fmt(t.sg)+'</td><td>'+fmt(t.sb)+'</td><td>'+fmt(t.stock)+'</td></tr></tbody></table></div>';
+  h+='<div class="muted" style="margin-top:8px">تاريخ الطباعة: '+fmtDate(todayStr())+'</div><div class="actions noprint"><button class="btn primary" onclick="repPrint()">🖨️ طباعة تفاصيل الأمر</button><button class="btn light" onclick="closeModal()">إغلاق</button></div>';
+  openModal(h,true);
+}
+
+/* بحث شامل في الأوامر والملاحظات */
+function searchModal(){
+  openModal('<h3>🔍 بحث في كل الماكينات</h3><label class="f">رقم الأمر أو الفئة أو ملاحظة<input type="text" id="gs-q" autocomplete="off" placeholder="مثال: 6029 أو 50 جنيه أو كسر" oninput="gsearch()"></label><div id="gs-res" style="margin-top:12px"></div><div class="actions"><button class="btn light" onclick="closeModal()">إغلاق</button></div>');
+  gsearch();
+}
+function gsearch(){
+  const q=normDigits($('#gs-q').value).trim().toLowerCase(),box=$('#gs-res');
+  if(!q){box.innerHTML='<div class="muted">اكتب للبحث — النتائج تشمل أرقام الأوامر والفئات وملاحظات الأوامر والحركات.</div>';return}
+  const hits=[];
+  for(const o of DB.orders){
+    let why='';
+    if((o.number+' '+(o.denom||'')).toLowerCase().includes(q))why='';
+    else if((o.notes||'').toLowerCase().includes(q))why='في ملاحظات الأمر';
+    else{const e=entsOf(o.id).find(x=>(x.note||'').toLowerCase().includes(q));if(e)why='في ملاحظة حركة '+fmtDate(e.date);else continue}
+    hits.push({o,why});
+  }
+  box.innerHTML=hits.length?hits.slice(0,30).map(h=>{const t=totals(h.o,DB.entries);
+    return '<button class="sr" onclick="closeModal();go('+h.o.machine+');orderDetail(\''+h.o.id+'\')"><b>'+esc(h.o.number)+'</b><span>'+esc(h.o.denom||'')+'</span><span class="chip" style="margin-inline-start:0">'+MNAME(h.o.machine)+'</span><span style="margin-inline-start:auto;font-weight:800">'+fmt(t.stock)+'</span>'+(h.why?'<small class="muted">'+esc(h.why)+'</small>':'')+'</button>'}).join(''):'<div class="empty">لا توجد نتائج</div>';
+}
+
+/* ============== تطويرات الإصدار ٢ (إضافات فقط، بدون تغيير منطق البيانات) ============== */
+(function(){
+  const DK='tarqeem_dark_v1';
+  let dark=false;try{dark=localStorage.getItem(DK)==='1'}catch(e){}
+  function applyDark(){document.body.classList.toggle('dark',dark);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#05201d':'#0f766e'}
+  window.toggleDark=function(){dark=!dark;try{localStorage.setItem(DK,dark?'1':'0')}catch(e){}applyDark();render(true)};
+  applyDark();
+  /* زر الوضع الليلي في الهيدر */
+  const _rh=renderHeader;
+  renderHeader=function(){_rh();const w=document.getElementById('who');if(w)w.insertAdjacentHTML('afterbegin','<button class="btn ghost sm icon" onclick="toggleDark()" title="الوضع الليلي">'+(dark?'☀️':'🌙')+'</button>')};
+  /* لوحة المتابعة: تحية + ساعة + مؤشرات ذكية + ترتيب الأوامر */
+  function ordersOfM(m){return DB.orders.filter(o=>o.machine===m)}
+  function heroHTML(){
+    const d=new Date(),h=d.getHours(),g=h<12?'صباح الخير':h<18?'مساء الخير':'مساء النور';
+    const days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    return '<div class="hero"><div><b>'+g+(SESSION?' '+esc(whoName()):'')+' 👋</b><span class="muted">'+days[d.getDay()]+' · '+fmtDate(todayStr())+'</span></div><div class="clk" id="clk">'+pad(h)+':'+pad(d.getMinutes())+'</div></div>';
+  }
+  function insightsHTML(){
+    if(!DB.orders.length)return '';
+    const rows=DB.orders.map(o=>{const t=totals(o,DB.entries),q=qtyOf(o);return {o,t,q,pct:Math.min(100,t.prod/q*100),def:t.prod?t.pb/t.prod*100:0}});
+    const mt=MACHINES.map(m=>({m,t:mTotals(m)}));
+    const best=[...mt].sort((a,b)=>b.t.prod-a.t.prod)[0];
+    const worst=[...mt].filter(x=>x.t.prod>0).sort((a,b)=>b.t.pb/b.t.prod-a.t.pb/a.t.prod)[0];
+    const tp=sum(mt,x=>x.t.prod),tb=sum(mt,x=>x.t.pb),td=sum(mt,x=>x.t.del);
+    const last7=dailySeries(7,'prod'),avg=sum(last7.series,s=>sum(s.values,v=>v))/7;
+    const stock=sum(mt,x=>x.t.stock);
+    const daysLeft=avg>0?Math.round(stock/avg):null;
+    const it=(l,v,s)=>'<div class="it"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>';
+    let h='<div class="card sec"><div class="sec-title"><h3>💡 مؤشرات ذكية</h3><span class="muted">محسوبة تلقائياً من البيانات</span></div><div class="ins">'+
+      it('🥇 الأعلى إنتاجاً',best&&best.t.prod?MNAME(best.m):'—',best?fmt(best.t.prod)+' فرخ':'')+
+      it('⚠️ الأعلى نسبة معيب',worst?MNAME(worst.m):'—',worst?(worst.t.pb/worst.t.prod*100).toFixed(1)+'% من إنتاجها':'')+
+      it('📉 نسبة المعيب الكلية',tp?(tb/tp*100).toFixed(1)+'%':'—','من '+fmt(tp)+' فرخ منتج')+
+      it('🚚 نسبة التسليم',tp?(td/tp*100).toFixed(1)+'%':'—','تم تسليم '+fmt(td)+' فرخ')+
+      it('📆 متوسط الإنتاج اليومي',fmt(Math.round(avg)),'آخر ٧ أيام')+
+    '</div></div>';
+    const open=rows.filter(r=>r.q&&r.t.prod>0&&r.pct<100).sort((a,b)=>b.pct-a.pct).slice(0,5);
+    const dfx=rows.filter(r=>r.t.prod>0).sort((a,b)=>b.def-a.def).slice(0,5);
+    const list=(arr,fn)=>arr.map((r,i)=>'<div class="rk" style="--mc:'+MCOL[r.o.machine]+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(r.o.number)+'</b> <span class="muted">'+esc(normDigits(r.o.denom))+' · '+MNAME(r.o.machine)+'</span><div class="pr"><i style="width:'+fn(r).w+'%"></i></div></div><span style="font-weight:800">'+fn(r).t+'</span></div>').join('')||'<div class="empty">لا توجد بيانات كافية</div>';
+    h+='<div class="grid two sec"><div class="card"><div class="sec-title"><h3>🏁 الأوامر الأقرب للاكتمال</h3></div>'+list(open,r=>({w:r.pct.toFixed(1),t:r.pct.toFixed(1)+'%'}))+'</div>'+
+       '<div class="card"><div class="sec-title"><h3>🔥 الأوامر الأعلى معيباً</h3></div>'+list(dfx,r=>({w:Math.min(100,r.def).toFixed(1),t:r.def.toFixed(1)+'%'}))+'</div></div>';
+    return h;
+  }
+  const _dh=dashHTML;
+  dashHTML=function(){const base=_dh();if(base.indexOf('class="kpi')<0)return base;return heroHTML()+base+insightsHTML()};
+  setInterval(()=>{const c=document.getElementById('clk');if(c){const d=new Date();c.textContent=pad(d.getHours())+':'+pad(d.getMinutes())}},15000);
+  /* زر الرجوع للأعلى + اختصار البحث */
+  const b=document.createElement('button');b.id='totop';b.textContent='↑';b.title='للأعلى';b.onclick=()=>scrollTo({top:0,behavior:'smooth'});document.body.appendChild(b);
+  addEventListener('scroll',()=>b.classList.toggle('on',scrollY>400),{passive:true});
+  addEventListener('keydown',e=>{const t=e.target&&e.target.tagName;if(e.key==='/'&&t!=='INPUT'&&t!=='TEXTAREA'&&t!=='SELECT'&&!document.querySelector('.overlay')){e.preventDefault();searchModal()}});
+})();
 
 /* ============== بدء التشغيل ============== */
 if(CLOUD){
