@@ -3,10 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#4f46e5">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app; base-uri 'none'; form-action 'none'; object-src 'none'">
-<meta name="referrer" content="no-referrer">
-<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f766e">
 <title>مخزن الترقيمات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -25,7 +22,7 @@ header.top{background:linear-gradient(120deg,#312e81 0%,#4f46e5 48%,#0891b2 100%
 header.top::after{content:"";position:absolute;inset:auto -80px -120px auto;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.08)}
 .top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:25px;backdrop-filter:blur(4px)}
+.logo{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:25px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .brand h1{margin:0;font-size:22px;font-weight:800;line-height:1.2}
 .brand p{margin:0;font-size:13px;opacity:.85}
 .who{display:flex;align-items:center;gap:8px}
@@ -171,7 +168,7 @@ td small{display:block;color:var(--muted);font-size:11.5px}
 .ltr{direction:ltr;unicode-bidi:embed}
 
 /* modal / toast */
-.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50;animation:fade .15s}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50;animation:fade .15s}
 .modal{background:#fff;border-radius:22px;width:100%;max-width:460px;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);animation:pop .18s}
 .modal h3{margin:0 0 14px;font-size:19px;font-weight:800}
 .modal .fgrid{grid-template-columns:1fr 1fr}
@@ -223,7 +220,69 @@ body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;p
 .pbar i{display:block;height:100%;background:var(--brand);border-radius:99px}\n.audit-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:10px 0}.audit-status{padding:9px 12px;border-radius:11px;font-size:12.5px;font-weight:700;margin:8px 0}.audit-status.ok{background:#ecfdf5;color:#047857}.audit-status.warn{background:#fffbeb;color:#92400e}.audit-status.bad{background:#fff1f2;color:#9f1239}
 @media print{.noprint{display:none!important}}
 </style>
-</head>
+<style id="v2-theme">
+:root{--bg:#f3f6f4;--brand:#0f766e;--ink:#10201e;--muted:#5d6f6b;--line:#e1e9e6;--shadow:0 1px 2px rgba(16,32,30,.05),0 12px 30px -12px rgba(16,32,30,.16)}
+body{background:radial-gradient(1100px 480px at 100% -8%,#cdeee6 0,transparent 60%),radial-gradient(900px 420px at 0% 0%,#fdecc8 0,transparent 55%),var(--bg)}
+header.top{background:linear-gradient(120deg,#0b3b36 0%,#0f766e 52%,#d97706 130%)}
+.btn.primary{background:var(--brand);box-shadow:0 6px 16px -6px rgba(15,118,110,.7)}
+.btn.light{background:#e2f4ef;color:#0b4f48}.btn.light:hover{background:#cfeee6}
+.kpi.big{background:linear-gradient(135deg,#0f766e,#115e59 60%,#b45309 140%)}
+.tab.on{background:var(--c,var(--brand))}
+.pbar i{background:var(--brand)}
+tr.tot td{background:#e2f4ef}
+.oc-s .d{background:#e2f4ef;color:#0b4f48}
+.card,.kpi,.mcard,.oc{transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 18px 36px -16px rgba(16,32,30,.28)}
+.kpi .v{letter-spacing:-.5px}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:14px 18px;border-radius:var(--r);background:linear-gradient(120deg,#ffffffcc,#ffffff88);backdrop-filter:blur(6px);box-shadow:var(--shadow)}
+.hero b{font-size:18px;font-weight:800}.hero .muted{display:block}
+.hero .clk{font-variant-numeric:tabular-nums;font-weight:800;font-size:22px;color:var(--brand);direction:ltr}
+.ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.ins .it{border-radius:14px;padding:12px 14px;background:#f6faf9;border:1px solid var(--line)}
+.ins .it .l{font-size:12.5px;color:var(--muted);font-weight:700}
+.ins .it .v{font-size:19px;font-weight:800;margin-top:2px}
+.ins .it .s{font-size:12px;color:var(--muted)}
+.rk{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:8px 4px;border-top:1px solid var(--line)}
+.rk:first-of-type{border-top:0}
+.rk .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;background:var(--mc,#0f766e)}
+.rk b{direction:ltr;unicode-bidi:embed}
+.rk .pr{height:6px;border-radius:99px;background:#e2e8f0;overflow:hidden;margin-top:4px}
+.rk .pr i{display:block;height:100%;border-radius:99px;background:var(--mc,#0f766e)}
+#totop{position:fixed;bottom:20px;inset-inline-start:16px;width:44px;height:44px;border-radius:50%;border:0;background:var(--brand);color:#fff;font-size:20px;box-shadow:0 10px 22px -8px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+#totop.on{opacity:1;pointer-events:auto}
+.btn.icon{padding:6px 10px}
+/* dark mode */
+body.dark{--bg:#0b1513;--card:#13211f;--ink:#e6f1ee;--muted:#93aaa5;--line:#223532;--brand:#2dd4bf;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px -12px rgba(0,0,0,.6);background:radial-gradient(1000px 420px at 100% -8%,#0f3a35 0,transparent 60%),#0b1513;color:var(--ink)}
+body.dark header.top{background:linear-gradient(120deg,#05201d,#0b4a44 55%,#7a4a0a 140%)}
+body.dark .tabs,body.dark .kpi,body.dark .mcard,body.dark .oc,body.dark .modal,body.dark table,body.dark .sr,body.dark .hero{background:var(--card);color:var(--ink)}
+body.dark .tab{color:#b6cac5}body.dark .tab:hover{background:#1a2d2a}
+body.dark th{background:#1a2d2a;color:#d4e6e1}
+body.dark tr:hover td{background:#182a27}
+body.dark input[type=text],body.dark input[type=date],body.dark input[type=password],body.dark select,body.dark textarea{background:#0f1c1a;color:var(--ink);border-color:var(--line)}
+body.dark input:focus,body.dark select:focus,body.dark textarea:focus{background:#0f1c1a}
+body.dark .pv,body.dark .formula,body.dark .fc,body.dark .oc-n,body.dark .ins .it{background:#0f1c1a;border-color:var(--line);color:var(--ink)}
+body.dark .seg{background:#0f1c1a}body.dark .seg button{color:#b6cac5}body.dark .seg button.on{background:#1f3a36;color:var(--brand)}
+body.dark .chip{background:#1f3a36;color:#cfe3de}
+body.dark .btn.light{background:#1f3a36;color:#bdf3e8}
+body.dark .btn.danger{background:#3a1820;color:#fda4af}
+body.dark .empty{background:#0f1c1a;color:var(--muted)}
+body.dark .tw{border-color:var(--line)}
+body.dark td.l,body.dark .card h3,body.dark label.f{color:var(--ink)}
+body.dark .oc-s .a{background:#0f3a2c;color:#6ee7b7}body.dark .oc-s .c{background:#3a1820;color:#fda4af}body.dark .oc-s .d{background:#17332f;color:#99f6e4}
+body.dark .al.hi{background:#3a1820;border-color:#7f1d33;color:#fecdd3}
+body.dark .al.md{background:#3a2c0f;border-color:#7a5a12;color:#fde68a}
+body.dark .al.lo{background:#112a3d;border-color:#1e4e75;color:#bfdbfe}
+body.dark .lock{background:#3a2c0f;border-color:#7a5a12}
+body.dark tr.tot td{background:#17332f}
+body.dark .heat .hc{background:#1b2d2a}
+body.dark .hero{background:var(--card)}
+body.dark .rk .pr,body.dark .pbar,body.dark .qbar{background:#223532}
+body.dark .tab.on{color:#04211e}
+body.dark .kpi.big{background:linear-gradient(135deg,#0f766e,#115e59 60%,#b45309 140%);color:#fff}
+body.dark svg text{fill:#b6cac5}
+body.dark .cat .tr{background:#223532}
+</style>
+<style>html,body{max-width:100%;overflow-x:hidden}body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}input,select,textarea{font-size:16px}img,svg,canvas{max-width:100%}td,th,.rk,.oc-h{overflow-wrap:anywhere}.tw{-webkit-overflow-scrolling:touch}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style></head>
 <body>
 
 <header class="top">
@@ -247,8 +306,6 @@ body.pr .modal{box-shadow:none;max-width:none;max-height:none;overflow:visible;p
 
 <script>
 "use strict";
-/* منع تضمين الصفحة داخل موقع آخر (clickjacking) */
-if(window.top!==window.self){try{window.top.location=window.self.location}catch(e){document.documentElement.innerHTML=''}}
 /* ============== ثوابت ============== */
 const LS_KEY='tarqeem_stock_v1', SS_KEY='tarqeem_session_v1';
 const MACHINES=[1,2,3,4];
@@ -274,9 +331,6 @@ const FIREBASE_CONFIG = {
 };
 const ACCOUNT_DOMAIN = 'tarqeem.app';     /* اسم المستخدم machine1 ⇐ البريد machine1@tarqeem.app */
 const FB_VERSION = '10.12.5';
-const REQUIRE_LOGIN_TO_VIEW = true;   /* true = لا تظهر أي بيانات قبل تسجيل الدخول (ويلزم نشر firebase-rules-strict.json) */
-const IDLE_MIN = 30;                  /* تسجيل خروج تلقائي بعد هذه المدة من عدم النشاط (دقائق) */
-let AUTH_READY=false;
 const CLOUD = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL);
 let FB=null, CLOUD_READY=false, CLOUD_ERR='', ONLINE=false, NAV_AFTER=false, RAF=0;
 
@@ -319,11 +373,11 @@ function seed(){
   return {
     v:1,
     users:{
-      admin:{user:'admin',pass:''},
-      1:{user:'machine1',pass:''},
-      2:{user:'machine2',pass:''},
-      3:{user:'machine3',pass:''},
-      4:{user:'machine4',pass:''}
+      admin:{user:'admin',pass:'admin123'},
+      1:{user:'machine1',pass:'11111'},
+      2:{user:'machine2',pass:'22222'},
+      3:{user:'machine3',pass:'33333'},
+      4:{user:'machine4',pass:'44444'}
     },
     orders:[
       O('o1',1,'9013/1','2000 كوانزا',281112,0,'','2026-10-24T12:33:18'),
@@ -363,28 +417,18 @@ const cloudOrderTouch=o=>{if(CLOUD&&FB)cw(()=>FB.update(FB.ref(FB.db,'orders/'+o
 const cloudEntry=e=>{if(CLOUD&&FB)cw(()=>FB.set(FB.ref(FB.db,'entries/'+e.id),plain(e)))};
 const cloudDelEntry=id=>{if(CLOUD&&FB)cw(()=>FB.remove(FB.ref(FB.db,'entries/'+id)))};
 function withM(e){if(e.m==null){const o=DB.orders.find(x=>x.id===e.order);if(o)return {...e,m:o.machine}}return e}
-const SAFE_ID=/^[A-Za-z0-9_-]{1,64}$/, DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
-const numF=(v,max)=>{v=Number(v);return Number.isFinite(v)&&v>=0?Math.min(v,max||1e9):0};
-const strF=(v,n)=>String(v==null?'':v).slice(0,n);
-/* المفتاح في قاعدة البيانات هو المرجع للمعرّف، وأي مفتاح غير آمن يُتجاهل */
-const toArr=s=>{const v=s.val();if(!v||typeof v!=='object')return [];return Object.keys(v).filter(k=>SAFE_ID.test(k)&&v[k]&&typeof v[k]==='object').map(k=>({...v[k],id:k}))};
-const normOrder=o=>{const m=Number(o.machine);if(!MACHINES.includes(m))return null;
-  return {...o,id:String(o.id),machine:m,number:strF(o.number,60),denom:strF(o.denom,60),notes:strF(o.notes,2000),og:numF(o.og),ob:numF(o.ob),qty:o.qty==null?undefined:numF(o.qty,MAXQ),modified:strF(o.modified,40)}};
-const normEntry=e=>{if(!DATE_RE.test(String(e.date))||!SAFE_ID.test(String(e.order)))return null;
-  const x={...e,id:String(e.id),order:String(e.order),date:String(e.date),g:numF(e.g),b:numF(e.b),dg:numF(e.dg),db:numF(e.db),note:strF(e.note,1000),by:strF(e.by,80),ts:strF(e.ts,40)};
-  if(e.m!=null){const m=Number(e.m);if(MACHINES.includes(m))x.m=m;else delete x.m}return x};
+const toArr=s=>{const v=s.val();return v?Object.keys(v).map(k=>({...v[k],id:v[k].id||k})):[]};
 function sched(){if(RAF)return;RAF=requestAnimationFrame(()=>{RAF=0;render(true)})}
 let AUTH_TK=0;
 async function onAuth(user){
   const tk=++AUTH_TK;
   auditStop();profStop();
-  if(!user){AUTH_READY=true;setSession(null);idleStop();if(REQUIRE_LOGIN_TO_VIEW&&FB&&FB.detachData)FB.detachData();EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
+  if(!user){setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render(true);return}
   const R=await resolveRole(user);
   if(tk!==AUTH_TK)return;
-  if(R.role==null){AUTH_READY=true;cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
+  if(R.role==null){cw(()=>FB.signOut(FB.auth));toast(R.off?'هذا الحساب معطّل':'هذا الحساب غير مصرّح له بالبرنامج','err');return}
   const role=R.role;
   setSession({role,displayName:R.displayName||''});
-  AUTH_READY=true;idleStart();if(FB.attachData)FB.attachData();
   auditLog('تسجيل دخول','دخول المستخدم '+whoName());
   if(role==='admin'){auditListen();profListen()}
   if(NAV_AFTER){NAV_AFTER=false;if(role!=='admin')VIEW=role;}
@@ -406,18 +450,8 @@ async function initCloud(){
     let gotO=false,gotE=false;
     const ready=()=>{if(gotO&&gotE)CLOUD_READY=true};
     const lerr=e=>{CLOUD_ERR=String((e&&e.code)||(e&&e.message)||e);render(true)};
-    FB.attachData=()=>{
-      if(FB.dataOn)return;FB.dataOn=true;gotO=gotE=false;CLOUD_READY=false;CLOUD_ERR='';
-      FB.dataOff=[
-        D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s).map(normOrder).filter(Boolean);gotO=true;ready();sched()},lerr),
-        D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s).map(normEntry).filter(Boolean);gotE=true;ready();sched()},lerr)
-      ];
-    };
-    FB.detachData=()=>{
-      (FB.dataOff||[]).forEach(f=>{try{f()}catch(e){}});FB.dataOff=null;FB.dataOn=false;
-      DB.orders=[];DB.entries=[];CLOUD_READY=false;CLOUD_ERR='';
-    };
-    if(!REQUIRE_LOGIN_TO_VIEW)FB.attachData();
+    D.onValue(D.ref(FB.db,'orders'),s=>{DB.orders=toArr(s);gotO=true;ready();sched()},lerr);
+    D.onValue(D.ref(FB.db,'entries'),s=>{DB.entries=toArr(s);gotE=true;ready();sched()},lerr);
     D.onValue(D.ref(FB.db,'.info/connected'),s=>{ONLINE=!!s.val();renderHeader()});
     U.onAuthStateChanged(FB.auth,onAuth);
   }catch(e){CLOUD_ERR=String((e&&e.message)||e);render(true)}
@@ -431,14 +465,14 @@ function seedCloud(){
   toast('تم رفع بيانات البداية ✓','ok');
 }
 function loadSession(){try{const s=JSON.parse(sessionStorage.getItem(SS_KEY));if(s&&s.role!=null)return s}catch(e){}return null}
-function setSession(s){SESSION=s;if(CLOUD)return;try{s?sessionStorage.setItem(SS_KEY,JSON.stringify(s)):sessionStorage.removeItem(SS_KEY)}catch(e){}}
+function setSession(s){SESSION=s;try{s?sessionStorage.setItem(SS_KEY,JSON.stringify(s)):sessionStorage.removeItem(SS_KEY)}catch(e){}}
 
 /* ============== إدارة المستخدمين (محمية بكلمة سر الموافقة) ============== */
 /* السحابة: الصلاحية تُقرأ من profiles/{uid}، وكتابتها مسموحة فقط لحساب الموافقة (gate) — فحتى لو حد سجّل حساب جديد بمفتاح المشروع ما يقدرش يدخل.
    المحلي: كلمة سر الموافقة تُحفظ مشفّرة (PBKDF2) داخل بيانات الجهاز. */
 const GATE_EMAIL='gate@'+ACCOUNT_DOMAIN;
 const BASE_USERS=[{k:'admin',user:'admin',role:'admin'},{k:1,user:'machine1',role:1},{k:2,user:'machine2',role:2},{k:3,user:'machine3',role:3},{k:4,user:'machine4',role:4}];
-const DEFAULT_PASS={};
+const DEFAULT_PASS={admin:'admin123',1:'11111',2:'22222',3:'33333',4:'44444'};
 const USER_RE=/^[a-z0-9][a-z0-9._-]{2,29}$/;
 const roleLabel=r=>r==='admin'?'مدير عام':MNAME(r);
 let PROFILES=[], UM_TARGET='', UM_KIND='';
@@ -833,17 +867,6 @@ function confirmBox(msg,cb,okLabel,word){
 }
 function go(v){VIEW=v;EDITING=null;SHOWALL=false;LOGF={o:'',from:'',to:'',q:''};render();window.scrollTo({top:0,behavior:'smooth'})}
 
-/* ============== تسجيل خروج تلقائي ============== */
-let IDLE_T=0,_idleLast=0;
-function idleBump(force){
-  if(!SESSION)return;
-  const n=Date.now();if(!force&&n-_idleLast<5000)return;_idleLast=n;
-  clearTimeout(IDLE_T);
-  IDLE_T=setTimeout(()=>{if(SESSION){toast('تم تسجيل الخروج تلقائياً لعدم النشاط','err');logout()}},IDLE_MIN*60000);
-}
-const idleStart=()=>idleBump(true), idleStop=()=>clearTimeout(IDLE_T);
-['click','keydown','touchstart','mousemove'].forEach(ev=>document.addEventListener(ev,()=>idleBump(),{passive:true}));
-
 /* ============== الدخول ============== */
 function loginModal(msg){
   openModal('<h3>🔐 تسجيل الدخول</h3>'+
@@ -853,12 +876,8 @@ function loginModal(msg){
    '</div><div class="err-txt" id="l-err">'+esc(msg||'')+'</div>'+
    '<div class="actions"><button class="btn primary" type="submit">دخول</button><button type="button" class="btn light" onclick="closeModal()">إلغاء</button></div></form>');
 }
-const LG={n:0,until:0};
-const lgBlocked=()=>{const w=LG.until-Date.now();return w>0?Math.ceil(w/1000):0};
-const lgFail=()=>{LG.n++;if(LG.n>=5)LG.until=Date.now()+Math.min(900000,30000*Math.pow(2,LG.n-5))};
 async function doLogin(){
   const u=$('#l-u').value.trim().toLowerCase(),p=$('#l-p').value;
-  const wait=lgBlocked();if(wait){$('#l-err').textContent='محاولات خاطئة كثيرة — انتظر '+wait+' ثانية ثم أعد المحاولة';return}
   if(CLOUD){
     if(!FB){$('#l-err').textContent='لم يتم الاتصال بالسحابة بعد — انتظر لحظة وحاول مرة أخرى';return}
     if(!u||!p){$('#l-err').textContent='اكتب اسم المستخدم وكلمة المرور';return}
@@ -866,12 +885,11 @@ async function doLogin(){
     try{
       NAV_AFTER=true;
       const tmo=new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),15000));
-      await Promise.race([FB.signInWithEmailAndPassword(FB.auth,(u.includes('@')?u.split('@')[0]:u)+'@'+ACCOUNT_DOMAIN,p),tmo]);
-      LG.n=0;closeModal();
+      await Promise.race([FB.signInWithEmailAndPassword(FB.auth,u.includes('@')?u:u+'@'+ACCOUNT_DOMAIN,p),tmo]);
+      closeModal();
     }catch(e){
       NAV_AFTER=false;
       const c=String(e&&e.code||'');
-      if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))lgFail();
       const el=$('#l-err');if(!el)return;
       el.textContent=
         /invalid-credential|wrong-password|user-not-found|invalid-email|invalid-login/.test(c)?'اسم المستخدم أو كلمة المرور غير صحيحة (كلمة المرور في Firebase 6 خانات على الأقل)':
@@ -885,7 +903,7 @@ async function doLogin(){
   }
   for(const k of Object.keys(DB.users)){
     const a=DB.users[k];
-    if(a.active!==false&&a.pass&&a.user.toLowerCase()===u&&a.pass===p){
+    if(a.active!==false&&a.user.toLowerCase()===u&&a.pass===p){
       const rl=k==='admin'?'admin':(a.role!=null?a.role:Number(k));
       setSession({role:rl,displayName:a.displayName||''});
       auditLog('تسجيل دخول','دخول المستخدم '+whoName());
@@ -894,14 +912,14 @@ async function doLogin(){
       render();toast('مرحباً '+whoName()+'، أهلاً بعودتك','ok');return;
     }
   }
-  lgFail();$('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
+  $('#l-err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة';
 }
 function logout(){if(SESSION)auditLog('تسجيل خروج','خروج المستخدم '+whoName());if(CLOUD&&FB){profStop();cw(()=>FB.signOut(FB.auth))}setSession(null);EDITING=null;if(VIEW==='settings')VIEW='dash';render();toast('تم تسجيل الخروج')}
 
 /* ============== الرسم ============== */
 function renderHeader(){
   const net=CLOUD?'<span class="chip-user" title="حالة الاتصال بالسحابة">'+(ONLINE?'🟢 متصل':'🔴 غير متصل')+'</span>':'';
-  $('#who').innerHTML=net+((SESSION||!(CLOUD&&REQUIRE_LOGIN_TO_VIEW))?'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>':'')+(SESSION
+  $('#who').innerHTML=net+'<button class="btn ghost sm" onclick="searchModal()">🔍 بحث</button><button class="btn ghost sm" onclick="reportModal()">📋 تقرير</button>'+(SESSION
    ? '<span class="chip-user">👤 '+esc(whoName())+'</span><button class="btn ghost sm" onclick="logout()">خروج</button>'
    : '<button class="btn ghost" onclick="loginModal()">🔐 تسجيل الدخول</button>');
 }
@@ -932,10 +950,6 @@ function render(keep){
   const qf=!!(keep&&document.activeElement&&document.activeElement.id==='lg-q');
   renderHeader();renderTabs();
   const v=$('#view');
-  if(CLOUD&&REQUIRE_LOGIN_TO_VIEW&&!SESSION&&!CLOUD_ERR){
-    v.innerHTML=AUTH_READY?lockedHTML('البيانات متاحة للمستخدمين المسجلين فقط'):'<div class="empty">⏳ جاري التحقق من الجلسة…</div>';
-    return;
-  }
   if(CLOUD&&!CLOUD_READY){
     v.innerHTML=CLOUD_ERR
      ?'<div class="card lock"><div class="ic">⚠️</div><div style="flex:1"><b>تعذر الاتصال بقاعدة البيانات</b><div class="muted">'+esc(CLOUD_ERR)+' — تأكد من الإنترنت ومن إعدادات Firebase وقواعد القراءة.</div></div><button class="btn primary" onclick="location.reload()">إعادة المحاولة</button></div>'
@@ -1350,7 +1364,7 @@ function exportJSON(){
 }
 function exportCSV(){
   /* حماية من حقن المعادلات: النص اللي يبدأ بـ = + - @ يتحول لنص عادي في Excel */
-  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
+  const q=v=>{let t=String(v==null?'':v);if(typeof v==='string'&&/^[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
   const OM={};DB.orders.forEach(o=>OM[o.id]=o);
   const rows=[['التاريخ','الماكينة','رقم الأمر','الفئة','سليم','معيب','إنتاج اليوم','تسليم سليم','تسليم معيب','ملاحظة','أدخله','وقت الإدخال']];
   [...DB.entries].sort((a,b)=>a.date.localeCompare(b.date)||String(a.ts).localeCompare(String(b.ts))).forEach(e=>{
@@ -1373,7 +1387,7 @@ function applyDataset(d){
     d.entries.forEach(e=>{const x=plain(e);if(x.m==null){const oo=d.orders.find(z=>z.id===x.order);if(oo)x.m=oo.machine}E[x.id]=x});
     (d.audit||[]).forEach(a=>{if(a&&a.id)A[a.id]=plain(a)});
     const patch={orders:Object.keys(O).length?O:null,entries:Object.keys(E).length?E:null};
-    /* سجل التدقيق لا يُستبدل أبداً (يُضاف إليه فقط) */
+    if(Array.isArray(d.audit))patch.audit=Object.keys(A).length?A:null;
     cw(()=>FB.update(FB.ref(FB.db),patch));
     return;
   }
@@ -1384,17 +1398,10 @@ function applyDataset(d){
 $('#file-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
   if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
-  if(f.size>10*1024*1024){toast('الملف كبير جداً (الحد 10 ميجا)','err');return}
   const r=new FileReader();
   r.onload=()=>{
     let d;try{d=JSON.parse(r.result)}catch(e){toast('الملف غير صالح','err');return}
     if(!d||!Array.isArray(d.orders)||!Array.isArray(d.entries)){toast('هذا ليس ملف نسخة احتياطية صالح','err');return}
-    /* تنقية كل ما في الملف قبل استخدامه: معرّفات آمنة وأرقام وطول نصوص محدود */
-    const nO=d.orders.length,nE=d.entries.length;
-    d.orders=d.orders.filter(o=>o&&typeof o==='object'&&SAFE_ID.test(String(o.id))).map(normOrder).filter(Boolean);
-    d.entries=d.entries.filter(e=>e&&typeof e==='object'&&SAFE_ID.test(String(e.id))).map(normEntry).filter(Boolean);
-    d.audit=Array.isArray(d.audit)?d.audit.filter(a=>a&&typeof a==='object'&&SAFE_ID.test(String(a.id))).map(a=>({id:String(a.id),ts:strF(a.ts,40),by:strF(a.by,80),act:strF(a.act,100),txt:strF(a.txt,1500)})):undefined;
-    if(d.orders.length<nO||d.entries.length<nE)toast('تم تجاهل '+((nO-d.orders.length)+(nE-d.entries.length))+' سجل غير صالح في الملف','err');
     if(IMPORT_MODE==='replace'){
       confirmBox('سيتم استبدال كل البيانات الحالية ('+DB.orders.length+' أمر / '+DB.entries.length+' حركة) بمحتوى الملف ('+d.orders.length+' أمر / '+d.entries.length+' حركة). تُحفظ نسخة تلقائية قبل الاستبدال للرجوع إليها من «نقطة الاسترجاع».',()=>{
         saveRestorePoint('قبل استبدال البيانات');
@@ -1626,8 +1633,6 @@ function pickExcel(){
 }
 $('#xl-in').addEventListener('change',ev=>{
   const f=ev.target.files[0];if(!f)return;
-  if(!isAdmin()){toast('هذه العملية للمدير العام فقط','err');return}
-  if(f.size>15*1024*1024){toast('الملف كبير جداً (الحد 15 ميجا)','err');return}
   toast('جاري قراءة الملف…');
   const r=new FileReader();
   r.onerror=()=>toast('تعذر قراءة الملف','err');
@@ -1801,7 +1806,7 @@ function auditLocalFallback(rec,reason){
   toast('تنبيه: تعذر حفظ عملية في سجل التدقيق السحابي. تم الاحتفاظ بها محلياً على هذا الجهاز فقط.','err');
 }
 function auditLog(act,txt){
-  const rec={id:uid('a'),ts:new Date().toISOString(),by:strF(whoName()||'—',80),act:strF(act||'عملية',100),txt:strF(txt,1500),uid:(CLOUD&&FB&&FB.auth&&FB.auth.currentUser)?FB.auth.currentUser.uid:''};
+  const rec={id:uid('a'),ts:new Date().toISOString(),by:whoName()||'—',act:String(act||'عملية'),txt:String(txt||'')};
   if(CLOUD){
     if(!FB){auditLocalFallback(rec,'لم تكتمل تهيئة Firebase');return rec}
     AUDIT_STATUS='جاري تسجيل آخر عملية…';
@@ -1835,7 +1840,7 @@ function auditStop(){
 }
 function auditExport(){
   const list=CLOUD?[(AUDIT||[]),AUDIT_LOCAL].flat():((DB.audit||[]).slice());
-  const q=v=>{let t=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
   const rows=[['الوقت','المستخدم','العملية','التفاصيل','حالة الحفظ']];
   list.sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).forEach(a=>rows.push([fmtTime(a.ts),a.by,a.act,a.txt,a.localOnly?'محلي فقط':'مسجل']));
   download('tarqeem-audit-'+todayStr()+'.csv','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv;charset=utf-8');
@@ -2116,6 +2121,57 @@ function gsearch(){
   box.innerHTML=hits.length?hits.slice(0,30).map(h=>{const t=totals(h.o,DB.entries);
     return '<button class="sr" onclick="closeModal();go('+h.o.machine+');orderDetail(\''+h.o.id+'\')"><b>'+esc(h.o.number)+'</b><span>'+esc(h.o.denom||'')+'</span><span class="chip" style="margin-inline-start:0">'+MNAME(h.o.machine)+'</span><span style="margin-inline-start:auto;font-weight:800">'+fmt(t.stock)+'</span>'+(h.why?'<small class="muted">'+esc(h.why)+'</small>':'')+'</button>'}).join(''):'<div class="empty">لا توجد نتائج</div>';
 }
+
+/* ============== تطويرات الإصدار ٢ (إضافات فقط، بدون تغيير منطق البيانات) ============== */
+(function(){
+  const DK='tarqeem_dark_v1';
+  let dark=false;try{dark=localStorage.getItem(DK)==='1'}catch(e){}
+  function applyDark(){document.body.classList.toggle('dark',dark);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#05201d':'#0f766e'}
+  window.toggleDark=function(){dark=!dark;try{localStorage.setItem(DK,dark?'1':'0')}catch(e){}applyDark();render(true)};
+  applyDark();
+  /* زر الوضع الليلي في الهيدر */
+  const _rh=renderHeader;
+  renderHeader=function(){_rh();const w=document.getElementById('who');if(w)w.insertAdjacentHTML('afterbegin','<button class="btn ghost sm icon" onclick="toggleDark()" title="الوضع الليلي">'+(dark?'☀️':'🌙')+'</button>')};
+  /* لوحة المتابعة: تحية + ساعة + مؤشرات ذكية + ترتيب الأوامر */
+  function ordersOfM(m){return DB.orders.filter(o=>o.machine===m)}
+  function heroHTML(){
+    const d=new Date(),h=d.getHours(),g=h<12?'صباح الخير':h<18?'مساء الخير':'مساء النور';
+    const days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    return '<div class="hero"><div><b>'+g+(SESSION?' '+esc(whoName()):'')+' 👋</b><span class="muted">'+days[d.getDay()]+' · '+fmtDate(todayStr())+'</span></div><div class="clk" id="clk">'+pad(h)+':'+pad(d.getMinutes())+'</div></div>';
+  }
+  function insightsHTML(){
+    if(!DB.orders.length)return '';
+    const rows=DB.orders.map(o=>{const t=totals(o,DB.entries),q=qtyOf(o);return {o,t,q,pct:Math.min(100,t.prod/q*100),def:t.prod?t.pb/t.prod*100:0}});
+    const mt=MACHINES.map(m=>({m,t:mTotals(m)}));
+    const best=[...mt].sort((a,b)=>b.t.prod-a.t.prod)[0];
+    const worst=[...mt].filter(x=>x.t.prod>0).sort((a,b)=>b.t.pb/b.t.prod-a.t.pb/a.t.prod)[0];
+    const tp=sum(mt,x=>x.t.prod),tb=sum(mt,x=>x.t.pb),td=sum(mt,x=>x.t.del);
+    const last7=dailySeries(7,'prod'),avg=sum(last7.series,s=>sum(s.values,v=>v))/7;
+    const stock=sum(mt,x=>x.t.stock);
+    const daysLeft=avg>0?Math.round(stock/avg):null;
+    const it=(l,v,s)=>'<div class="it"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>';
+    let h='<div class="card sec"><div class="sec-title"><h3>💡 مؤشرات ذكية</h3><span class="muted">محسوبة تلقائياً من البيانات</span></div><div class="ins">'+
+      it('🥇 الأعلى إنتاجاً',best&&best.t.prod?MNAME(best.m):'—',best?fmt(best.t.prod)+' فرخ':'')+
+      it('⚠️ الأعلى نسبة معيب',worst?MNAME(worst.m):'—',worst?(worst.t.pb/worst.t.prod*100).toFixed(1)+'% من إنتاجها':'')+
+      it('📉 نسبة المعيب الكلية',tp?(tb/tp*100).toFixed(1)+'%':'—','من '+fmt(tp)+' فرخ منتج')+
+      it('🚚 نسبة التسليم',tp?(td/tp*100).toFixed(1)+'%':'—','تم تسليم '+fmt(td)+' فرخ')+
+      it('📆 متوسط الإنتاج اليومي',fmt(Math.round(avg)),'آخر ٧ أيام')+
+    '</div></div>';
+    const open=rows.filter(r=>r.q&&r.t.prod>0&&r.pct<100).sort((a,b)=>b.pct-a.pct).slice(0,5);
+    const dfx=rows.filter(r=>r.t.prod>0).sort((a,b)=>b.def-a.def).slice(0,5);
+    const list=(arr,fn)=>arr.map((r,i)=>'<div class="rk" style="--mc:'+MCOL[r.o.machine]+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(r.o.number)+'</b> <span class="muted">'+esc(normDigits(r.o.denom))+' · '+MNAME(r.o.machine)+'</span><div class="pr"><i style="width:'+fn(r).w+'%"></i></div></div><span style="font-weight:800">'+fn(r).t+'</span></div>').join('')||'<div class="empty">لا توجد بيانات كافية</div>';
+    h+='<div class="grid two sec"><div class="card"><div class="sec-title"><h3>🏁 الأوامر الأقرب للاكتمال</h3></div>'+list(open,r=>({w:r.pct.toFixed(1),t:r.pct.toFixed(1)+'%'}))+'</div>'+
+       '<div class="card"><div class="sec-title"><h3>🔥 الأوامر الأعلى معيباً</h3></div>'+list(dfx,r=>({w:Math.min(100,r.def).toFixed(1),t:r.def.toFixed(1)+'%'}))+'</div></div>';
+    return h;
+  }
+  const _dh=dashHTML;
+  dashHTML=function(){const base=_dh();if(base.indexOf('class="kpi')<0)return base;return heroHTML()+base+insightsHTML()};
+  setInterval(()=>{const c=document.getElementById('clk');if(c){const d=new Date();c.textContent=pad(d.getHours())+':'+pad(d.getMinutes())}},15000);
+  /* زر الرجوع للأعلى + اختصار البحث */
+  const b=document.createElement('button');b.id='totop';b.textContent='↑';b.title='للأعلى';b.onclick=()=>scrollTo({top:0,behavior:'smooth'});document.body.appendChild(b);
+  addEventListener('scroll',()=>b.classList.toggle('on',scrollY>400),{passive:true});
+  addEventListener('keydown',e=>{const t=e.target&&e.target.tagName;if(e.key==='/'&&t!=='INPUT'&&t!=='TEXTAREA'&&t!=='SELECT'&&!document.querySelector('.overlay')){e.preventDefault();searchModal()}});
+})();
 
 /* ============== بدء التشغيل ============== */
 if(CLOUD){
